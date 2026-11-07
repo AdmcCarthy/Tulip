@@ -23,8 +23,10 @@ jobs:
       - run: uv sync --locked --all-groups
       - name: Check the data (mass balance, cross-border shares, hubs and areas)
         run: uv run pytest -q
-      - name: Build the page from the committed data
-        run: uv run python scripts/build_site.py _site
+      - name: Build the story with SubScout (fails on errors; warnings fail below)
+        run: uv run subscout build . --out _site
+      - name: No build warnings (untraced numbers, unused metrics, arc beats)
+        run: python3 -c 'import json,sys;w=json.load(open("_site/build-report.json"))["warnings"];print("\n".join(w));sys.exit(1 if w else 0)' 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

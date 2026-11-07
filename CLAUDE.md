@@ -27,10 +27,9 @@ McCarthy, petroleum geoscience domain expert. Follow SubScout's CLAUDE.md and st
   Norway–Denmark boundary; agreed maritime boundaries drawn dashed.
 - Circle packing: sea → hub → field (hub parsed from Sodir development text, scripts/hubs.py); snapshots
   recoverable / left 1995 / 2005 / today; zoomable.
-- Repo publishes to GitHub Pages via .github/workflows/pages.yml (tests -> scripts/build_site.py -> _site).
-  prototype/index.html is the body-only fragment for the claude.ai artifact; _site/index.html is the page.
-- Not yet a SubScout `subscout build` story: figures are custom. A SubScout custom-figure hook is the
-  planned route (SubScout had uncommitted work on 2026-11-07, so it was not changed).
-- Conflicts with SubScout rules, declared: stream graph has no y-axis of values (width = value, scale bar
-  instead); shade encodes size class within a fluid hue (more than 5 categories via linked families);
-  maps rotated (north arrow); dark-mode pale NGL tone retired.
+- Now a SubScout story (v0.3.0 custom figures): story.md + story.py + figures/*.js; build with
+  `uv run subscout build . --out _site`; CI fails on build warnings. Every number in prose comes from
+  story.py and has a test in tests/test_story.py (years typed in prose are asserted there too).
+- figures/bulb.js renders on Canvas with one pre-painted canvas per scroll state (opts.states) so steps
+  only cross-fade; keep it that way or the perf gate (SubScout scripts/perf.py, 4x throttle) fails.
+- Declared exceptions live in the chart blocks (direct-labels, north-up); the truth gate still applies.

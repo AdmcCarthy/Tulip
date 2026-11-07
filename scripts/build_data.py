@@ -26,6 +26,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import shapely
 from shapely.geometry import Point, shape
 
 import hubs
@@ -274,22 +275,26 @@ def main(raw: Path, out: Path) -> None:
         if n in byq.index:
             props.update({str(y): float(byq.loc[n, y]) for y in byq.columns})
         feats.append({"type": "Feature", "properties": props,
-                      "geometry": json.loads(json.dumps(d3_orient(s.simplify(0.01)).__geo_interface__))})
+                      "geometry": json.loads(json.dumps(d3_orient(shapely.set_precision(s.simplify(0.01), 0.001)).__geo_interface__))})
     (out / "quadrants_remaining.geojson").write_text(json.dumps({"type": "FeatureCollection",
                                                                  "features": feats}))
     (out / "potential.json").write_text(json.dumps({
         "resource_accounts": RESOURCE_ACCOUNTS, "undiscovered_range": UNDISCOVERED_RANGE,
         "undiscovered_by_area": UNDISCOVERED_BY_AREA, "dropped_carriers": dropped,
+        "prod_last12": round(float(prod[prod.date > last - pd.DateOffset(months=12)][FLUIDS].sum().sum()), 2),
         "last_month": last.strftime("%Y-%m")}, indent=1))
     # basemap: land clipped to the map frame and simplified for small multiples
     from shapely.geometry import box
     frame = box(-4, 54.0, 30, 75)
     land = unary_union([shape(ft["geometry"]).buffer(0) for ft in
                         json.loads((raw / "land.geojson").read_text())["features"] if ft.get("geometry")])
-    land = d3_orient(land.intersection(frame).simplify(0.03))
+    from shapely.geometry import MultiPolygon
+    land = land.intersection(frame).simplify(0.06)
+    land = MultiPolygon([g for g in getattr(land, "geoms", [land]) if g.area > 0.03])  # drop small islands
+    land = d3_orient(shapely.set_precision(land, 0.01))
     sb = json.loads((raw / "sea_boundaries.geojson").read_text())
     lines = [{"type": "Feature", "properties": {"info": ft["properties"].get("informasjon")},
-              "geometry": json.loads(json.dumps(shape(ft["geometry"]).intersection(frame).simplify(0.01).__geo_interface__))}
+              "geometry": json.loads(json.dumps(shapely.set_precision(shape(ft["geometry"]).intersection(frame).simplify(0.02), 0.01).__geo_interface__))}
              for ft in sb["features"] if ft.get("geometry")]
     lines = [ln for ln in lines if ln["geometry"]["type"] != "GeometryCollection" or ln["geometry"].get("geometries")]
     (out / "borders.geojson").write_text(json.dumps({"type": "FeatureCollection", "features": lines}))
