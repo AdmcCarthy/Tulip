@@ -28,6 +28,8 @@ import numpy as np
 import pandas as pd
 from shapely.geometry import Point, shape
 
+import hubs
+
 NGL_T_TO_SM3 = 1.9
 FLUIDS = ["oil", "liquids", "gas"]  # liquids = NGL + condensate
 ESTIMATE_YEAR = 2025
@@ -157,6 +159,9 @@ def main(raw: Path, out: Path) -> None:
                                       for f in meta.index]
     meta["cross_border"] = [f in CROSS_BORDER for f in meta.index]
     meta = meta.join(rem)
+    hb = hubs.derive(pd.read_csv(raw / "field_description.csv"), sorted(fld.fldName.unique()), GROUPS)
+    meta = meta.join(hb.set_index("field")[["hub", "area_name"]])
+    meta["hub"] = meta.hub.fillna(pd.Series(meta.index, index=meta.index))
 
     last = prod.date.max()
     months = pd.date_range("1971-01-01", last, freq="MS")
@@ -274,10 +279,16 @@ def main(raw: Path, out: Path) -> None:
         "last_month": last.strftime("%Y-%m")}, indent=1))
     # basemap: land clipped to the map frame and simplified for small multiples
     from shapely.geometry import box
-    frame = box(-4, 55.5, 38, 75)
+    frame = box(-4, 54.0, 30, 75)
     land = unary_union([shape(ft["geometry"]).buffer(0) for ft in
                         json.loads((raw / "land.geojson").read_text())["features"] if ft.get("geometry")])
     land = d3_orient(land.intersection(frame).simplify(0.03))
+    sb = json.loads((raw / "sea_boundaries.geojson").read_text())
+    lines = [{"type": "Feature", "properties": {"info": ft["properties"].get("informasjon")},
+              "geometry": json.loads(json.dumps(shape(ft["geometry"]).intersection(frame).simplify(0.01).__geo_interface__))}
+             for ft in sb["features"] if ft.get("geometry")]
+    lines = [ln for ln in lines if ln["geometry"]["type"] != "GeometryCollection" or ln["geometry"].get("geometries")]
+    (out / "borders.geojson").write_text(json.dumps({"type": "FeatureCollection", "features": lines}))
     (out / "land_simple.geojson").write_text(json.dumps({"type": "FeatureCollection", "features": [
         {"type": "Feature", "properties": {}, "geometry": json.loads(json.dumps(land.__geo_interface__))}]}))
     print(f"{len(meta)} streams, {len(q)} time steps to {last:%Y-%m}; dropped carriers: {dropped}")

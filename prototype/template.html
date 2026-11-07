@@ -8,11 +8,11 @@
 :root {
   --canvas: #f3f7fb; --surface: #fdfeff; --raised: #ecf1f5;
   --ink: #2d3439; --muted: #596c7b; --rule: #ccd6dd; --grid: #d4d4d4; --link: #20565c;
-  --oil: #008171; --liq: #7c50a8; --gas: #c96900; --context: #b4b4b4;
+  --oil: #00703e; --liq: #7c50a8; --gas: #dd7610; --context: #b4b4b4;
   --accent: #1a7f88; --hatch: #596c7b;
   --seq-0: #ecf3f8; --seq-1: #c2d0dc; --seq-2: #96aec2; --seq-3: #6f8da5; --seq-4: #526c82; --seq-5: #3c4d5b; --seq-6: #272f35;
   --land: #e2e9ef;
-  --oil-0: #00372e; --oil-1: #005b48; --oil-2: #008171; --oil-3: #08a2af; --oil-4: #72bed1; --oil-5: #b9deee; --gas-0: #88341e; --gas-1: #ac4a09; --gas-2: #c96900; --gas-3: #df8b1e; --gas-4: #eab26b; --gas-5: #f4dab2; --silhouette: #8798a6;
+  --oil-0: #063215; --oil-1: #005126; --oil-2: #00703e; --oil-3: #1a8f69; --oil-4: #5eb198; --oil-5: #9dd5c7; --gas-0: #a0412e; --gas-1: #c35a25; --gas-2: #dd7610; --gas-3: #eb9939; --gas-4: #f2bc79; --gas-5: #f7ddb7; --silhouette: #8798a6;
   --f-display: "Newsreader", "Iowan Old Style", Georgia, serif;
   --f-body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
   --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
@@ -20,20 +20,20 @@
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --canvas: #0e1820; --surface: #15212a; --raised: #1e2b35;
   --ink: #f5fdff; --muted: #b4c7d7; --rule: #2c3a45; --grid: #33424d; --link: #86d2da;
-  --oil: #2fbda7; --liq: #e7c7ff; --gas: #e57b24; --context: #7f7f7f;
+  --oil: #329d5a; --liq: #e7c7ff; --gas: #ffa663; --context: #7f7f7f;
   --accent: #55b3bd; --hatch: #b4c7d7;
   --seq-0: #2b2e31; --seq-1: #424b52; --seq-2: #576a78; --seq-3: #6e8aa0; --seq-4: #8cabc4; --seq-5: #b3cce1; --seq-6: #deeefb;
   --land: #1e2b35;
-  --oil-0: #abfaec; --oil-1: #80d8bd; --oil-2: #2fbda7; --oil-3: #0098a4; --oil-4: #1f7183; --oil-5: #2b4d5a; --gas-0: #ffc0ae; --gas-1: #fb966a; --gas-2: #e57b24; --gas-3: #b56d00; --gas-4: #885700; --gas-5: #584018; --silhouette: #6e8aa0;
+  --oil-0: #91d993; --oil-1: #60bc71; --oil-2: #329d5a; --oil-3: #067f5c; --oil-4: #10614d; --oil-5: #17433b; --gas-0: #ffeee8; --gas-1: #ffcab2; --gas-2: #ffa663; --gas-3: #df8b1e; --gas-4: #af761e; --gas-5: #7c5d29; --silhouette: #6e8aa0;
   color-scheme: dark; } }
 :root[data-theme="dark"] {
   --canvas: #0e1820; --surface: #15212a; --raised: #1e2b35;
   --ink: #f5fdff; --muted: #b4c7d7; --rule: #2c3a45; --grid: #33424d; --link: #86d2da;
-  --oil: #2fbda7; --liq: #e7c7ff; --gas: #e57b24; --context: #7f7f7f;
+  --oil: #329d5a; --liq: #e7c7ff; --gas: #ffa663; --context: #7f7f7f;
   --accent: #55b3bd; --hatch: #b4c7d7;
   --seq-0: #2b2e31; --seq-1: #424b52; --seq-2: #576a78; --seq-3: #6e8aa0; --seq-4: #8cabc4; --seq-5: #b3cce1; --seq-6: #deeefb;
   --land: #1e2b35;
-  --oil-0: #abfaec; --oil-1: #80d8bd; --oil-2: #2fbda7; --oil-3: #0098a4; --oil-4: #1f7183; --oil-5: #2b4d5a; --gas-0: #ffc0ae; --gas-1: #fb966a; --gas-2: #e57b24; --gas-3: #b56d00; --gas-4: #885700; --gas-5: #584018; --silhouette: #6e8aa0;
+  --oil-0: #91d993; --oil-1: #60bc71; --oil-2: #329d5a; --oil-3: #067f5c; --oil-4: #10614d; --oil-5: #17433b; --gas-0: #ffeee8; --gas-1: #ffcab2; --gas-2: #ffa663; --gas-3: #df8b1e; --gas-4: #af761e; --gas-5: #7c5d29; --silhouette: #6e8aa0;
   color-scheme: dark; }
 
 * { box-sizing: border-box; }
@@ -84,6 +84,9 @@ figcaption, .fig-foot { font-size: 12.5px; color: var(--muted); line-height: 1.5
 .ctrl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .ghost { font: 500 13px/1 var(--f-body); color: var(--link); background: none; border: 0; padding: 9px 6px; cursor: pointer; }
 .ghost:focus-visible { outline: 2px solid var(--accent); }
+.sealabel { font: 500 15px var(--f-display); fill: var(--ink); paint-order: stroke; stroke: var(--canvas); stroke-width: 3px; }
+.hublabel { font: 500 11px var(--f-mono); fill: var(--muted); letter-spacing: .02em; paint-order: stroke; stroke: var(--canvas); stroke-width: 3px; }
+#pack svg { overflow: hidden; }
 .legend .m2 { color: var(--muted); font-size: 12px; }
 .legend .m { color: var(--muted); font-size: 12px; flex-basis: 100%; }
 .anno text.y { font: 500 11px var(--f-mono); fill: var(--ink); }
@@ -105,7 +108,7 @@ table.qc th, table.qc td { text-align: right; padding: 6px 8px; border-bottom: 1
 table.qc th:first-child, table.qc td:first-child { text-align: left; }
 table.qc th { font-weight: 600; color: var(--muted); font-size: 12px; }
 .tablewrap { overflow-x: auto; }
-.maps { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 12px 16px; }
+.maps { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); gap: 12px 16px; }
 .maps .m h4 { font: 500 1.1rem/1 var(--f-display); margin: 0 0 4px; }
 .maps .m p { font-size: 12.5px; color: var(--muted); margin: 0; }
 a { color: var(--link); }
@@ -181,7 +184,25 @@ a { color: var(--link); }
       <p class="fig-sub">MSm³ o.e. per 1° quadrant, fields assigned by a point inside their outline.</p></div>
       <div class="legend" id="maplegend"></div></div>
     <div class="maps" id="maps"></div>
-    <figcaption><span><span class="conf">Derived</span> Same method as the bulb, summed by Sodir quadrant. Large fields that span quadrants count in one.</span><span>Source: Sodir FactMaps (fields, quadrants, land), FactPages.</span></figcaption>
+    <figcaption><span><span class="conf">Derived</span> Same method as the bulb, summed by Sodir quadrant. Large fields that span quadrants count in one. Dashed lines: agreed maritime boundaries (Denmark, UK, Sweden, Russia).</span><span>Source: Sodir FactMaps (fields, quadrants, land), FactPages.</span></figcaption>
+  </figure>
+</section>
+
+<section class="wide">
+  <h2 class="col">Hubs and the fields that feed them</h2>
+  <p class="col">Most new fields are tied back to a host. Grouping each field under its host, and each host under its sea, shows how the shelf is wired: a few large hubs with clusters of small tie-backs, and big stand-alone fields.</p>
+  <figure>
+    <div class="fig-head"><div>
+      <p class="fig-title">Sea area, hub and field, sized by volume</p>
+      <p class="fig-sub">Circle area = MSm³ o.e. Click a sea or hub to zoom; click outside to zoom out. Same colours as the bulb.</p></div>
+      <div class="seg" role="group" aria-label="Volume shown">
+        <button id="pk-rec" aria-pressed="true">Recoverable</button>
+        <button id="pk-1995" aria-pressed="false">Left 1995</button>
+        <button id="pk-2005" aria-pressed="false">Left 2005</button>
+        <button id="pk-now" aria-pressed="false">Left today</button>
+      </div></div>
+    <div class="chart" id="pack"><div class="tip" id="tip5"></div></div>
+    <figcaption><span><span class="conf">Derived</span> Hub = the field whose facility a field is tied back to, connected to or processed on, read from Sodir's development descriptions; chains resolved to the final host. Fields with no host stand alone.</span><span>Source: Sodir FactPages field descriptions, reserves and production.</span></figcaption>
   </figure>
 </section>
 
@@ -203,6 +224,7 @@ const HIND = __HIND__;
 const POT = __POT__;
 const QUADS = __QUADS__;
 const LAND = __LAND__;
+const BORDERS = __BORDERS__;
 const FIELDS = __FIELDS__;
 const QC = __QC__;
 const ARC = __ARC__;
@@ -286,10 +308,10 @@ const shade = (hue, c) => css(`--${hue}-${c}`);
 const fillOf = (chart, f) => shade(chart === "oe" ? (f.dom === "gas" ? "gas" : "oil") : (chart === "gas" ? "gas" : "oil"), f.cls);
 
 function legend() {
-  const fam = [["Below giant", CL.filter(c => c.family === 0)], ["Giant and above", CL.filter(c => c.family === 1)]];
+  const fam = [["Small to large", CL.filter(c => c.family === 0)], ["Giant and above", CL.filter(c => c.family === 1)]];
   document.getElementById("bulb-legend").innerHTML = fam.map(([t, cs]) => `<span class="ramp"><b>${t}</b>` +
-    cs.map(c => `<span><i style="background:linear-gradient(90deg,var(--oil-${c.idx}) 50%,var(--gas-${c.idx}) 50%)"></i>${c.range}</span>`).join("") + "</span>").join("") +
-    `<span class="m">Field size = total recoverable volume, million boe, on a log scale in half-decade steps anchored on giant (500 MMboe) and super-giant (5 Bboe). Two linked colour families per fluid: below giant (moss greens; rust to orange for gas) and giant and above (teal to pale blue; amber to pale gold). Green: oil, NGL &amp; condensate; orange: gas. Smaller fields are deeper. In the oil-equivalent chart a field takes the colour of its main fluid.</span>`;
+    cs.map(c => `<span><i style="background:linear-gradient(90deg,var(--oil-${c.idx}) 50%,var(--gas-${c.idx}) 50%)"></i>${c.short} <span class="m2">${c.range}</span></span>`).join("") + "</span>").join("") +
+    `<span class="m">Field size = total recoverable volume in million boe, log scale in half-decade steps: small &lt; 50, medium 50–160, large 160–500; giant 500–1,600 and 1,600–5,000; super-giant ≥ 5,000 (Troll). Two linked colour families per fluid: small to large (deep forest to leaf green; brick to orange for gas) and giant and above (jade to pale mint; amber to pale gold). Green: oil, NGL &amp; condensate; orange: gas. Smaller fields are deeper. In the oil-equivalent chart a field takes the colour of its main fluid.</span>`;
 }
 
 function drawBulb() {
@@ -401,7 +423,7 @@ function drawBulb() {
         <div class="row"><span><span class="sw" style="background:${shade("oil", f.cls)}"></span>Oil, NGL, cond.</span><span>${fmt1(lv)}</span></div>
         <div class="row"><span><span class="sw" style="background:${shade("gas", f.cls)}"></span>Gas</span><span>${fmt1(gv)}</span></div>
         <div class="row"><b>Total</b><b>${fmt1(tot)} MSm³ o.e.</b></div><div class="row m"><span>${d3.format(".1%")(tot / RAW.oe[t])} of the NCS</span><span>≈ ${fmt(boe(tot))} MMboe</span></div>
-        <div class="m" style="margin-top:6px">${CL[f.cls].label}, ${CL[f.cls].range} MMboe: ${fmt1(f.rec_liq + f.rec_gas)} MSm³ o.e. recoverable</div>`;
+        <div class="m" style="margin-top:6px">${CL[f.cls].short}, ${CL[f.cls].range} MMboe: ${fmt1(f.rec_liq + f.rec_gas)} MSm³ o.e. recoverable</div>`;
     }
     tip.innerHTML = html; tip.style.opacity = 1;
     const bw = bulb.clientWidth, sc = bw / W;
@@ -488,24 +510,108 @@ function drawMaps() {
   const col = v => v > 0 ? cols[d3.bisectRight(th, v)] : null;
   document.getElementById("maplegend").innerHTML = ["< 10", "10–50", "50–100", "100–250", "250–500", "500–1,000", "> 1,000"]
     .map((l, i) => `<span><i style="background:${cols[i]}"></i>${l}</span>`).join("");
-  const proj = d3.geoConicConformal().parallels([60, 72]).rotate([-12, 0]);
-  const frame = { type: "MultiPoint", coordinates: [[0, 56.5], [26, 56.5], [26, 73.2], [0, 73.2], [13, 73.6], [13, 56.5]] };
+  // Rotated so the shelf runs up the panel: the frame hugs the quadrants that ever held reserves plus the
+  // Norway-Denmark boundary, leaving out Sweden, Finland and the empty east. A north arrow shows the turn.
+  const ANG = S.map_angle;
+  const proj = d3.geoConicConformal().parallels([60, 72]).rotate([-12, 0]).angle(ANG);
+  const used = QUADS.features.filter(f => years.some(y => (f.properties[y] || 0) > 0));
+  const frame = { type: "FeatureCollection", features: [...used, { type: "Feature", geometry: { type: "MultiPoint", coordinates: [[3.0, 56.0], [8.0, 55.6], [10.6, 57.7]] } }] };
   years.forEach(yr => {
     const box = document.createElement("div"); box.className = "m"; el.appendChild(box);
     const tot = d3.sum(QUADS.features, f => f.properties[yr] || 0);
     box.innerHTML = `<h4>${yr}</h4><p>${fmt(tot)} MSm³ o.e. remaining</p>`;
-    const W = box.clientWidth || 320, H = Math.round(W * 0.9);
-    proj.fitSize([W, H], frame);
+    const W = box.clientWidth || 320, H = Math.round(W * 1.25);
+    proj.fitExtent([[14, 14], [W - 14, H - 10]], frame);
     const path = d3.geoPath(proj);
     const svg = d3.select(box).append("svg").attr("viewBox", [0, 0, W, H]).style("width", "100%").style("height", "auto");
     svg.append("path").datum(LAND).attr("d", path).attr("fill", css("--land")).attr("stroke", "none");
+    svg.append("path").datum(BORDERS).attr("d", path).attr("fill", "none").attr("stroke", css("--muted")).attr("stroke-width", .7).attr("stroke-dasharray", "3 2");
     svg.append("g").selectAll("path").data(QUADS.features.filter(f => (f.properties[yr] || 0) > 0)).join("path").attr("d", path)
       .attr("fill", f => col(f.properties[yr])).attr("stroke", css("--canvas")).attr("stroke-width", .6)
       .append("title").text(f => `Quadrant ${f.properties.q}: ${fmt1(f.properties[yr])} MSm³ o.e.`);
+    const na = svg.append("g").attr("transform", `translate(${W - 22},${30}) rotate(${ANG})`);
+    na.append("path").attr("d", "M0,-12 L5,6 L0,2 L-5,6 Z").attr("fill", css("--muted"));
+    na.append("text").attr("class", "lbl").attr("y", -16).attr("text-anchor", "middle").text("N");
   });
 }
 
-function drawAll() { drawBulb(); drawHind(); drawCream(); drawMaps(); }
+
+// ---------------- circle packing: sea -> hub -> field
+const PK = { t: null };
+const SEA = { "North Sea": 0, "Norwegian Sea": 1, "Barents Sea": 2 };
+const title = k => k.split(" ").map(w => w[0] + w.slice(1).toLowerCase()).join(" ");
+function drawPack(animate) {
+  const el = document.getElementById("pack"), tp = document.getElementById("tip5");
+  const prev = new Map();
+  d3.select(el).selectAll("circle.n").each(function (d) { prev.set(d.data.id, { x: +this.getAttribute("cx"), y: +this.getAttribute("cy"), r: +this.getAttribute("r") }); });
+  el.querySelectorAll("svg").forEach(s => s.remove());
+  const W = el.clientWidth, H = Math.round(Math.min(Math.max(W * 0.9, 380), 860));
+  const val = f => PK.t == null ? f.rec_liq + f.rec_gas : f.w.liq[PK.t] + f.w.gas[PK.t];
+  const bySea = d3.group(S.fields, f => f.area, f => f.hub);
+  const data = { id: "NCS", name: "Norwegian continental shelf", children: [...bySea].sort((a, b) => SEA[a[0]] - SEA[b[0]]).map(([sea, hubs]) => ({
+    id: sea, name: sea, kind: "sea", children: [...hubs].map(([hub, fs]) => fs.length === 1 ? { id: fs[0].key, name: fs[0].name, f: fs[0] }
+      : { id: "hub:" + hub, name: `${title(hub)} hub`, kind: "hub", children: fs.map(f => ({ id: f.key, name: f.name, f })) }) })) };
+  const root = d3.pack().size([W, H]).padding(d => d.depth === 0 ? 14 : d.depth === 1 ? 5 : 1.5)(
+    d3.hierarchy(data).sum(d => d.f ? Math.max(val(d.f), 0) : 0).sort((a, b) => b.value - a.value));
+  const svg = d3.select(el).append("svg").attr("viewBox", [0, 0, W, H]).attr("role", "img").attr("aria-label", "Circle packing of fields grouped by hub and sea area");
+  let focus = root, view = [root.x, root.y, root.r * 2];
+  const nodes = root.descendants().filter(d => d.depth > 0 && d.r > 0.2);
+  const circ = svg.append("g").selectAll("circle").data(nodes, d => d.data.id).join("circle").attr("class", "n")
+    .attr("fill", d => d.data.f ? shade(d.data.f.dom === "gas" ? "gas" : "oil", d.data.f.cls) : d.data.kind === "sea" ? css("--raised") : "none")
+    .attr("fill-opacity", d => d.data.kind === "sea" ? .6 : 1)
+    .attr("stroke", d => d.data.f ? css("--canvas") : css("--muted"))
+    .attr("stroke-width", d => d.data.f ? .6 : d.data.kind === "sea" ? 1 : .8)
+    .attr("stroke-dasharray", d => d.data.kind === "hub" ? "2 2" : null)
+    .style("cursor", d => d.children ? "zoom-in" : "default");
+  const lab = svg.append("g").attr("pointer-events", "none");
+  function labels() {
+    lab.selectAll("*").remove();
+    const kk = W / view[2];
+    nodes.forEach(d => {
+      const x = (d.x - view[0]) * kk + W / 2, y = (d.y - view[1]) * kk + H / 2, r = d.r * kk;
+      if (d.data.kind === "sea") { if (focus === root || focus === d) lab.append("text").attr("class", "sealabel").attr("x", x).attr("y", y - r + 20).attr("text-anchor", "middle").text(d.data.name); }
+      else if (d.data.kind === "hub") { if (r > (focus === root ? 46 : 30)) lab.append("text").attr("class", "hublabel").attr("x", x).attr("y", y - r + 12).attr("text-anchor", "middle").text(d.data.name); }
+      else if (r > (focus === root ? 22 : 14)) lab.append("text").attr("class", "flabel").attr("x", x).attr("y", y).attr("dy", "0.35em").attr("text-anchor", "middle").style("font-size", r > 40 ? "12px" : "10.5px").text(d.data.name);
+    });
+  }
+  function place(v) {
+    view = v; const kk = W / v[2];
+    circ.attr("cx", d => (d.x - v[0]) * kk + W / 2).attr("cy", d => (d.y - v[1]) * kk + H / 2).attr("r", d => d.r * kk);
+  }
+  const reduce = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (animate && prev.size) {
+    circ.attr("cx", d => prev.get(d.data.id)?.x ?? W / 2).attr("cy", d => prev.get(d.data.id)?.y ?? H / 2).attr("r", d => prev.get(d.data.id)?.r ?? 0)
+      .transition().duration(reduce() ? 0 : 900).ease(d3.easeCubicInOut)
+      .attr("cx", d => d.x).attr("cy", d => d.y).attr("r", d => d.r).end().then(() => { place(view); labels(); }).catch(() => {});
+  } else { place(view); labels(); }
+  function zoom(d) {
+    focus = d; lab.selectAll("*").remove();
+    const i = d3.interpolateZoom(view, [d.x, d.y, d.r * 2.1]);
+    svg.transition().duration(reduce() ? 0 : 750).tween("zoom", () => t => place(i(t))).end().then(() => labels()).catch(() => {});
+  }
+  circ.on("click", (ev, d) => { ev.stopPropagation(); const z = d.children ? d : d.parent; if (z && focus !== z) zoom(z); });
+  svg.on("click", () => { if (focus !== root) zoom(root); });
+  circ.on("pointermove", (ev, d) => {
+    const v = d.value, liq = d3.sum(d.leaves(), l => l.data.f ? (PK.t == null ? l.data.f.rec_liq : l.data.f.w.liq[PK.t]) : 0);
+    const when = PK.t == null ? "Recoverable (all time)" : `Left, ${fmtMonth(dates[PK.t])}`;
+    let html = `<b>${d.data.name}</b>`;
+    if (d.data.f) { const f = d.data.f; html += `<div class="m">${f.area} · ${f.hub !== f.key ? `tied to ${title(f.hub)}` : "own facilities"}${f.discovered ? ` · found ${f.discovered}` : ""}</div>`; }
+    else html += `<div class="m">${d.leaves().filter(l => l.value > 0).length} fields</div>`;
+    html += `<div class="m" style="margin-top:6px">${when}</div><div class="row"><span>Oil, NGL, cond.</span><span>${fmt1(liq)}</span></div><div class="row"><span>Gas</span><span>${fmt1(v - liq)}</span></div><div class="row"><b>Total</b><b>${fmt1(v)} MSm³ o.e.</b></div><div class="row m"><span>≈ ${fmt(boe(v))} MMboe</span></div>`;
+    if (d.data.f) html += `<div class="m" style="margin-top:4px">${CL[d.data.f.cls].short}, ${CL[d.data.f.cls].range} MMboe</div>`;
+    tp.innerHTML = html; tp.style.opacity = 1;
+    const [px, py] = d3.pointer(ev, el), bw = el.clientWidth;
+    tp.style.left = Math.min(bw - 270, px + 14) + "px"; tp.style.top = (py + 14) + "px";
+  }).on("pointerleave", () => tp.style.opacity = 0);
+}
+const PKB = { rec: null, "1995": "1995-12", "2005": "2005-12", now: null };
+Object.keys(PKB).forEach(k => document.getElementById(`pk-${k}`).onclick = () => {
+  Object.keys(PKB).forEach(j => document.getElementById(`pk-${j}`).setAttribute("aria-pressed", j === k));
+  PK.t = k === "rec" ? null : k === "now" ? dates.length - 1 : S.dates.indexOf(PKB[k]);
+  drawPack(true);
+});
+
+function drawAll() { drawBulb(); drawPack(); drawHind(); drawCream(); drawMaps(); }
 drawAll();
 io.observe(bulb);
 let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(drawAll, 150); });

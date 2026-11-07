@@ -21,3 +21,9 @@ McCarthy, petroleum geoscience domain expert. Follow SubScout's CLAUDE.md and st
 - Discovery years listed right of the year scale (no in-chart roots).
 - Undiscovered resources: left out for now (placeholder). Contingent shown as hatched bar at today.
 - Open: port `stream` chart type into SubScout.
+- Palette (v7): oil green families (forest→leaf | jade→pale mint), gas (brick→orange | amber→pale gold); oil kept
+  darker than gas per class for CVD separation. Class names: small, medium, large | giant, giant, super-giant.
+- Maps: conic projection rotated (S.map_angle) so the shelf runs up the panel; frame = quadrants with data +
+  Norway–Denmark boundary; agreed maritime boundaries drawn dashed.
+- Circle packing: sea → hub → field (hub parsed from Sodir development text, scripts/hubs.py); snapshots
+  recoverable / left 1995 / 2005 / today; zoomable.
