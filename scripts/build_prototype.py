@@ -33,7 +33,8 @@ def main() -> None:
 
     pk = t.oe.idxmax()
     now = t.index[-1]
-    gas_cross = t[t.gas > t.oil].index.min()
+    t["liq"] = t.oil + t.liquids  # NGL and condensate are grouped with oil in this story
+    gas_cross = t[t.gas > t.liq].index.min()
     tot_rec = m.recoverable_oe.sum()
     small = m[m.recoverable_oe < 50]
     big2 = fi.loc[["TROLL", "JOHAN SVERDRUP"], "remaining_oe"].sum() / fi.remaining_oe.sum()
@@ -62,8 +63,8 @@ def main() -> None:
         {"when": f"{pk:%Y}", "date": f"{pk:%Y-%m}", "mark": f"{pk:%Y}", "short": "Peak",
          "title": "The widest point",
          "text": f"Remaining reserves peak at {f0(t.oe.max())} MSm³ o.e. in {pk:%B %Y}, "
-                 f"about {t.oe.max()*6.29/1000:,.0f} billion boe. By {gas_cross:%B %Y} gas overtakes oil "
-                 f"in what is left. It is {pct(t.loc[now,'gas']/t.loc[now,'oe'])} gas today."},
+                 f"about {t.oe.max()*6.29/1000:,.0f} billion boe. By {gas_cross:%B %Y} gas overtakes oil, NGL "
+                 f"and condensate together in what is left. It is {pct(t.loc[now,'gas']/t.loc[now,'oe'])} gas today."},
         {"when": "2007", "date": "2007-09", "mark": "2007", "short": "Ormen Lange, Snøhvit",
          "title": "Moving north",
          "text": f"Ormen Lange ({f0(fi.loc['ORMEN LANGE','recoverable_oe'])}) and Snøhvit "
@@ -79,9 +80,9 @@ def main() -> None:
         {"when": f"{now:%Y}", "date": f"{now:%Y-%m}", "mark": "Today", "short": f"{f0(t.oe.iloc[-1])} left",
          "title": "The neck",
          "text": f"{f0(t.oe.iloc[-1])} MSm³ o.e. remain in {fmt_month(now)}. Troll and Johan Sverdrup "
-                 f"hold {pct(big2)} of it. Below the line are the volumes not yet sanctioned "
-                 f"({f0(pot['resource_accounts']['contingent_fields']+pot['resource_accounts']['contingent_discoveries'])}) "
-                 f"and Sodir's expected undiscovered volume ({f0(pot['resource_accounts']['undiscovered'])})."},
+                 f"hold {pct(big2)} of it. Just above the line sit the volumes found but not yet "
+                 f"sanctioned ({f0(pot['resource_accounts']['contingent_fields']+pot['resource_accounts']['contingent_discoveries'])}). "
+                 f"The open space above is the next ten years."},
         {"when": "Twist", "title": "Drawn with hindsight",
          "text": f"Every width above uses today's estimate. At the end of {int(h0.year)} Sodir's tables put "
                  f"{f0(h0.estimated_then)} MSm³ o.e. in the {int(h0.n_fields)} fields then booked; we now "
@@ -102,27 +103,57 @@ def main() -> None:
         f"Width of a field at month <i>m</i> = Sodir's remaining reserves at 31.12.2025 + its reported production after <i>m</i> (minus production in 2026 for later months). Today's widths therefore equal Sodir's remaining reserves ({f0(fi.remaining_oe.sum())} MSm³ o.e., matching the resource accounts) and shut-down fields taper to zero.",
         "Streams start at Sodir's first <i>Producing</i> status date. Test production before that (Troll from 1990, Oseberg 1986, Balder 1991, Grane 1996) is kept in the volumes but does not start the stream. Discovery year is carried for the creaming curve and annotations.",
         f"{int(m.not_yet_producing.sum())} fields approved but not yet producing enter at their PDO approval. Five fields that started in 2026 (Symra, Ørn, Alve Nord, Idun Nord, Eirin) enter in 2026.",
-        "Fluids: oil; NGL and condensate merged; gas. Reserves list NGL in million tonnes (× 1.9 to Sm³ o.e.), production lists it in MSm³ already. With that, oil + gas + NGL + condensate reproduces Sodir's o.e. totals to 0.02.",
+        "Fluids: oil, NGL and condensate are grouped as liquids; gas on its own. Each field's liquids and gas are classed by that fluid's recoverable volume: small &lt; 10, medium 10–80, giant 80–795 (≥ 500 MMboe), super-giant ≥ 795 MSm³ o.e. (≥ 5 Bboe; only Troll gas). Liquids sit left of the seam and gas right, biggest classes innermost and newer fields outermost.",
+        "Underlying units: Reserves list NGL in million tonnes (× 1.9 to Sm³ o.e.), production lists it in MSm³ already. With that, oil + gas + NGL + condensate reproduces Sodir's o.e. totals to 0.02.",
         f"Sleipner Øst, Sleipner Vest and Gungne are one stream ({f0(sleip.recoverable_oe)} MSm³ o.e.): their production was reported under Sleipner Øst until about 2013, so they balance only as a group.",
         f"Not in the stack: production reported under discoveries with no field (16/1-12 Troldhaugen, 33/9-6 Delta, 7220/11-1 Alta) and Sindre (no 2025 reserves row). All are small.",
         "Cross-border fields carry the Norwegian share only. All ten balance within 0.9 MSm³ o.e., which confirms Sodir's reserves and production use the same share.",
         "Colour: three fluid colours from SubScout's Tide preset. Light mode passes all six palette checks. Dark mode uses a pale NGL &amp; condensate tone to keep colour-blind separation, outside the lightness band: a declared exception.",
     ]
     open_q = [
-        "Time direction: top-down (shown) or bottom-up so the bulb grows upward? Decide with the Present-mode layout.",
-        "Undiscovered range: the dashed P95/P05 marks use the 2020 resource report (2,200–6,200). Sodir's site blocks automated reads; the 2025 range needs reading in a browser.",
+        "Steps are buttons here; in SubScout they become scroll steps (silhouette, oil and gas, field size).",
+        "Undiscovered resources are left out for now (placeholder). The hatched bar at today is contingent resources only.",
         "Hindsight: add the contemporaneous estimate as a ghost outline on the bulb itself (2004 onward only; earlier field-level estimates are not in FactPages).",
-        "Ordering: inside-out by start date (shown). Alternatives: by sea area, or by discovery date so the bulb's core is the oldest finds.",
-        "Discovery date as a second state: hatched from discovery to production start would show how long volumes waited.",
+        "Ordering is for the eye: try mirrored size classes on both sides, or a smoothing window on the field ledges.",
         "Maps: quadrant choropleth shown. Alternatives: hex bins, or proportional circles per field with a time slider.",
         "Port the stream graph into SubScout as a generic <code>stream</code> chart type (vertical/horizontal, centred offset, morph between orders).",
     ]
 
     fields = [{"name": r.field.title(), "area": r.area, "discovery_year": None if pd.isna(r.discovery_year) else int(r.discovery_year),
                "recoverable_oe": r.recoverable_oe, "dominant_fluid": r.dominant_fluid} for r in m.itertuples()]
+    classes = [  # per-fluid recoverable volume, MSm³ o.e.; giant = 500 MMboe, super-giant = 5 Bboe
+        {"idx": 0, "label": "Small", "range": "< 10", "max": 10},
+        {"idx": 1, "label": "Medium", "range": "10–80", "max": 80},
+        {"idx": 2, "label": "Giant", "range": "80–795", "max": 795},
+        {"idx": 3, "label": "Super-giant", "range": "≥ 795", "max": 1e12},
+    ]
+
+    def cls(v: float) -> int:
+        return next(c["idx"] for c in classes if v < c["max"])
+
+    dates = pd.to_datetime(streams["dates"])
+    first_keys = [f["key"] for f in streams["fields"]][:3]
+    top_keys = m.nlargest(10, "recoverable_oe").field.tolist()
+    slim = []
     for f in streams["fields"]:
-        f["name"] = f["key"].title()
-        f["area"] = f["area"].replace(" sea", " Sea")
+        r = fi.loc[f["key"]]
+        liq = [round(a + b, 2) for a, b in zip(f["v"]["oil"], f["v"]["liquids"], strict=True)]
+        gas = f["v"]["gas"]
+        tot = [a + b for a, b in zip(liq, gas, strict=True)]
+        entry_i = next((i for i, v in enumerate(tot) if v > 0), len(tot) - 1)
+        rl, rg = r.recoverable_oil + r.recoverable_liquids, r.recoverable_gas
+        slim.append({
+            "name": f["key"].title().replace("Ø", "Ø"), "key": f["key"], "area": f["area"].replace(" sea", " Sea"),
+            "discovered": f["discovered"], "first_prod": f["first_prod"], "status": f["status"],
+            "cross_border": f["cross_border"], "w": {"liq": liq, "gas": gas},
+            "cls": {"liq": cls(rl), "gas": cls(rg)}, "rec_liq": round(rl, 1), "rec_gas": round(rg, 1),
+            "entry_i": entry_i, "first": f["key"] in first_keys,
+        })
+    streams = {"dates": streams["dates"], "fields": slim, "classes": classes,
+               "axis_start": 1966, "axis_end": int(dates[-1].year) + 10,
+               "pending": {"contingent": pot["resource_accounts"]["contingent_fields"] + pot["resource_accounts"]["contingent_discoveries"]},
+               "rooted": ["EKOFISK", "FRIGG", "STATFJORD", "GULLFAKS", "TROLL", "ORMEN LANGE", "JOHAN SVERDRUP"],
+               "labelled": top_keys, "peak": round(float(t.oe.max()), 1)}
     for f in fields:
         f["area"] = f["area"].replace(" sea", " Sea")
 
