@@ -1,7 +1,7 @@
 """Fill prototype/template.html with Tulip's data -> prototype/index.html (first-pass review page).
 
 Every number in the arc text is computed here from data/ (no typed figures).
-Usage: python scripts/build_prototype.py
+Usage: python scripts/build_site.py [site_dir]
 """
 
 from __future__ import annotations
@@ -10,6 +10,8 @@ import json
 from pathlib import Path
 
 import pandas as pd
+
+import hubs
 
 ROOT = Path(__file__).resolve().parents[1]
 D = ROOT / "data"
@@ -23,7 +25,7 @@ def pct(v: float) -> str:
     return f"{v:.0%}"
 
 
-def main() -> None:
+def main(site: Path = ROOT / "_site") -> None:
     streams = json.loads((D / "streams.json").read_text())
     pot = json.loads((D / "potential.json").read_text())
     m = pd.read_csv(D / "fields.csv", parse_dates=["first_production"])
@@ -149,13 +151,13 @@ def main() -> None:
             "discovered": f["discovered"], "first_prod": f["first_prod"], "status": f["status"],
             "cross_border": f["cross_border"], "w": {"liq": liq, "gas": gas},
             "cls": cls(rl + rg), "dom": "gas" if rg > rl else "liq", "rec_liq": round(rl, 1), "rec_gas": round(rg, 1),
-            "entry_i": entry_i, "first": f["key"] in first_keys, "hub": r.hub,
+            "entry_i": entry_i, "first": f["key"] in first_keys, "hub": r.hub, "area_group": r.area_group,
         })
     streams = {"dates": streams["dates"], "fields": slim, "classes": classes,
                "axis_start": 1966, "axis_end": int(dates[-1].year) + 10,
                "pending": {"contingent": pot["resource_accounts"]["contingent_fields"] + pot["resource_accounts"]["contingent_discoveries"]},
                "rooted": ["EKOFISK", "FRIGG", "STATFJORD", "GULLFAKS", "TROLL", "ORMEN LANGE", "JOHAN SVERDRUP"],
-               "labelled": top_keys, "smooth_sigma": 3, "map_angle": 18, "giant_cls": 4, "peak": round(float(t.oe.max()), 1)}
+               "labelled": top_keys, "hub_names": hubs.HUB_NAMES, "smooth_sigma": 3, "map_angle": 18, "giant_cls": 4, "peak": round(float(t.oe.max()), 1)}
     for f in fields:
         f["area"] = f["area"].replace(" sea", " Sea")
 
@@ -183,9 +185,29 @@ def main() -> None:
     }
     for k, v in repl.items():
         html = html.replace(k, v)
-    out = ROOT / "prototype" / "index.html"
+    out = ROOT / "prototype" / "index.html"  # body-only fragment (claude.ai artifact preview)
     out.write_text(html)
     print(f"wrote {out} ({out.stat().st_size/1e6:.2f} MB)")
+    write_site(html, site)
+
+
+def write_site(fragment: str, site: Path) -> None:
+    """Wrap the fragment as a full page for GitHub Pages: head bits (title, meta, fonts, styles) go in <head>."""
+    cut = fragment.index("</style>") + len("</style>")
+    head, body = fragment[:cut], fragment[cut:]
+    page = (
+        '<!doctype html>\n<html lang="en-GB">\n<head>\n<meta charset="utf-8">\n'
+        '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
+        '<meta name="description" content="Tulip: the Norwegian continental shelf\'s remaining oil and gas '
+        'reserves, field by field, 1971 to today. Data: Sodir.">\n'
+        '<meta property="og:title" content="Tulip">\n'
+        '<meta property="og:description" content="Norway\'s remaining reserves, field by field, drawn as a tulip bulb.">\n'
+        "<style>html,body{margin:0}</style>\n" + head + "\n</head>\n<body>\n" + body + "\n</body>\n</html>\n"
+    )
+    site.mkdir(parents=True, exist_ok=True)
+    (site / "index.html").write_text(page, encoding="utf-8")
+    (site / ".nojekyll").write_text("")
+    print(f"wrote {site / 'index.html'}")
 
 
 def fmt_month(d: pd.Timestamp) -> str:
@@ -193,4 +215,6 @@ def fmt_month(d: pd.Timestamp) -> str:
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+
+    main(Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "_site")

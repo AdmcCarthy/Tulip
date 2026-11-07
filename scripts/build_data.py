@@ -189,6 +189,10 @@ def main(raw: Path, out: Path) -> None:
     meta["lon"] = [cxy[f].x if f in cxy else np.nan for f in meta.index]
     meta["lat"] = [cxy[f].y if f in cxy else np.nan for f in meta.index]
 
+    for f, h in hubs.HUB_OVERRIDES.items():
+        if f in meta.index:
+            meta.loc[f, "hub"] = h
+    meta["area_group"] = hubs.areas(meta)
     out.mkdir(parents=True, exist_ok=True)
     meta.reset_index(names="field").to_csv(out / "fields.csv", index=False, date_format="%Y-%m-%d")
 

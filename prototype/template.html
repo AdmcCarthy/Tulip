@@ -85,6 +85,7 @@ figcaption, .fig-foot { font-size: 12.5px; color: var(--muted); line-height: 1.5
 .ghost { font: 500 13px/1 var(--f-body); color: var(--link); background: none; border: 0; padding: 9px 6px; cursor: pointer; }
 .ghost:focus-visible { outline: 2px solid var(--accent); }
 .sealabel { font: 500 15px var(--f-display); fill: var(--ink); paint-order: stroke; stroke: var(--canvas); stroke-width: 3px; }
+.arealabel { font: 600 11.5px var(--f-body); fill: var(--ink); paint-order: stroke; stroke: var(--canvas); stroke-width: 3px; }
 .hublabel { font: 500 11px var(--f-mono); fill: var(--muted); letter-spacing: .02em; paint-order: stroke; stroke: var(--canvas); stroke-width: 3px; }
 #pack svg { overflow: hidden; }
 .legend .m2 { color: var(--muted); font-size: 12px; }
@@ -116,7 +117,7 @@ a { color: var(--link); }
 </style>
 
 <header class="hero col">
-  <div class="kicker">Norwegian continental shelf · remaining reserves 1971–2026 · <span class="status">first pass</span></div>
+  <div class="kicker">Norwegian continental shelf · remaining reserves 1971–2026 · <span class="status">working draft</span></div>
   <h1>Tulip</h1>
   <p class="dek">Norway found its biggest fields first. The volume left to produce swelled into a bulb, peaked in __PEAK_YEAR__, and has been narrowing since. Most of it now sits in a handful of giants, but well over a hundred smaller fields have added to it.</p>
   <div class="kpis">
@@ -149,8 +150,8 @@ a { color: var(--link); }
 </section>
 
 <section class="col">
-  <h2>A draft arc</h2>
-  <p>Seven beats, each tied to a feature you can see in the bulb. The numbers are computed from the data; the wording is a first draft.</p>
+  <h2>The arc</h2>
+  <p>Seven beats and a twist, each tied to a feature you can see in the bulb. Every number is computed from Sodir's data.</p>
   <ol class="arc" id="arc"></ol>
 </section>
 
@@ -194,7 +195,7 @@ a { color: var(--link); }
   <figure>
     <div class="fig-head"><div>
       <p class="fig-title">Sea area, hub and field, sized by volume</p>
-      <p class="fig-sub">Circle area = MSm³ o.e. Click a sea or hub to zoom; click outside to zoom out. Same colours as the bulb.</p></div>
+      <p class="fig-sub">Sea, then area, then hub, then field. Circle area = MSm³ o.e. Click a circle to zoom in; click outside to zoom out. Same colours as the bulb.</p></div>
       <div class="seg" role="group" aria-label="Volume shown">
         <button id="pk-rec" aria-pressed="true">Recoverable</button>
         <button id="pk-1995" aria-pressed="false">Left 1995</button>
@@ -202,18 +203,18 @@ a { color: var(--link); }
         <button id="pk-now" aria-pressed="false">Left today</button>
       </div></div>
     <div class="chart" id="pack"><div class="tip" id="tip5"></div></div>
-    <figcaption><span><span class="conf">Derived</span> Hub = the field whose facility a field is tied back to, connected to or processed on, read from Sodir's development descriptions; chains resolved to the final host. Fields with no host stand alone.</span><span>Source: Sodir FactPages field descriptions, reserves and production.</span></figcaption>
+    <figcaption><span><span class="conf">Derived</span> Hub = the field whose facility a field is tied back to, connected to or processed on, read from Sodir's development descriptions; chains resolved to the final host. Fields with no host stand alone. Areas: each hub goes to the nearest named area in its sea, with a few overrides (Valhall to the southern North Sea, Grane to Frigg–Alvheim–Balder, Martin Linge to Oseberg–Troll, Hugin/Munin/Fulla as Yggdrasil).</span><span>Source: Sodir FactPages field descriptions, reserves and production.</span></figcaption>
   </figure>
 </section>
 
 <section class="col notes">
-  <h2>How this first pass was built</h2>
+  <h2>How it was built</h2>
   <ul id="method"></ul>
   <h3>Mass balance: recoverable − produced − remaining (largest gaps)</h3>
   <div class="tablewrap"><table class="qc" id="qc"></table></div>
   <h3>Cross-border fields (Norwegian share only, confirmed by the balance)</h3>
   <div class="tablewrap"><table class="qc" id="xb"></table></div>
-  <h3>Open questions for the next loop</h3>
+  <h3>Still open</h3>
   <ul id="open"></ul>
 </section>
 
@@ -539,7 +540,7 @@ function drawMaps() {
 // ---------------- circle packing: sea -> hub -> field
 const PK = { t: null };
 const SEA = { "North Sea": 0, "Norwegian Sea": 1, "Barents Sea": 2 };
-const title = k => k.split(" ").map(w => w[0] + w.slice(1).toLowerCase()).join(" ");
+const title = k => S.hub_names[k] || k.split(" ").map(w => w[0] + w.slice(1).toLowerCase()).join(" ");
 function drawPack(animate) {
   const el = document.getElementById("pack"), tp = document.getElementById("tip5");
   const prev = new Map();
@@ -547,18 +548,19 @@ function drawPack(animate) {
   el.querySelectorAll("svg").forEach(s => s.remove());
   const W = el.clientWidth, H = Math.round(Math.min(Math.max(W * 0.9, 380), 860));
   const val = f => PK.t == null ? f.rec_liq + f.rec_gas : f.w.liq[PK.t] + f.w.gas[PK.t];
-  const bySea = d3.group(S.fields, f => f.area, f => f.hub);
-  const data = { id: "NCS", name: "Norwegian continental shelf", children: [...bySea].sort((a, b) => SEA[a[0]] - SEA[b[0]]).map(([sea, hubs]) => ({
-    id: sea, name: sea, kind: "sea", children: [...hubs].map(([hub, fs]) => fs.length === 1 ? { id: fs[0].key, name: fs[0].name, f: fs[0] }
-      : { id: "hub:" + hub, name: `${title(hub)} hub`, kind: "hub", children: fs.map(f => ({ id: f.key, name: f.name, f })) }) })) };
-  const root = d3.pack().size([W, H]).padding(d => d.depth === 0 ? 14 : d.depth === 1 ? 5 : 1.5)(
+  const bySea = d3.group(S.fields, f => f.area, f => f.area_group, f => f.hub);
+  const hubNode = ([hub, fs]) => fs.length === 1 ? { id: fs[0].key, name: fs[0].name, f: fs[0] }
+    : { id: "hub:" + hub, name: `${title(hub)} hub`, kind: "hub", children: fs.map(f => ({ id: f.key, name: f.name, f })) };
+  const data = { id: "NCS", name: "Norwegian continental shelf", children: [...bySea].sort((a, b) => SEA[a[0]] - SEA[b[0]]).map(([sea, areas]) => ({
+    id: sea, name: sea, kind: "sea", children: [...areas].map(([area, hubs]) => ({ id: "area:" + area, name: area, kind: "area", children: [...hubs].map(hubNode) })) })) };
+  const root = d3.pack().size([W, H]).padding(d => d.depth === 0 ? 14 : d.depth === 1 ? 7 : d.depth === 2 ? 4 : 1.5)(
     d3.hierarchy(data).sum(d => d.f ? Math.max(val(d.f), 0) : 0).sort((a, b) => b.value - a.value));
   const svg = d3.select(el).append("svg").attr("viewBox", [0, 0, W, H]).attr("role", "img").attr("aria-label", "Circle packing of fields grouped by hub and sea area");
   let focus = root, view = [root.x, root.y, root.r * 2];
   const nodes = root.descendants().filter(d => d.depth > 0 && d.r > 0.2);
   const circ = svg.append("g").selectAll("circle").data(nodes, d => d.data.id).join("circle").attr("class", "n")
-    .attr("fill", d => d.data.f ? shade(d.data.f.dom === "gas" ? "gas" : "oil", d.data.f.cls) : d.data.kind === "sea" ? css("--raised") : "none")
-    .attr("fill-opacity", d => d.data.kind === "sea" ? .6 : 1)
+    .attr("fill", d => d.data.f ? shade(d.data.f.dom === "gas" ? "gas" : "oil", d.data.f.cls) : d.data.kind === "sea" ? css("--raised") : d.data.kind === "area" ? css("--surface") : "none")
+    .attr("fill-opacity", d => d.data.kind === "sea" ? .6 : d.data.kind === "area" ? .7 : 1)
     .attr("stroke", d => d.data.f ? css("--canvas") : css("--muted"))
     .attr("stroke-width", d => d.data.f ? .6 : d.data.kind === "sea" ? 1 : .8)
     .attr("stroke-dasharray", d => d.data.kind === "hub" ? "2 2" : null)
@@ -570,7 +572,8 @@ function drawPack(animate) {
     nodes.forEach(d => {
       const x = (d.x - view[0]) * kk + W / 2, y = (d.y - view[1]) * kk + H / 2, r = d.r * kk;
       if (d.data.kind === "sea") { if (focus === root || focus === d) lab.append("text").attr("class", "sealabel").attr("x", x).attr("y", y - r + 20).attr("text-anchor", "middle").text(d.data.name); }
-      else if (d.data.kind === "hub") { if (r > (focus === root ? 46 : 30)) lab.append("text").attr("class", "hublabel").attr("x", x).attr("y", y - r + 12).attr("text-anchor", "middle").text(d.data.name); }
+      else if (d.data.kind === "area") { if (r > 28 && (focus === root || focus === d.parent || focus === d)) lab.append("text").attr("class", "arealabel").attr("x", x).attr("y", y - r + 13).attr("text-anchor", "middle").text(d.data.name); }
+      else if (d.data.kind === "hub") { if (focus !== root && r > 30) lab.append("text").attr("class", "hublabel").attr("x", x).attr("y", y - r + 12).attr("text-anchor", "middle").text(d.data.name); }
       else if (r > (focus === root ? 22 : 14)) lab.append("text").attr("class", "flabel").attr("x", x).attr("y", y).attr("dy", "0.35em").attr("text-anchor", "middle").style("font-size", r > 40 ? "12px" : "10.5px").text(d.data.name);
     });
   }
@@ -595,7 +598,7 @@ function drawPack(animate) {
     const v = d.value, liq = d3.sum(d.leaves(), l => l.data.f ? (PK.t == null ? l.data.f.rec_liq : l.data.f.w.liq[PK.t]) : 0);
     const when = PK.t == null ? "Recoverable (all time)" : `Left, ${fmtMonth(dates[PK.t])}`;
     let html = `<b>${d.data.name}</b>`;
-    if (d.data.f) { const f = d.data.f; html += `<div class="m">${f.area} · ${f.hub !== f.key ? `tied to ${title(f.hub)}` : "own facilities"}${f.discovered ? ` · found ${f.discovered}` : ""}</div>`; }
+    if (d.data.f) { const f = d.data.f; html += `<div class="m">${f.area_group} · ${f.hub !== f.key ? `tied to ${title(f.hub)}` : "own facilities"}${f.discovered ? ` · found ${f.discovered}` : ""}</div>`; }
     else html += `<div class="m">${d.leaves().filter(l => l.value > 0).length} fields</div>`;
     html += `<div class="m" style="margin-top:6px">${when}</div><div class="row"><span>Oil, NGL, cond.</span><span>${fmt1(liq)}</span></div><div class="row"><span>Gas</span><span>${fmt1(v - liq)}</span></div><div class="row"><b>Total</b><b>${fmt1(v)} MSm³ o.e.</b></div><div class="row m"><span>≈ ${fmt(boe(v))} MMboe</span></div>`;
     if (d.data.f) html += `<div class="m" style="margin-top:4px">${CL[d.data.f.cls].short}, ${CL[d.data.f.cls].range} MMboe</div>`;

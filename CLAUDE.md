@@ -15,7 +15,7 @@ McCarthy, petroleum geoscience domain expert. Follow SubScout's CLAUDE.md and st
   "Producing" status (production date); discovery year is kept for annotation. Shut-down fields taper to 0.
 - Cross-border fields are Norwegian share only (verified by mass balance; see tests).
 - Hindsight is part of the story: back-projected widths use today's estimate.
-- Numbers in prose are computed (scripts/build_prototype.py now; story.py later). No typed figures.
+- Numbers in prose are computed (scripts/build_site.py now; story.py later). No typed figures.
 - British English; MSm³ o.e. first with boe alongside (1 Sm³ = 6.29 bbl). Observed / Derived / Interpreted.
 - Grey silhouette is only a reveal on first view (dissolves into colour).
 - Discovery years listed right of the year scale (no in-chart roots).
@@ -27,3 +27,10 @@ McCarthy, petroleum geoscience domain expert. Follow SubScout's CLAUDE.md and st
   Norway–Denmark boundary; agreed maritime boundaries drawn dashed.
 - Circle packing: sea → hub → field (hub parsed from Sodir development text, scripts/hubs.py); snapshots
   recoverable / left 1995 / 2005 / today; zoomable.
+- Repo publishes to GitHub Pages via .github/workflows/pages.yml (tests -> scripts/build_site.py -> _site).
+  prototype/index.html is the body-only fragment for the claude.ai artifact; _site/index.html is the page.
+- Not yet a SubScout `subscout build` story: figures are custom. A SubScout custom-figure hook is the
+  planned route (SubScout had uncommitted work on 2026-11-07, so it was not changed).
+- Conflicts with SubScout rules, declared: stream graph has no y-axis of values (width = value, scale bar
+  instead); shade encodes size class within a fluid hue (more than 5 categories via linked families);
+  maps rotated (north arrow); dark-mode pale NGL tone retired.

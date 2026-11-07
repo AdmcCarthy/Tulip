@@ -22,3 +22,8 @@ Resource accounts: norskpetroleum.no/wp-content/uploads/74-Ressursregnskap-total
 Known quirks: NGL in reserves is million tonnes (× 1.9), in production MSm³. Sleipner Øst/Vest/Gungne
 balance only as a group. Test production precedes the production-start status for Troll, Oseberg,
 Balder, Grane, Mime, Gimle. Undiscovered P95/P05 range is a placeholder from the 2020 resource report.
+
+Hubs and areas (`fields.csv` columns `hub`, `area_group`): hub = host facility parsed from Sodir's
+'Development' descriptions (`scripts/hubs.py`; tied/connected/processed to a named field's facility,
+chains resolved). Areas: nearest named anchor per sea with documented overrides. Interpreted grouping;
+checked by `tests/test_hubs.py`.
