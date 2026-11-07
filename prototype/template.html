@@ -12,7 +12,7 @@
   --accent: #1a7f88; --hatch: #596c7b;
   --seq-0: #e5f6f7; --seq-1: #b3d8dc; --seq-2: #7bbcc3; --seq-3: #429fa8; --seq-4: #1a7f88; --seq-5: #1a5e65; --seq-6: #1d3e41;
   --land: #e2e9ef;
-  --oil-0: #f0b689; --oil-1: #e38d42; --oil-2: #a34e00; --gas-0: #99cbf0; --gas-1: #5cade5; --gas-2: #0070a9; --gas-3: #164461; --silhouette: #8798a6;
+  --oil-0: #f0b689; --oil-1: #e38d42; --oil-2: #a34e00; --oil-3: #603204; --gas-0: #99cbf0; --gas-1: #5cade5; --gas-2: #0070a9; --gas-3: #164461; --silhouette: #8798a6;
   --f-display: "Newsreader", "Iowan Old Style", Georgia, serif;
   --f-body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
   --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
@@ -24,7 +24,7 @@
   --accent: #55b3bd; --hatch: #b4c7d7;
   --seq-0: #273031; --seq-1: #354d50; --seq-2: #3b6f74; --seq-3: #3d919a; --seq-4: #55b3bd; --seq-5: #86d2da; --seq-6: #bfeff4;
   --land: #1e2b35;
-  --oil-0: #744a28; --oil-1: #c36800; --oil-2: #ffad63; --gas-0: #335a75; --gas-1: #2d86be; --gas-2: #7dceff; --gas-3: #c4eeff; --silhouette: #6e8aa0;
+  --oil-0: #744a28; --oil-1: #c36800; --oil-2: #ffad63; --oil-3: #ffddb9; --gas-0: #335a75; --gas-1: #2d86be; --gas-2: #7dceff; --gas-3: #c4eeff; --silhouette: #6e8aa0;
   color-scheme: dark; } }
 :root[data-theme="dark"] {
   --canvas: #0e1820; --surface: #15212a; --raised: #1e2b35;
@@ -33,7 +33,7 @@
   --accent: #55b3bd; --hatch: #b4c7d7;
   --seq-0: #273031; --seq-1: #354d50; --seq-2: #3b6f74; --seq-3: #3d919a; --seq-4: #55b3bd; --seq-5: #86d2da; --seq-6: #bfeff4;
   --land: #1e2b35;
-  --oil-0: #744a28; --oil-1: #c36800; --oil-2: #ffad63; --gas-0: #335a75; --gas-1: #2d86be; --gas-2: #7dceff; --gas-3: #c4eeff; --silhouette: #6e8aa0;
+  --oil-0: #744a28; --oil-1: #c36800; --oil-2: #ffad63; --oil-3: #ffddb9; --gas-0: #335a75; --gas-1: #2d86be; --gas-2: #7dceff; --gas-3: #c4eeff; --silhouette: #6e8aa0;
   color-scheme: dark; }
 
 * { box-sizing: border-box; }
@@ -79,6 +79,11 @@ figcaption, .fig-foot { font-size: 12.5px; color: var(--muted); line-height: 1.5
 .flabel.big { font: 500 15px var(--f-display); }
 .legend .ramp { display: inline-flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; }
 .legend .ramp b { font-weight: 600; margin-right: 2px; }
+.coltitle { font: 600 13px var(--f-body); fill: var(--ink); }
+.ctrl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.ghost { font: 500 13px/1 var(--f-body); color: var(--link); background: none; border: 0; padding: 9px 6px; cursor: pointer; }
+.ghost:focus-visible { outline: 2px solid var(--accent); }
+.legend .m2 { color: var(--muted); font-size: 12px; }
 .legend .m { color: var(--muted); font-size: 12px; flex-basis: 100%; }
 .anno text.y { font: 500 11px var(--f-mono); fill: var(--ink); }
 .flabel { font: 600 11.5px var(--f-body); fill: var(--ink); paint-order: stroke; stroke: var(--canvas); stroke-width: 3px; stroke-linejoin: round; pointer-events: none; }
@@ -122,13 +127,15 @@ a { color: var(--link); }
   <figure id="fig-bulb">
     <div class="fig-head">
       <div>
-        <p class="fig-title">The bulb: remaining reserves of every field, month by month</p>
-        <p class="fig-sub">Width = recoverable volume not yet produced, MSm³ o.e. Time runs up the page, from the first discoveries to ten years ahead. Hover for a field.</p>
+        <p class="fig-title">The bulb: remaining reserves of every field, by fluid and in total</p>
+        <p class="fig-sub">Width = recoverable volume not yet produced, MSm³ o.e., on one scale across the three charts. Time runs up the page. Hover for a field.</p>
       </div>
-      <div class="seg" role="group" aria-label="Step through the figure">
-        <button id="s-silhouette" aria-pressed="true">1 · Silhouette</button>
-        <button id="s-fluids" aria-pressed="false">2 · Oil and gas</button>
-        <button id="s-sizes" aria-pressed="false">3 · Field size</button>
+      <div class="ctrl">
+        <div class="seg" role="group" aria-label="Order of the streams">
+          <button id="o-mixed" aria-pressed="true">Mixed order</button>
+          <button id="o-age" aria-pressed="false">Oldest at the centre</button>
+        </div>
+        <button class="ghost" id="replay">Replay reveal</button>
       </div>
     </div>
     <div class="legend" id="bulb-legend" aria-live="polite"></div>
@@ -136,7 +143,7 @@ a { color: var(--link); }
     <figcaption>
       <span><span class="conf">Derived</span> Today's Sodir reserve estimate (31.12.2025) plus reported production since each month. Hindsight: every past width uses what we know now.</span>
       <span>Source: Sodir FactPages, field reserves, monthly production and status history, accessed 2026-11-07. Not yet sanctioned: contingent resources in fields and discoveries, Sodir resource accounts 31.12.2025 (placeholder; undiscovered resources left out for now).</span>
-      <span>Oil, NGL and condensate are shown together as liquids. 1 Sm³ o.e. = 6.29 boe; 1,000 Sm³ gas = 1 Sm³ o.e.; NGL tonnes × 1.9.</span>
+      <span>Curves smoothed for display (Gaussian, about one year); hover values are unsmoothed. Oil, NGL and condensate are shown together. 1 Sm³ o.e. = 6.29 boe; 1,000 Sm³ gas = 1 Sm³ o.e.; NGL tonnes × 1.9.</span>
     </figcaption>
   </figure>
 </section>
@@ -224,184 +231,212 @@ document.getElementById("qc").innerHTML = "<tr><th>Field</th><th>Recoverable</th
 document.getElementById("xb").innerHTML = "<tr><th>Field</th><th>Norwegian share</th><th>Recoverable (NO)</th><th>Gap</th></tr>" +
   QC.xb.map(r => `<tr><td>${r.field}</td><td>${r.share == null ? "see FactPages" : r.share + "%"}</td><td>${fmt1(r.rec)}</td><td>${d3.format("+.2f")(r.gap)}</td></tr>`).join("");
 
-// ---------------- the bulb
+// ---------------- the bulb: three linked stream graphs (liquids, gas, oil equivalent), one scale
 const bulb = document.getElementById("bulb"), tip = document.getElementById("tip");
 const fields = S.fields, n = dates.length, CL = S.classes;
-const FLB = ["liq", "gas"];
-const FLBNAME = { liq: "Oil, NGL & condensate", gas: "Gas" };
-const clsVar = (fl, c) => `--${fl === "liq" ? "oil" : "gas"}-${c}`;
-const series = [];
-fields.forEach((f, fi) => FLB.forEach(fl => { if (f.w[fl].some(x => x > 0)) series.push({ fi, fl, v: f.w[fl], cls: f.cls[fl], entry: f.entry_i }); }));
-// Order for the eye: liquids to the left, gas to the right; biggest class at the seam, smaller classes outward;
-// within a class, older fields nearer the seam so new fields bloom at the edges.
-const side = fl => series.map((s, i) => [s, i]).filter(([s]) => s.fl === fl)
-  .sort(([a], [b]) => b.cls - a.cls || a.entry - b.entry).map(([, i]) => i);
-const ORDER = [...side("liq").reverse(), ...side("gas")];
-const LAY = (() => {
-  const x0 = series.map(() => new Float32Array(n)), x1 = series.map(() => new Float32Array(n));
-  for (let t = 0; t < n; t++) {
-    let tot = 0; for (const s of series) tot += s.v[t];
-    let c = -tot / 2;
-    for (const i of ORDER) { x0[i][t] = c; c += series[i].v[t]; x1[i][t] = c; }
+const CHARTS = [
+  { key: "liq", title: "Oil, NGL & condensate" },
+  { key: "gas", title: "Gas" },
+  { key: "oe", title: "Oil equivalent" },
+];
+// display smoothing: gaussian over time (sigma in quarters); hover reads the raw values
+const SIG = S.smooth_sigma, RAD = Math.ceil(SIG * 3);
+const KER = d3.range(-RAD, RAD + 1).map(k => Math.exp(-(k * k) / (2 * SIG * SIG)));
+function smooth(v) {
+  const out = new Float32Array(v.length);
+  for (let t = 0; t < v.length; t++) {
+    let s = 0, w = 0;
+    for (let k = -RAD; k <= RAD; k++) { const j = t + k; if (j < 0 || j >= v.length) continue; s += v[j] * KER[k + RAD]; w += KER[k + RAD]; }
+    out[t] = s / w < 0.005 ? 0 : s / w;
   }
-  return { x0, x1 };
-})();
-const totals = dates.map((_, t) => d3.sum(series, s => s.v[t]));
-const peakT = d3.maxIndex(totals);
-const fluidTot = fl => dates.map((_, t) => d3.sum(series.filter(s => s.fl === fl), s => s.v[t]));
-const LIQ = fluidTot("liq"), GAS = fluidTot("gas");
+  return out;
+}
+fields.forEach(f => { f.w.oe = f.w.liq.map((v, t) => v + f.w.gas[t]); f.sm = { liq: smooth(f.w.liq), gas: smooth(f.w.gas), oe: smooth(f.w.oe) }; });
 
-const STEPS = ["silhouette", "fluids", "sizes"];
-let step = "silhouette";
-const fillFor = s => step === "sizes" ? css(clsVar(s.fl, s.cls)) : css(s.fl === "liq" ? "--oil-1" : "--gas-1");
+// seeded shuffle for the mixed order
+function rng(seed) { return () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }; }
+const idx = fields.map((_, i) => i);
+const ORDERS = {
+  mixed: (() => {  // each big field sits among a scatter of smaller ones
+    const r = rng(7), big = idx.filter(i => fields[i].cls >= 2).sort((a, b) => fields[a].entry_i - fields[b].entry_i);
+    const rest = idx.filter(i => fields[i].cls < 2).sort(() => r() - .5);
+    const out = [], per = rest.length / (big.length + 1); let k = 0;
+    big.forEach((b, j) => { const upto = Math.round(per * (j + 1)); while (k < upto) out.push(rest[k++]); out.push(b); });
+    while (k < rest.length) out.push(rest[k++]);
+    return out;
+  })(),
+  age: (() => { const o = []; [...idx].sort((a, b) => fields[a].entry_i - fields[b].entry_i).forEach((i, k) => k % 2 ? o.unshift(i) : o.push(i)); return o; })(),
+};
+function layout(chart, order) {
+  const sers = order.filter(i => fields[i].w[chart].some(v => v > 0));
+  const x0 = {}, x1 = {};
+  sers.forEach(i => { x0[i] = new Float32Array(n); x1[i] = new Float32Array(n); });
+  const tot = new Float32Array(n);
+  for (let t = 0; t < n; t++) {
+    let s = 0; for (const i of sers) s += fields[i].sm[chart][t];
+    tot[t] = s; let c = -s / 2;
+    for (const i of sers) { x0[i][t] = c; c += fields[i].sm[chart][t]; x1[i][t] = c; }
+  }
+  return { sers, x0, x1, tot };
+}
+const LAY = {};
+for (const o of Object.keys(ORDERS)) LAY[o] = Object.fromEntries(CHARTS.map(c => [c.key, layout(c.key, ORDERS[o])]));
+const RAW = Object.fromEntries(CHARTS.map(c => [c.key, dates.map((_, t) => d3.sum(fields, f => f.w[c.key][t]))]));
+const peakT = d3.maxIndex(RAW.oe);
+let order = "mixed", revealed = false;
+const shade = (hue, c) => css(`--${hue}-${c}`);
+const fillOf = (chart, f) => shade(chart === "oe" ? (f.dom === "gas" ? "gas" : "oil") : (chart === "gas" ? "gas" : "oil"), f.cls);
 
 function legend() {
-  const el = document.getElementById("bulb-legend");
-  if (step === "silhouette") { el.innerHTML = `<span><i style="background:var(--silhouette)"></i>All fields combined</span>`; return; }
-  if (step === "fluids") { el.innerHTML = FLB.map(fl => `<span><i style="background:var(${fl === "liq" ? "--oil-1" : "--gas-1"})"></i>${FLBNAME[fl]}</span>`).join(""); return; }
-  el.innerHTML = FLB.map(fl => `<span class="ramp"><b>${FLBNAME[fl]}</b>` +
-    CL.filter(c => fl === "gas" || c.idx < 3).map(c => `<span><i style="background:var(${clsVar(fl, c.idx)})"></i>${c.label}</span>`).join("") + "</span>").join("") +
-    `<span class="m">Size = the field's recoverable volume of that fluid: ${CL.map(c => `${c.label.toLowerCase()} ${c.range}`).join(", ")} MSm³ o.e.</span>`;
+  document.getElementById("bulb-legend").innerHTML =
+    `<span class="ramp"><b>Field size</b>${CL.map(c => `<span><i style="background:linear-gradient(90deg,var(--oil-${c.idx}) 50%,var(--gas-${c.idx}) 50%)"></i>${c.label} <span class="m2">${c.range}</span></span>`).join("")}</span>` +
+    `<span class="m">Size = the field's total recoverable volume, MSm³ o.e. (giant ≥ 500 MMboe, super-giant ≥ 5 Bboe), the same class in all three charts. Orange: oil, NGL &amp; condensate; blue: gas. In the oil-equivalent chart a field takes the colour of its main fluid.</span>`;
 }
 
 function drawBulb() {
   bulb.querySelectorAll("svg").forEach(s => s.remove());
+  legend();
   const W = bulb.clientWidth, narrow = W < 640;
-  const mL = narrow ? 8 : 190, mR = narrow ? 30 : 40, mT = 30, mB = 30;
-  const H = Math.round(Math.min(Math.max(W * 1.6, 1150), 1750));
-  const plotH = H - mT - mB;
-  const xmax = (totals[peakT] + 0) * 1.04;
-  const x = d3.scaleLinear([-xmax / 2, xmax / 2], [mL, W - mR]);
-  const t0 = new Date(S.axis_start, 0, 1), t1 = new Date(S.axis_end, 11, 31);
-  const y = d3.scaleTime([t0, t1], [mT + plotH, mT]);  // time runs up the page
-  const yNow = y(dates[n - 1]);
+  const mL = narrow ? 4 : 150, mR = narrow ? 30 : 40, mT = 46, mB = 26, gap = narrow ? 6 : 22;
+  const H = Math.round(Math.min(Math.max(W * 1.25, 1000), 1500)), plotH = H - mT - mB;
+  const maxes = CHARTS.map(c => d3.max(LAY.mixed[c.key].tot));
+  const k = (W - mL - mR - 2 * gap) / d3.sum(maxes);
+  let acc = mL; const cx = maxes.map(m => { const c = acc + m * k / 2; acc += m * k + gap; return c; });
+  const y = d3.scaleTime([new Date(S.axis_start, 0, 1), new Date(S.axis_end, 11, 31)], [mT + plotH, mT]);
+  const yNow = y(dates[n - 1]), x0p = narrow ? 0 : mL - 8;
   const svg = d3.select(bulb).append("svg").attr("viewBox", [0, 0, W, H]).attr("role", "img")
-    .attr("aria-label", "Vertical stream graph of remaining reserves per field, 1971 to today, growing upward");
-  const defs = svg.append("defs");
-  defs.append("pattern").attr("id", "hatch").attr("patternUnits", "userSpaceOnUse").attr("width", 5).attr("height", 5)
+    .attr("aria-label", "Three stream graphs of remaining reserves per field: liquids, gas and oil equivalent, 1971 to today");
+  svg.append("defs").append("pattern").attr("id", "hatch").attr("patternUnits", "userSpaceOnUse").attr("width", 5).attr("height", 5)
     .attr("patternTransform", "rotate(45)").append("rect").attr("width", 1).attr("height", 5).attr("fill", css("--hatch"));
-  const glow = defs.append("filter").attr("id", "glow").attr("x", "-20%").attr("y", "-10%").attr("width", "140%").attr("height", "120%");
-  glow.append("feGaussianBlur").attr("stdDeviation", narrow ? 6 : 10).attr("result", "b");
-  const mg = glow.append("feMerge"); mg.append("feMergeNode").attr("in", "b");
 
-  // the next ten years: an open band above today
-  svg.append("rect").attr("x", narrow ? 0 : mL - 8).attr("width", W - (narrow ? 0 : mL - 8)).attr("y", mT).attr("height", yNow - mT).attr("fill", css("--raised")).attr("opacity", .55);
-  svg.append("text").attr("class", "lbl").attr("x", narrow ? 4 : mL).attr("y", mT + 16).text(`The next ten years, to ${S.axis_end}`);
-
-  const ax = svg.append("g").attr("class", "axis");
-  const yr = d3.range(1970, S.axis_end + 1, 5).map(v => new Date(v, 0, 1));
-  ax.selectAll("line").data(yr).join("line").attr("x1", narrow ? 0 : mL - 8).attr("x2", W).attr("y1", y).attr("y2", y).attr("stroke-dasharray", "1 3");
+  svg.append("rect").attr("x", x0p).attr("width", W - x0p).attr("y", mT).attr("height", yNow - mT).attr("fill", css("--raised")).attr("opacity", .55);
+  svg.append("text").attr("class", "lbl").attr("x", narrow ? 4 : mL).attr("y", mT + 16).text(`Next ten years, to ${S.axis_end}`);
+  const ax = svg.append("g").attr("class", "axis"), yr = d3.range(1970, S.axis_end + 1, 5).map(v => new Date(v, 0, 1));
+  ax.selectAll("line").data(yr).join("line").attr("x1", x0p).attr("x2", W).attr("y1", y).attr("y2", y).attr("stroke-dasharray", "1 3");
   ax.selectAll("text").data(yr).join("text").attr("x", W).attr("y", d => y(d) - 4).attr("text-anchor", "end").text(d => d.getFullYear());
+  CHARTS.forEach((c, j) => svg.append("text").attr("class", "coltitle").attr("x", cx[j]).attr("y", 18).attr("text-anchor", "middle").text(narrow && c.key === "liq" ? "Liquids" : narrow && c.key === "oe" ? "Oil eq." : c.title));
+  CHARTS.forEach((c, j) => svg.append("text").attr("class", "lbl").attr("x", cx[j]).attr("y", 34).attr("text-anchor", "middle").text(`peak ${fmt(c.key === "oe" ? S.peak : d3.max(RAW[c.key]))}`));
 
-  const area = i => d3.area().curve(d3.curveBasis).y((_, t) => y(dates[t])).x0((_, t) => x(LAY.x0[i][t])).x1((_, t) => x(LAY.x1[i][t]))
-    .defined((_, t) => series[i].v[t] > 0 || (t + 1 < n && series[i].v[t + 1] > 0) || (t > 0 && series[i].v[t - 1] > 0))(dates) || "";
-  const totalArea = d3.area().curve(d3.curveBasis).y((_, t) => y(dates[t])).x0((_, t) => x(-totals[t] / 2)).x1((_, t) => x(totals[t] / 2))
-    .defined((_, t) => totals[t] > 0 || (t + 1 < n && totals[t + 1] > 0))(dates);
+  const curve = d3.curveBumpY;
+  const def = (v, t) => v[t] > 0 || (t + 1 < n && v[t + 1] > 0) || (t > 0 && v[t - 1] > 0);
+  const areaOf = (lay, i, j) => d3.area().curve(curve).y((_, t) => y(dates[t]))
+    .x0((_, t) => cx[j] + lay.x0[i][t] * k).x1((_, t) => cx[j] + lay.x1[i][t] * k)
+    .defined((_, t) => def(fields[i].sm[CHARTS[j].key], t))(dates) || "";
+  const silOf = j => d3.area().curve(curve).y((_, t) => y(dates[t])).x0((_, t) => cx[j] - LAY[order][CHARTS[j].key].tot[t] * k / 2)
+    .x1((_, t) => cx[j] + LAY[order][CHARTS[j].key].tot[t] * k / 2).defined((_, t) => def(LAY[order][CHARTS[j].key].tot, t))(dates);
 
-  const halo = svg.append("path").attr("d", totalArea).attr("fill", css("--silhouette")).attr("filter", "url(#glow)").attr("opacity", step === "silhouette" ? .45 : .22);
-  const sil = svg.append("path").attr("d", totalArea).attr("fill", css("--silhouette")).attr("opacity", step === "silhouette" ? 1 : 0);
-  const g = svg.append("g");
-  const paths = g.selectAll("path").data(series).join("path").attr("d", (_, i) => area(i))
-    .attr("fill", fillFor).attr("stroke", css("--canvas")).attr("stroke-width", narrow ? .35 : .5).attr("stroke-linejoin", "round")
-    .attr("opacity", step === "silhouette" ? 0 : 1);
+  const G = CHARTS.map((c, j) => {
+    const lay = LAY[order][c.key], g = svg.append("g");
+    const data = lay.sers.map(i => ({ i, f: fields[i] }));
+    const fill = g.append("g").selectAll("path").data(data, d => d.i).join("path").attr("d", d => areaOf(lay, d.i, j)).attr("fill", d => fillOf(c.key, d.f));
+    // softened seams: a wide, faint band of the background either side, then a thin solid line
+    const seamA = g.append("g").attr("pointer-events", "none").selectAll("path").data(data, d => d.i).join("path").attr("d", d => areaOf(lay, d.i, j))
+      .attr("fill", "none").attr("stroke", css("--canvas")).attr("stroke-opacity", .38).attr("stroke-width", narrow ? 1.2 : 2.4).attr("stroke-linejoin", "round");
+    const seamB = g.append("g").attr("pointer-events", "none").selectAll("path").data(data, d => d.i).join("path").attr("d", d => areaOf(lay, d.i, j))
+      .attr("fill", "none").attr("stroke", css("--canvas")).attr("stroke-width", narrow ? .3 : .55).attr("stroke-linejoin", "round");
+    const sil = g.append("path").attr("d", silOf(j)).attr("fill", css("--silhouette")).attr("pointer-events", "none").attr("opacity", revealed ? 0 : 1);
+    return { g, fill, seamA, seamB, sil, lay, j };
+  });
 
-  // today, and the volume not yet sanctioned as a placeholder above it
-  const P = S.pending;
-  svg.append("line").attr("x1", narrow ? 0 : mL - 8).attr("x2", W).attr("y1", yNow).attr("y2", yNow).attr("stroke", css("--ink")).attr("stroke-width", 1);
-  const pw = totals[n - 1] + P.contingent;
-  svg.append("rect").attr("x", x(-pw / 2)).attr("width", x(pw / 2) - x(-pw / 2)).attr("y", yNow - 14).attr("height", 10).attr("fill", "url(#hatch)").attr("stroke", css("--hatch")).attr("stroke-width", .6);
-  if (narrow) svg.append("text").attr("class", "lbl").attr("x", x(0)).attr("y", yNow - 22).attr("text-anchor", "middle").text(`+${fmt(P.contingent)} not yet sanctioned`);
-  else svg.append("text").attr("class", "lbl").attr("x", x(pw / 2) + 6).attr("y", yNow - 9).attr("dy", "0.35em").text(`+${fmt(P.contingent)} not yet sanctioned`);
+  // today, and found-but-not-sanctioned as a placeholder in the oil-equivalent chart
+  svg.append("line").attr("x1", x0p).attr("x2", W).attr("y1", yNow).attr("y2", yNow).attr("stroke", css("--ink"));
+  const jo = 2, pw = (RAW.oe[n - 1] + S.pending.contingent) * k;
+  svg.append("rect").attr("x", cx[jo] - pw / 2).attr("width", pw).attr("y", yNow - 13).attr("height", 9).attr("fill", "url(#hatch)").attr("stroke", css("--hatch")).attr("stroke-width", .6);
+  svg.append("text").attr("class", "lbl").attr("x", cx[jo]).attr("y", yNow - 20).attr("text-anchor", "middle").text(`+${fmt(S.pending.contingent)} found, not yet sanctioned`);
 
-  // annotations: story beats (left margin) and discovery roots for the first and largest fields
+  // story beats as faint rules across all three charts
   const fg = svg.append("g");
-  const notes = ARC.filter(a => a.date).map(a => ({ ...a, d: d3.timeParse("%Y-%m")(a.date) }));
-  notes.forEach(a => {
-    const yy = y(a.d), t = Math.min(n - 1, d3.bisectLeft(dates, a.d)), xl = x(-totals[t] / 2);
-    if (narrow) { fg.append("text").attr("class", "anno-y").attr("x", 2).attr("y", yy).attr("dy", "0.35em").text(a.mark); return; }
-    fg.append("line").attr("class", "anno-l").attr("x1", mL - 6).attr("x2", Math.max(mL - 6, xl - 4)).attr("y1", yy).attr("y2", yy);
+  ARC.filter(a => a.date).forEach(a => {
+    const yy = y(d3.timeParse("%Y-%m")(a.date));
+    if (narrow) { fg.append("text").attr("class", "anno-y").attr("x", 2).attr("y", yy - 4).text(a.mark); return; }
+    fg.append("line").attr("class", "anno-l").attr("x1", mL - 6).attr("x2", W - mR).attr("y1", yy).attr("y2", yy).attr("opacity", .55);
     fg.append("text").attr("class", "anno-y").attr("x", mL - 10).attr("y", yy).attr("dy", "-0.25em").attr("text-anchor", "end").text(a.mark);
     fg.append("text").attr("class", "anno-t").attr("x", mL - 10).attr("y", yy).attr("dy", "1.05em").attr("text-anchor", "end").text(a.short);
   });
-  const roots = svg.append("g").attr("class", "roots");
-  const labels = svg.append("g");
+  const roots = svg.append("g").attr("class", "roots"), labels = svg.append("g");
   function place() {
     roots.selectAll("*").remove(); labels.selectAll("*").remove();
-    if (step === "silhouette") {
-      labels.append("text").attr("class", "flabel big").attr("x", x(0)).attr("y", y(dates[peakT])).attr("text-anchor", "middle").attr("dy", "0.35em")
-        .text(`${fmt(S.peak)} MSm³ o.e. at the peak`);
-      return;
-    }
-    if (step === "fluids") {
-      [["liq", -1], ["gas", 1]].forEach(([fl, sgn]) => {
-        const idx = series.map((s, i) => i).filter(i => series[i].fl === fl);
-        const lo = d3.min(idx, i => LAY.x0[i][peakT]), hi = d3.max(idx, i => LAY.x1[i][peakT]);
-        labels.append("text").attr("class", "flabel").attr("x", x((lo + hi) / 2)).attr("y", y(dates[peakT])).attr("text-anchor", "middle").text(FLBNAME[fl]);
-      });
-    }
     const named = new Set(S.rooted), lab = new Set(S.labelled);
-    S.fields.forEach((f, fi) => {
-      if (!named.has(f.key) && !lab.has(f.key)) return;
-      const parts = series.map((s, i) => i).filter(i => series[i].fi === fi);
-      const main = parts.reduce((a, b) => d3.max(series[b].v) > d3.max(series[a].v) ? b : a, parts[0]);
-      const te = f.entry_i, tl = Math.min(n - 1, te + 8);
-      const xs = x((LAY.x0[main][tl] + LAY.x1[main][tl]) / 2);
-      const wpx = x(LAY.x1[main][tl]) - x(LAY.x0[main][tl]);
-      if (wpx > 30 && lab.has(f.key)) labels.append("text").attr("class", "flabel").attr("x", xs).attr("y", y(dates[tl])).attr("dy", "0.35em").attr("text-anchor", "middle").text(f.name);
-      if (f.discovered && named.has(f.key)) {
-        const xe = x((LAY.x0[main][te] + LAY.x1[main][te]) / 2), yd = y(new Date(f.discovered, 6, 1)), ye = y(dates[te]);
-        roots.append("line").attr("x1", xe).attr("x2", xe).attr("y1", yd).attr("y2", ye);
+    CHARTS.forEach((c, j) => {
+      const lay = LAY[order][c.key];
+      const top = [...lay.sers].sort((a, b) => d3.max(fields[b].w[c.key]) - d3.max(fields[a].w[c.key])).slice(0, c.key === "oe" ? 10 : 4);
+      top.forEach(i => {
+        const f = fields[i], tl = Math.min(n - 1, f.entry_i + 10), w = (lay.x1[i][tl] - lay.x0[i][tl]) * k;
+        if (w < 30 || (c.key === "oe" && !lab.has(f.key))) return;
+        labels.append("text").attr("class", "flabel").attr("x", cx[j] + (lay.x0[i][tl] + lay.x1[i][tl]) / 2 * k).attr("y", y(dates[tl])).attr("dy", "0.35em").attr("text-anchor", "middle").text(narrow ? f.name.split(" ").pop() : f.name);
+      });
+      if (c.key !== "oe") return;
+      lay.sers.forEach(i => {
+        const f = fields[i]; if (!named.has(f.key) || !f.discovered) return;
+        const te = f.entry_i, xe = cx[j] + (lay.x0[i][te + 2] + lay.x1[i][te + 2]) / 2 * k, yd = y(new Date(f.discovered, 6, 1));
+        roots.append("line").attr("x1", xe).attr("x2", xe).attr("y1", yd).attr("y2", y(dates[te]));
         roots.append("circle").attr("cx", xe).attr("cy", yd).attr("r", 2.6);
-        if (!narrow || f.first) roots.append("text").attr("x", xe + 5).attr("y", yd).attr("dy", "0.35em").text(`found ${f.discovered}`);
-      }
+        if (!narrow || f.first) roots.append("text").attr("x", xe > W - 190 ? xe - 5 : xe + 5).attr("text-anchor", xe > W - 190 ? "end" : "start").attr("y", yd).attr("dy", "0.35em").text(f.entry_i > 60 ? `found ${f.discovered}` : `${narrow ? "" : f.name + ", "}found ${f.discovered}`);
+      });
     });
   }
   place();
+  labels.attr("opacity", revealed ? 1 : 0); roots.attr("opacity", revealed ? 1 : 0);
 
-  // hover
+  // hover: one field lights up in all three charts
   const hl = svg.append("line").attr("stroke", css("--ink")).attr("stroke-width", .75).attr("stroke-dasharray", "2 2").attr("opacity", 0);
+  const dim = fi => G.forEach(gg => gg.fill.attr("opacity", d => fi == null || d.i === fi ? 1 : .3));
   svg.on("pointermove", ev => {
+    if (!revealed) return;
     const [px, py] = d3.pointer(ev);
-    if (py < yNow || py > mT + plotH) { tip.style.opacity = 0; hl.attr("opacity", 0); paths.attr("opacity", step === "silhouette" ? 0 : 1); return; }
+    if (py < yNow || py > mT + plotH) { tip.style.opacity = 0; hl.attr("opacity", 0); dim(null); return; }
     const t = Math.max(0, Math.min(n - 1, d3.bisectLeft(dates, y.invert(py))));
-    hl.attr("x1", narrow ? 0 : mL - 8).attr("x2", W).attr("y1", y(dates[t])).attr("y2", y(dates[t])).attr("opacity", 1);
-    const v = x.invert(px);
-    let i = -1;
-    if (step !== "silhouette") for (let k = 0; k < series.length; k++) if (series[k].v[t] > 0 && v >= LAY.x0[k][t] && v <= LAY.x1[k][t]) { i = k; break; }
-    let html = `<div class="m">${fmtMonth(dates[t])} · all fields</div><div class="row"><span>Remaining</span><b>${fmt(totals[t])} MSm³ o.e.</b></div>
-      <div class="row m"><span>≈ ${d3.format(".1f")(boe(totals[t]) / 1000)} billion boe</span><span>${d3.format(".0%")(GAS[t] / totals[t])} gas</span></div>`;
-    if (i >= 0) {
-      const s = series[i], f = fields[s.fi];
-      paths.attr("opacity", d => d.fi === s.fi ? 1 : .35);
-      const lv = f.w.liq[t], gv = f.w.gas[t], tot = lv + gv;
-      const cn = fl => CL[f.cls[fl]].label.toLowerCase();
+    hl.attr("x1", x0p).attr("x2", W).attr("y1", y(dates[t])).attr("y2", y(dates[t])).attr("opacity", 1);
+    let hit = null;
+    G.forEach(gg => { const v = (px - cx[gg.j]) / k; for (const i of gg.lay.sers) if (v >= gg.lay.x0[i][t] && v <= gg.lay.x1[i][t] && gg.lay.x1[i][t] > gg.lay.x0[i][t]) { hit = i; break; } });
+    let html = `<div class="m">${fmtMonth(dates[t])} · all fields</div>` +
+      `<div class="row"><span>Oil, NGL, cond.</span><span>${fmt(RAW.liq[t])}</span></div><div class="row"><span>Gas</span><span>${fmt(RAW.gas[t])}</span></div>` +
+      `<div class="row"><b>Total</b><b>${fmt(RAW.oe[t])} MSm³ o.e.</b></div><div class="row m"><span>≈ ${d3.format(".1f")(boe(RAW.oe[t]) / 1000)} billion boe</span></div>`;
+    dim(hit);
+    if (hit != null) {
+      const f = fields[hit], lv = f.w.liq[t], gv = f.w.gas[t], tot = lv + gv;
       html = `<b>${f.name}</b>${f.cross_border ? ' <span class="m">(Norwegian share)</span>' : ""}<div class="m">${f.area}${f.discovered ? ` · found ${f.discovered}` : ""}${f.first_prod ? ` · on stream ${f.first_prod.slice(0, 4)}` : ""}${f.status === "Shut down" ? " · shut down" : ""}</div>
         <div class="m" style="margin-top:6px">${fmtMonth(dates[t])}: remaining</div>
-        <div class="row"><span><span class="sw" style="background:${css(clsVar("liq", f.cls.liq))}"></span>Oil, NGL, cond.</span><span>${fmt1(lv)}</span></div>
-        <div class="row"><span><span class="sw" style="background:${css(clsVar("gas", f.cls.gas))}"></span>Gas</span><span>${fmt1(gv)}</span></div>
-        <div class="row"><b>Total</b><b>${fmt1(tot)} MSm³ o.e.</b></div><div class="row m"><span>${d3.format(".1%")(tot / totals[t])} of the NCS</span><span>≈ ${fmt(boe(tot))} MMboe</span></div>
-        <div class="m" style="margin-top:6px">Size class: ${f.rec_liq > 0 ? `${cn("liq")} in liquids` : ""}${f.rec_liq > 0 && f.rec_gas > 0 ? ", " : ""}${f.rec_gas > 0 ? `${cn("gas")} in gas` : ""}</div>`;
-    } else paths.attr("opacity", step === "silhouette" ? 0 : 1);
+        <div class="row"><span><span class="sw" style="background:${shade("oil", f.cls)}"></span>Oil, NGL, cond.</span><span>${fmt1(lv)}</span></div>
+        <div class="row"><span><span class="sw" style="background:${shade("gas", f.cls)}"></span>Gas</span><span>${fmt1(gv)}</span></div>
+        <div class="row"><b>Total</b><b>${fmt1(tot)} MSm³ o.e.</b></div><div class="row m"><span>${d3.format(".1%")(tot / RAW.oe[t])} of the NCS</span><span>≈ ${fmt(boe(tot))} MMboe</span></div>
+        <div class="m" style="margin-top:6px">${CL[f.cls].label}: ${fmt1(f.rec_liq + f.rec_gas)} MSm³ o.e. recoverable</div>`;
+    }
     tip.innerHTML = html; tip.style.opacity = 1;
     const bw = bulb.clientWidth, sc = bw / W;
     tip.style.left = Math.min(bw - 270, Math.max(0, px * sc + 14)) + "px"; tip.style.top = (py * sc + 14) + "px";
-  }).on("pointerleave", () => { tip.style.opacity = 0; hl.attr("opacity", 0); paths.attr("opacity", step === "silhouette" ? 0 : 1); });
+  }).on("pointerleave", () => { tip.style.opacity = 0; hl.attr("opacity", 0); dim(null); });
 
-  bulb._go = to => {
-    step = to; legend();
-    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches, D = reduce ? 0 : 900;
-    sil.transition().duration(D).attr("opacity", to === "silhouette" ? 1 : 0);
-    halo.transition().duration(D).attr("opacity", to === "silhouette" ? .45 : .22);
-    paths.transition().duration(D).delay((_, i) => reduce ? 0 : (to === "sizes" ? series[i].cls * 120 : 0))
-      .attr("opacity", to === "silhouette" ? 0 : 1).attr("fill", fillFor);
-    labels.transition().duration(reduce ? 0 : 150).attr("opacity", 0).end().then(() => { place(); labels.transition().duration(reduce ? 0 : 300).attr("opacity", 1); }).catch(() => {});
+  const reduce = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+  bulb._reveal = () => {
+    revealed = true; const r = reduce();
+    G.forEach(gg => gg.sil.transition().delay(r ? 0 : 500 + gg.j * 280).duration(r ? 0 : 1600).ease(d3.easeCubicInOut).attr("opacity", 0));
+    labels.transition().delay(r ? 0 : 2300).duration(r ? 0 : 500).attr("opacity", 1);
+    roots.transition().delay(r ? 0 : 2300).duration(r ? 0 : 500).attr("opacity", 1);
   };
-  legend();
+  bulb._grey = () => { revealed = false; G.forEach(gg => gg.sil.interrupt().attr("opacity", 1)); labels.attr("opacity", 0); roots.attr("opacity", 0); };
+  bulb._order = to => {
+    const r = reduce(); order = to;
+    labels.transition().duration(r ? 0 : 150).attr("opacity", 0);
+    G.forEach(gg => {
+      const from = gg.lay, dest = LAY[to][CHARTS[gg.j].key]; gg.lay = dest;
+      const tw = sel => sel.transition().duration(r ? 0 : 1100).ease(d3.easeCubicInOut).attrTween("d", d => q => {
+        const tmp = { x0: { [d.i]: from.x0[d.i].map((v, t) => v + (dest.x0[d.i][t] - v) * q) }, x1: { [d.i]: from.x1[d.i].map((v, t) => v + (dest.x1[d.i][t] - v) * q) } };
+        return areaOf(tmp, d.i, gg.j);
+      });
+      tw(gg.fill); tw(gg.seamA); tw(gg.seamB).end().then(() => { place(); labels.transition().duration(r ? 0 : 300).attr("opacity", revealed ? 1 : 0); }).catch(() => {});
+    });
+  };
 }
-STEPS.forEach(s => document.getElementById(`s-${s}`).onclick = () => {
-  STEPS.forEach(k => document.getElementById(`s-${k}`).setAttribute("aria-pressed", k === s));
-  bulb._go(s);
-});
+document.getElementById("o-mixed").onclick = () => setOrder("mixed");
+document.getElementById("o-age").onclick = () => setOrder("age");
+document.getElementById("replay").onclick = () => { bulb._grey(); setTimeout(() => bulb._reveal(), 400); };
+function setOrder(o) {
+  if (o === order) return;
+  ["mixed", "age"].forEach(k => document.getElementById(`o-${k}`).setAttribute("aria-pressed", k === o));
+  bulb._order(o);
+}
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting && !revealed) { bulb._reveal(); io.disconnect(); } }), { threshold: 0.25 });
 
 // ---------------- hindsight
 function drawHind() {
@@ -488,8 +523,9 @@ function drawMaps() {
   });
 }
 
-function drawAll() { drawBulb(); bulb._go(step); drawHind(); drawCream(); drawMaps(); }
+function drawAll() { drawBulb(); drawHind(); drawCream(); drawMaps(); }
 drawAll();
+io.observe(bulb);
 let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(drawAll, 150); });
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawAll);
 new MutationObserver(drawAll).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
