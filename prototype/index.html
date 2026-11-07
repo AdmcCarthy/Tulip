@@ -8,11 +8,11 @@
 :root {
   --canvas: #f3f7fb; --surface: #fdfeff; --raised: #ecf1f5;
   --ink: #2d3439; --muted: #596c7b; --rule: #ccd6dd; --grid: #d4d4d4; --link: #20565c;
-  --oil: #cc6700; --liq: #7c50a8; --gas: #1d8fcf; --context: #b4b4b4;
+  --oil: #1d8fcf; --liq: #7c50a8; --gas: #cc6700; --context: #b4b4b4;
   --accent: #1a7f88; --hatch: #596c7b;
   --seq-0: #e5f6f7; --seq-1: #b3d8dc; --seq-2: #7bbcc3; --seq-3: #429fa8; --seq-4: #1a7f88; --seq-5: #1a5e65; --seq-6: #1d3e41;
   --land: #e2e9ef;
-  --oil-0: #f0b689; --oil-1: #e38d42; --oil-2: #a34e00; --oil-3: #603204; --gas-0: #99cbf0; --gas-1: #5cade5; --gas-2: #0070a9; --gas-3: #164461; --silhouette: #8798a6;
+  --oil-0: #164461; --oil-1: #0070a9; --oil-2: #5cade5; --oil-3: #99cbf0; --gas-0: #603204; --gas-1: #a34e00; --gas-2: #e38d42; --gas-3: #f0b689; --silhouette: #8798a6;
   --f-display: "Newsreader", "Iowan Old Style", Georgia, serif;
   --f-body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
   --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
@@ -20,20 +20,20 @@
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --canvas: #0e1820; --surface: #15212a; --raised: #1e2b35;
   --ink: #f5fdff; --muted: #b4c7d7; --rule: #2c3a45; --grid: #33424d; --link: #86d2da;
-  --oil: #c36800; --liq: #e7c7ff; --gas: #2d86be; --context: #7f7f7f;
+  --oil: #2d86be; --liq: #e7c7ff; --gas: #c36800; --context: #7f7f7f;
   --accent: #55b3bd; --hatch: #b4c7d7;
   --seq-0: #273031; --seq-1: #354d50; --seq-2: #3b6f74; --seq-3: #3d919a; --seq-4: #55b3bd; --seq-5: #86d2da; --seq-6: #bfeff4;
   --land: #1e2b35;
-  --oil-0: #744a28; --oil-1: #c36800; --oil-2: #ffad63; --oil-3: #ffddb9; --gas-0: #335a75; --gas-1: #2d86be; --gas-2: #7dceff; --gas-3: #c4eeff; --silhouette: #6e8aa0;
+  --oil-0: #c4eeff; --oil-1: #7dceff; --oil-2: #2d86be; --oil-3: #335a75; --gas-0: #ffddb9; --gas-1: #ffad63; --gas-2: #c36800; --gas-3: #744a28; --silhouette: #6e8aa0;
   color-scheme: dark; } }
 :root[data-theme="dark"] {
   --canvas: #0e1820; --surface: #15212a; --raised: #1e2b35;
   --ink: #f5fdff; --muted: #b4c7d7; --rule: #2c3a45; --grid: #33424d; --link: #86d2da;
-  --oil: #c36800; --liq: #e7c7ff; --gas: #2d86be; --context: #7f7f7f;
+  --oil: #2d86be; --liq: #e7c7ff; --gas: #c36800; --context: #7f7f7f;
   --accent: #55b3bd; --hatch: #b4c7d7;
   --seq-0: #273031; --seq-1: #354d50; --seq-2: #3b6f74; --seq-3: #3d919a; --seq-4: #55b3bd; --seq-5: #86d2da; --seq-6: #bfeff4;
   --land: #1e2b35;
-  --oil-0: #744a28; --oil-1: #c36800; --oil-2: #ffad63; --oil-3: #ffddb9; --gas-0: #335a75; --gas-1: #2d86be; --gas-2: #7dceff; --gas-3: #c4eeff; --silhouette: #6e8aa0;
+  --oil-0: #c4eeff; --oil-1: #7dceff; --oil-2: #2d86be; --oil-3: #335a75; --gas-0: #ffddb9; --gas-1: #ffad63; --gas-2: #c36800; --gas-3: #744a28; --silhouette: #6e8aa0;
   color-scheme: dark; }
 
 * { box-sizing: border-box; }
@@ -73,9 +73,10 @@ figcaption, .fig-foot { font-size: 12.5px; color: var(--muted); line-height: 1.5
 .anno line, .anno-l { stroke: var(--muted); stroke-width: .75; stroke-dasharray: 2 2; }
 .anno-t { font: 400 11.5px var(--f-body); fill: var(--muted); }
 .anno-y { font: 500 11px var(--f-mono); fill: var(--ink); }
-.roots line { stroke: var(--ink); stroke-width: .8; stroke-dasharray: 1.5 2.5; opacity: .7; }
+.roots line { stroke: var(--muted); stroke-width: 1; }
+.roots text.dhead { font: 500 11px var(--f-mono); letter-spacing: .05em; text-transform: uppercase; fill: var(--muted); }
 .roots circle { fill: var(--canvas); stroke: var(--ink); stroke-width: 1.2; }
-.roots text { font: italic 400 12px var(--f-display); fill: var(--ink); paint-order: stroke; stroke: var(--canvas); stroke-width: 3px; }
+.roots text { font: italic 400 12.5px var(--f-display); fill: var(--ink); }
 .flabel.big { font: 500 15px var(--f-display); }
 .legend .ramp { display: inline-flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; }
 .legend .ramp b { font-weight: 600; margin-right: 2px; }
@@ -131,10 +132,6 @@ a { color: var(--link); }
         <p class="fig-sub">Width = recoverable volume not yet produced, MSm³ o.e., on one scale across the three charts. Time runs up the page. Hover for a field.</p>
       </div>
       <div class="ctrl">
-        <div class="seg" role="group" aria-label="Order of the streams">
-          <button id="o-mixed" aria-pressed="true">Mixed order</button>
-          <button id="o-age" aria-pressed="false">Oldest at the centre</button>
-        </div>
         <button class="ghost" id="replay">Replay reveal</button>
       </div>
     </div>
@@ -209,7 +206,7 @@ const LAND = {"type": "FeatureCollection", "features": [{"type": "Feature", "pro
 const FIELDS = [{"name": "Aasta Hansteen", "area": "Norwegian Sea", "discovery_year": 1997, "recoverable_oe": 74.55, "dominant_fluid": "gas"}, {"name": "Albuskjell", "area": "North Sea", "discovery_year": 1972, "recoverable_oe": 24.77, "dominant_fluid": "gas"}, {"name": "Alve", "area": "Norwegian Sea", "discovery_year": 1990, "recoverable_oe": 17.98, "dominant_fluid": "gas"}, {"name": "Alve Nord", "area": "Norwegian Sea", "discovery_year": 2011, "recoverable_oe": 6.96, "dominant_fluid": "gas"}, {"name": "Alvheim", "area": "North Sea", "discovery_year": 1974, "recoverable_oe": 82.89, "dominant_fluid": "oil"}, {"name": "Atla", "area": "North Sea", "discovery_year": 2010, "recoverable_oe": 1.76, "dominant_fluid": "gas"}, {"name": "Balder", "area": "North Sea", "discovery_year": 1967, "recoverable_oe": 115.99, "dominant_fluid": "oil"}, {"name": "Bauge", "area": "Norwegian Sea", "discovery_year": 2013, "recoverable_oe": 3.67, "dominant_fluid": "oil"}, {"name": "Berling", "area": "Norwegian Sea", "discovery_year": 2018, "recoverable_oe": 7.34, "dominant_fluid": "gas"}, {"name": "Bestla", "area": "North Sea", "discovery_year": 2016, "recoverable_oe": 3.78, "dominant_fluid": "oil"}, {"name": "Blane", "area": "North Sea", "discovery_year": 1989, "recoverable_oe": 1.72, "dominant_fluid": "oil"}, {"name": "Brage", "area": "North Sea", "discovery_year": 1980, "recoverable_oe": 72.84, "dominant_fluid": "oil"}, {"name": "Breidablikk", "area": "North Sea", "discovery_year": 1992, "recoverable_oe": 33.42, "dominant_fluid": "oil"}, {"name": "Brynhild", "area": "North Sea", "discovery_year": 1992, "recoverable_oe": 0.49, "dominant_fluid": "oil"}, {"name": "Byrding", "area": "North Sea", "discovery_year": 2005, "recoverable_oe": 1.56, "dominant_fluid": "oil"}, {"name": "Bøyla", "area": "North Sea", "discovery_year": 2009, "recoverable_oe": 6.36, "dominant_fluid": "oil"}, {"name": "Cod", "area": "North Sea", "discovery_year": 1968, "recoverable_oe": 11.15, "dominant_fluid": "gas"}, {"name": "Draugen", "area": "Norwegian Sea", "discovery_year": 1984, "recoverable_oe": 163.58, "dominant_fluid": "oil"}, {"name": "Duva", "area": "North Sea", "discovery_year": 2016, "recoverable_oe": 9.85, "dominant_fluid": "gas"}, {"name": "Dvalin", "area": "Norwegian Sea", "discovery_year": 2010, "recoverable_oe": 24.53, "dominant_fluid": "gas"}, {"name": "Edda", "area": "North Sea", "discovery_year": 1972, "recoverable_oe": 7.19, "dominant_fluid": "oil"}, {"name": "Edvard Grieg", "area": "North Sea", "discovery_year": 2007, "recoverable_oe": 62.34, "dominant_fluid": "oil"}, {"name": "Eirin", "area": "North Sea", "discovery_year": 1978, "recoverable_oe": 4.04, "dominant_fluid": "gas"}, {"name": "Ekofisk", "area": "North Sea", "discovery_year": 1969, "recoverable_oe": 708.03, "dominant_fluid": "oil"}, {"name": "Eldfisk", "area": "North Sea", "discovery_year": 1970, "recoverable_oe": 211.61, "dominant_fluid": "oil"}, {"name": "Embla", "area": "North Sea", "discovery_year": 1988, "recoverable_oe": 19.6, "dominant_fluid": "oil"}, {"name": "Enoch", "area": "North Sea", "discovery_year": 1985, "recoverable_oe": 0.37, "dominant_fluid": "oil"}, {"name": "Fenja", "area": "Norwegian Sea", "discovery_year": 2014, "recoverable_oe": 8.57, "dominant_fluid": "oil"}, {"name": "Fenris", "area": "North Sea", "discovery_year": 2012, "recoverable_oe": 25.35, "dominant_fluid": "gas"}, {"name": "Flyndre", "area": "North Sea", "discovery_year": 1974, "recoverable_oe": 0.09, "dominant_fluid": "oil"}, {"name": "Fram", "area": "North Sea", "discovery_year": 1990, "recoverable_oe": 82.93, "dominant_fluid": "oil"}, {"name": "Fram H-Nord", "area": "North Sea", "discovery_year": 2007, "recoverable_oe": 0.68, "dominant_fluid": "oil"}, {"name": "Frigg", "area": "North Sea", "discovery_year": 1971, "recoverable_oe": 116.66, "dominant_fluid": "gas"}, {"name": "Frøy", "area": "North Sea", "discovery_year": null, "recoverable_oe": 7.27, "dominant_fluid": "oil"}, {"name": "Fulla", "area": "North Sea", "discovery_year": 1975, "recoverable_oe": 17.13, "dominant_fluid": "gas"}, {"name": "Gaupe", "area": "North Sea", "discovery_year": 1985, "recoverable_oe": 0.76, "dominant_fluid": "gas"}, {"name": "Gimle", "area": "North Sea", "discovery_year": 2001, "recoverable_oe": 4.94, "dominant_fluid": "oil"}, {"name": "Gina Krog", "area": "North Sea", "discovery_year": 1978, "recoverable_oe": 30.5, "dominant_fluid": "gas"}, {"name": "Gjøa", "area": "North Sea", "discovery_year": 1989, "recoverable_oe": 80.76, "dominant_fluid": "gas"}, {"name": "Glitne", "area": "North Sea", "discovery_year": 1995, "recoverable_oe": 8.88, "dominant_fluid": "oil"}, {"name": "Goliat", "area": "Barents Sea", "discovery_year": 2000, "recoverable_oe": 32.1, "dominant_fluid": "oil"}, {"name": "Grane", "area": "North Sea", "discovery_year": 1991, "recoverable_oe": 150.78, "dominant_fluid": "oil"}, {"name": "Gudrun", "area": "North Sea", "discovery_year": 1975, "recoverable_oe": 49.22, "dominant_fluid": "oil"}, {"name": "Gullfaks", "area": "North Sea", "discovery_year": 1978, "recoverable_oe": 419.6, "dominant_fluid": "oil"}, {"name": "Gullfaks Sør", "area": "North Sea", "discovery_year": 1978, "recoverable_oe": 205.44, "dominant_fluid": "gas"}, {"name": "Gyda", "area": "North Sea", "discovery_year": 1980, "recoverable_oe": 46.06, "dominant_fluid": "oil"}, {"name": "Halten Øst", "area": "Norwegian Sea", "discovery_year": 2001, "recoverable_oe": 14.48, "dominant_fluid": "gas"}, {"name": "Hanz", "area": "North Sea", "discovery_year": 1997, "recoverable_oe": 0.83, "dominant_fluid": "oil"}, {"name": "Heidrun", "area": "Norwegian Sea", "discovery_year": 1985, "recoverable_oe": 268.33, "dominant_fluid": "oil"}, {"name": "Heimdal", "area": "North Sea", "discovery_year": 1972, "recoverable_oe": 52.86, "dominant_fluid": "gas"}, {"name": "Hod", "area": "North Sea", "discovery_year": 1974, "recoverable_oe": 19.35, "dominant_fluid": "oil"}, {"name": "Hugin", "area": "North Sea", "discovery_year": 1986, "recoverable_oe": 43.91, "dominant_fluid": "oil"}, {"name": "Hugin Satellitter", "area": "North Sea", "discovery_year": 1976, "recoverable_oe": 0.0, "dominant_fluid": "oil"}, {"name": "Huldra", "area": "North Sea", "discovery_year": 1982, "recoverable_oe": 22.67, "dominant_fluid": "gas"}, {"name": "Hyme", "area": "Norwegian Sea", "discovery_year": 2009, "recoverable_oe": 4.46, "dominant_fluid": "oil"}, {"name": "Idun Nord", "area": "Norwegian Sea", "discovery_year": 2009, "recoverable_oe": 3.7, "dominant_fluid": "gas"}, {"name": "Irpa", "area": "Norwegian Sea", "discovery_year": 2009, "recoverable_oe": 23.59, "dominant_fluid": "gas"}, {"name": "Islay", "area": "North Sea", "discovery_year": 2008, "recoverable_oe": 0.2, "dominant_fluid": "liquids"}, {"name": "Ivar Aasen", "area": "North Sea", "discovery_year": 2004, "recoverable_oe": 31.37, "dominant_fluid": "oil"}, {"name": "Jette", "area": "North Sea", "discovery_year": 2009, "recoverable_oe": 0.44, "dominant_fluid": "oil"}, {"name": "Johan Castberg", "area": "Barents Sea", "discovery_year": 2011, "recoverable_oe": 95.42, "dominant_fluid": "oil"}, {"name": "Johan Sverdrup", "area": "North Sea", "discovery_year": 2010, "recoverable_oe": 422.02, "dominant_fluid": "oil"}, {"name": "Jotun", "area": "North Sea", "discovery_year": 1994, "recoverable_oe": 24.02, "dominant_fluid": "oil"}, {"name": "Knarr", "area": "North Sea", "discovery_year": 2008, "recoverable_oe": 11.27, "dominant_fluid": "oil"}, {"name": "Kristin", "area": "Norwegian Sea", "discovery_year": 1995, "recoverable_oe": 82.17, "dominant_fluid": "gas"}, {"name": "Kvitebjørn", "area": "North Sea", "discovery_year": 1994, "recoverable_oe": 155.83, "dominant_fluid": "gas"}, {"name": "Lille-Frigg", "area": "North Sea", "discovery_year": null, "recoverable_oe": 3.53, "dominant_fluid": "gas"}, {"name": "Maria", "area": "Norwegian Sea", "discovery_year": 2010, "recoverable_oe": 17.99, "dominant_fluid": "oil"}, {"name": "Martin Linge", "area": "North Sea", "discovery_year": 1975, "recoverable_oe": 32.76, "dominant_fluid": "gas"}, {"name": "Marulk", "area": "Norwegian Sea", "discovery_year": 1992, "recoverable_oe": 13.9, "dominant_fluid": "gas"}, {"name": "Mikkel", "area": "Norwegian Sea", "discovery_year": 1987, "recoverable_oe": 57.34, "dominant_fluid": "gas"}, {"name": "Mime", "area": "North Sea", "discovery_year": 1982, "recoverable_oe": 0.47, "dominant_fluid": "oil"}, {"name": "Morvin", "area": "Norwegian Sea", "discovery_year": 2001, "recoverable_oe": 14.58, "dominant_fluid": "oil"}, {"name": "Munin", "area": "North Sea", "discovery_year": 1997, "recoverable_oe": 47.62, "dominant_fluid": "gas"}, {"name": "Murchison", "area": "North Sea", "discovery_year": 1975, "recoverable_oe": 14.82, "dominant_fluid": "oil"}, {"name": "Njord", "area": "Norwegian Sea", "discovery_year": 1986, "recoverable_oe": 66.21, "dominant_fluid": "oil"}, {"name": "Nordøst Frigg", "area": "North Sea", "discovery_year": 1974, "recoverable_oe": 11.68, "dominant_fluid": "gas"}, {"name": "Norne", "area": "Norwegian Sea", "discovery_year": 1992, "recoverable_oe": 108.99, "dominant_fluid": "oil"}, {"name": "Nova", "area": "North Sea", "discovery_year": 2012, "recoverable_oe": 9.96, "dominant_fluid": "oil"}, {"name": "Oda", "area": "North Sea", "discovery_year": 2011, "recoverable_oe": 5.19, "dominant_fluid": "oil"}, {"name": "Odin", "area": "North Sea", "discovery_year": 1974, "recoverable_oe": 27.48, "dominant_fluid": "gas"}, {"name": "Ormen Lange", "area": "Norwegian Sea", "discovery_year": 1997, "recoverable_oe": 350.96, "dominant_fluid": "gas"}, {"name": "Oseberg", "area": "North Sea", "discovery_year": 1979, "recoverable_oe": 576.33, "dominant_fluid": "oil"}, {"name": "Oseberg Sør", "area": "North Sea", "discovery_year": 1984, "recoverable_oe": 106.32, "dominant_fluid": "oil"}, {"name": "Oseberg Øst", "area": "North Sea", "discovery_year": 1981, "recoverable_oe": 24.92, "dominant_fluid": "oil"}, {"name": "Oselvar", "area": "North Sea", "discovery_year": 1991, "recoverable_oe": 1.11, "dominant_fluid": "oil"}, {"name": "Rev", "area": "North Sea", "discovery_year": 2001, "recoverable_oe": 3.69, "dominant_fluid": "gas"}, {"name": "Ringhorne Øst", "area": "North Sea", "discovery_year": 2003, "recoverable_oe": 15.6, "dominant_fluid": "oil"}, {"name": "Sigyn", "area": "North Sea", "discovery_year": 1982, "recoverable_oe": 21.12, "dominant_fluid": "liquids"}, {"name": "Skarv", "area": "Norwegian Sea", "discovery_year": 1998, "recoverable_oe": 113.07, "dominant_fluid": "gas"}, {"name": "Skirne", "area": "North Sea", "discovery_year": 1990, "recoverable_oe": 13.19, "dominant_fluid": "gas"}, {"name": "Skogul", "area": "North Sea", "discovery_year": 2010, "recoverable_oe": 2.43, "dominant_fluid": "oil"}, {"name": "Skuld", "area": "Norwegian Sea", "discovery_year": 2008, "recoverable_oe": 6.54, "dominant_fluid": "oil"}, {"name": "Sleipner", "area": "North Sea", "discovery_year": 1974, "recoverable_oe": 361.62, "dominant_fluid": "gas"}, {"name": "Snorre", "area": "North Sea", "discovery_year": 1979, "recoverable_oe": 335.41, "dominant_fluid": "oil"}, {"name": "Snøhvit", "area": "Barents Sea", "discovery_year": 1981, "recoverable_oe": 269.67, "dominant_fluid": "gas"}, {"name": "Solveig", "area": "North Sea", "discovery_year": 2013, "recoverable_oe": 17.52, "dominant_fluid": "oil"}, {"name": "Statfjord", "area": "North Sea", "discovery_year": 1974, "recoverable_oe": 717.35, "dominant_fluid": "oil"}, {"name": "Statfjord Nord", "area": "North Sea", "discovery_year": 1977, "recoverable_oe": 48.82, "dominant_fluid": "oil"}, {"name": "Statfjord Øst", "area": "North Sea", "discovery_year": 1976, "recoverable_oe": 50.86, "dominant_fluid": "oil"}, {"name": "Svalin", "area": "North Sea", "discovery_year": 1992, "recoverable_oe": 11.1, "dominant_fluid": "oil"}, {"name": "Sygna", "area": "North Sea", "discovery_year": 1996, "recoverable_oe": 11.53, "dominant_fluid": "oil"}, {"name": "Symra", "area": "North Sea", "discovery_year": 2018, "recoverable_oe": 10.29, "dominant_fluid": "oil"}, {"name": "Tambar", "area": "North Sea", "discovery_year": 1983, "recoverable_oe": 15.3, "dominant_fluid": "oil"}, {"name": "Tambar Øst", "area": "North Sea", "discovery_year": 2007, "recoverable_oe": 1.18, "dominant_fluid": "oil"}, {"name": "Tommeliten A", "area": "North Sea", "discovery_year": 1977, "recoverable_oe": 25.0, "dominant_fluid": "gas"}, {"name": "Tommeliten Gamma", "area": "North Sea", "discovery_year": 1978, "recoverable_oe": 14.75, "dominant_fluid": "gas"}, {"name": "Tor", "area": "North Sea", "discovery_year": 1970, "recoverable_oe": 43.43, "dominant_fluid": "oil"}, {"name": "Tordis", "area": "North Sea", "discovery_year": 1987, "recoverable_oe": 81.87, "dominant_fluid": "oil"}, {"name": "Trestakk", "area": "Norwegian Sea", "discovery_year": 1986, "recoverable_oe": 10.91, "dominant_fluid": "oil"}, {"name": "Troll", "area": "North Sea", "discovery_year": 1979, "recoverable_oe": 1815.95, "dominant_fluid": "gas"}, {"name": "Troll Brent B", "area": "North Sea", "discovery_year": 2005, "recoverable_oe": 0.0, "dominant_fluid": "oil"}, {"name": "Trym", "area": "North Sea", "discovery_year": 1990, "recoverable_oe": 5.93, "dominant_fluid": "gas"}, {"name": "Tune", "area": "North Sea", "discovery_year": 1995, "recoverable_oe": 23.0, "dominant_fluid": "gas"}, {"name": "Tyrihans", "area": "Norwegian Sea", "discovery_year": 1983, "recoverable_oe": 96.94, "dominant_fluid": "gas"}, {"name": "Tyrving", "area": "North Sea", "discovery_year": 1973, "recoverable_oe": 5.76, "dominant_fluid": "oil"}, {"name": "Ula", "area": "North Sea", "discovery_year": 1976, "recoverable_oe": 87.71, "dominant_fluid": "oil"}, {"name": "Urd", "area": "Norwegian Sea", "discovery_year": 2000, "recoverable_oe": 9.5, "dominant_fluid": "oil"}, {"name": "Utgard", "area": "North Sea", "discovery_year": 1982, "recoverable_oe": 2.75, "dominant_fluid": "gas"}, {"name": "Vale", "area": "North Sea", "discovery_year": 1991, "recoverable_oe": 5.33, "dominant_fluid": "oil"}, {"name": "Valemon", "area": "North Sea", "discovery_year": 1985, "recoverable_oe": 18.1, "dominant_fluid": "gas"}, {"name": "Valhall", "area": "North Sea", "discovery_year": 1975, "recoverable_oe": 198.48, "dominant_fluid": "oil"}, {"name": "Varg", "area": "North Sea", "discovery_year": 1984, "recoverable_oe": 16.69, "dominant_fluid": "oil"}, {"name": "Vega", "area": "North Sea", "discovery_year": 1981, "recoverable_oe": 47.4, "dominant_fluid": "gas"}, {"name": "Verdande", "area": "Norwegian Sea", "discovery_year": 2017, "recoverable_oe": 7.09, "dominant_fluid": "oil"}, {"name": "Veslefrikk", "area": "North Sea", "discovery_year": 1981, "recoverable_oe": 62.97, "dominant_fluid": "oil"}, {"name": "Vest Ekofisk", "area": "North Sea", "discovery_year": 1970, "recoverable_oe": 41.04, "dominant_fluid": "gas"}, {"name": "Vigdis", "area": "North Sea", "discovery_year": 1986, "recoverable_oe": 80.67, "dominant_fluid": "oil"}, {"name": "Vilje", "area": "North Sea", "discovery_year": 2003, "recoverable_oe": 14.81, "dominant_fluid": "oil"}, {"name": "Visund", "area": "North Sea", "discovery_year": 1986, "recoverable_oe": 130.38, "dominant_fluid": "gas"}, {"name": "Visund Sør", "area": "North Sea", "discovery_year": 2008, "recoverable_oe": 11.25, "dominant_fluid": "gas"}, {"name": "Volund", "area": "North Sea", "discovery_year": 1994, "recoverable_oe": 14.52, "dominant_fluid": "oil"}, {"name": "Volve", "area": "North Sea", "discovery_year": 1993, "recoverable_oe": 11.38, "dominant_fluid": "oil"}, {"name": "Yme", "area": "North Sea", "discovery_year": 1987, "recoverable_oe": 14.33, "dominant_fluid": "oil"}, {"name": "Yttergryta", "area": "Norwegian Sea", "discovery_year": 2007, "recoverable_oe": 2.75, "dominant_fluid": "gas"}, {"name": "Åsgard", "area": "Norwegian Sea", "discovery_year": 1981, "recoverable_oe": 457.15, "dominant_fluid": "gas"}, {"name": "Ærfugl Nord", "area": "Norwegian Sea", "discovery_year": 2012, "recoverable_oe": 2.73, "dominant_fluid": "gas"}, {"name": "Ørn", "area": "Norwegian Sea", "discovery_year": 2019, "recoverable_oe": 9.48, "dominant_fluid": "gas"}, {"name": "Øst Frigg", "area": "North Sea", "discovery_year": 1973, "recoverable_oe": 9.29, "dominant_fluid": "gas"}];
 const QC = {"gaps": [{"field": "Troll", "rec": 1815.95, "cum": 1218.76057, "rem": 576.32, "gap": 20.86943000000008}, {"field": "Visund", "rec": 130.38, "cum": 100.01359, "rem": 25.29, "gap": 5.076410000000003}, {"field": "Åsgard", "rec": 457.15, "cum": 425.57146, "rem": 35.31, "gap": -3.731460000000027}, {"field": "Oseberg Sør", "rec": 106.32, "cum": 80.74664999999999, "rem": 23.12, "gap": 2.453350000000004}, {"field": "Gjøa", "rec": 80.76, "cum": 79.49396, "rem": 3.7, "gap": -2.4339599999999963}, {"field": "Tambar", "rec": 15.3, "cum": 12.77019, "rem": 0.44, "gap": 2.0898100000000013}, {"field": "Snøhvit", "rec": 269.67, "cum": 102.58954999999999, "rem": 165.22, "gap": 1.8604500000000428}, {"field": "Morvin", "rec": 14.58, "cum": 16.016469999999998, "rem": 0.19, "gap": -1.626469999999998}], "xb": [{"field": "Alvheim", "share": null, "rec": 82.89, "gap": 0.08571000000001305}, {"field": "Blane", "share": 18.0, "rec": 1.72, "gap": 0.8627099999999999}, {"field": "Enoch", "share": 20.0, "rec": 0.37, "gap": -0.004219999999999993}, {"field": "Flyndre", "share": 7.0, "rec": 0.09, "gap": -0.00016000000000000736}, {"field": "Frigg", "share": null, "rec": 116.66, "gap": 0.030529999999998836}, {"field": "Islay", "share": null, "rec": 0.2, "gap": 0.09325}, {"field": "Murchison", "share": 22.2, "rec": 14.82, "gap": -0.01168999999999798}, {"field": "Statfjord", "share": 85.47, "rec": 717.35, "gap": -0.8607499999999941}, {"field": "Tommeliten A", "share": 99.57, "rec": 25.0, "gap": 0.03814000000000206}, {"field": "Utgard", "share": 62.0, "rec": 2.75, "gap": -0.0038999999999999035}]};
 const ARC = [{"when": "1971", "date": "1971-06", "mark": "1971", "short": "Ekofisk on stream", "title": "The stem", "text": "Ekofisk, found in 1969, starts production in June 1971 and is the whole bulb for years: 708 MSm³ o.e. by today's estimate."}, {"when": "1979", "date": "1979-11", "mark": "1979", "short": "Statfjord", "title": "The giants arrive", "text": "Statfjord (717, Norwegian share), then Gullfaks and Oseberg in 1986–88. The ten largest fields hold 55% of all the volume ever booked on the shelf."}, {"when": "1995", "date": "1995-09", "mark": "1995", "short": "Troll", "title": "Gas at the heart", "text": "Troll comes on stream and adds 1,778 MSm³ o.e. to the bulb in a single month. Found in 1979, it is still the largest field by far: 1,816 recoverable, 576 left."}, {"when": "2000", "date": "2000-02", "mark": "2000", "short": "Peak", "title": "The widest point", "text": "Remaining reserves peak at 5,171 MSm³ o.e. in February 2000, about 33 billion boe. By June 2002 gas overtakes oil, NGL and condensate together in what is left. It is 57% gas today."}, {"when": "2007", "date": "2007-09", "mark": "2007", "short": "Ormen Lange, Snøhvit", "title": "Moving north", "text": "Ormen Lange (351) and Snøhvit (270) bring the Norwegian and Barents Seas into the bulb. Meanwhile the edges fill with small fields: 98 of the 139 hold under 50 MSm³ o.e. each, 12% of the total between them."}, {"when": "2019", "date": "2019-10", "mark": "2019", "short": "Johan Sverdrup", "title": "A late bloom", "text": "Johan Sverdrup, found in 2010 on the Utsira High in a long-explored part of the North Sea, adds 404 MSm³ o.e. the month it starts. Exploration in a mature area can still change the shape."}, {"when": "2026", "date": "2026-08", "mark": "Today", "short": "1,992 left", "title": "The neck", "text": "1,992 MSm³ o.e. remain in August 2026. Troll and Johan Sverdrup hold 36% of it. Just above the line sit the volumes found but not yet sanctioned (1,108). The open space above is the next ten years."}, {"when": "Twist", "title": "Drawn with hindsight", "text": "Every width above uses today's estimate. At the end of 2004 Sodir's tables put 3,918 MSm³ o.e. in the 64 fields then booked; we now know they held 5,292, 35% more. The bulb kept refilling from inside as recovery improved."}];
-const METHOD = ["Width of a field at month <i>m</i> = Sodir's remaining reserves at 31.12.2025 + its reported production after <i>m</i> (minus production in 2026 for later months). Today's widths therefore equal Sodir's remaining reserves (2,165 MSm³ o.e., matching the resource accounts) and shut-down fields taper to zero.", "Streams start at Sodir's first <i>Producing</i> status date. Test production before that (Troll from 1990, Oseberg 1986, Balder 1991, Grane 1996) is kept in the volumes but does not start the stream. Discovery year is carried for the creaming curve and annotations.", "9 fields approved but not yet producing enter at their PDO approval. Five fields that started in 2026 (Symra, Ørn, Alve Nord, Idun Nord, Eirin) enter in 2026.", "Fluids: oil, NGL and condensate are grouped as liquids; gas on its own. Fields are classed by total recoverable volume (o.e.), the same class in every chart: small &lt; 10, medium 10–80, giant 80–795 (≥ 500 MMboe), super-giant ≥ 795 MSm³ o.e. (≥ 5 Bboe). Shades of one hue per fluid show the class; the order is mixed (each giant among smaller fields, seeded shuffle) or oldest at the centre.", "Display: curves smoothed with a Gaussian of about one year (σ = 3 quarters) and drawn with bump curves, so a field's start shows as a soft shoulder rather than a step. Hover values are unsmoothed. The grey silhouette is only a reveal on first view.", "Underlying units: Reserves list NGL in million tonnes (× 1.9 to Sm³ o.e.), production lists it in MSm³ already. With that, oil + gas + NGL + condensate reproduces Sodir's o.e. totals to 0.02.", "Sleipner Øst, Sleipner Vest and Gungne are one stream (362 MSm³ o.e.): their production was reported under Sleipner Øst until about 2013, so they balance only as a group.", "Not in the stack: production reported under discoveries with no field (16/1-12 Troldhaugen, 33/9-6 Delta, 7220/11-1 Alta) and Sindre (no 2025 reserves row). All are small.", "Cross-border fields carry the Norwegian share only. All ten balance within 0.9 MSm³ o.e., which confirms Sodir's reserves and production use the same share.", "Colour: three fluid colours from SubScout's Tide preset. Light mode passes all six palette checks. Dark mode uses a pale NGL &amp; condensate tone to keep colour-blind separation, outside the lightness band: a declared exception."];
+const METHOD = ["Width of a field at month <i>m</i> = Sodir's remaining reserves at 31.12.2025 + its reported production after <i>m</i> (minus production in 2026 for later months). Today's widths therefore equal Sodir's remaining reserves (2,165 MSm³ o.e., matching the resource accounts) and shut-down fields taper to zero.", "Streams start at Sodir's first <i>Producing</i> status date. Test production before that (Troll from 1990, Oseberg 1986, Balder 1991, Grane 1996) is kept in the volumes but does not start the stream. Discovery year is carried for the creaming curve and annotations.", "9 fields approved but not yet producing enter at their PDO approval. Five fields that started in 2026 (Symra, Ørn, Alve Nord, Idun Nord, Eirin) enter in 2026.", "Fluids: oil, NGL and condensate are grouped as liquids; gas on its own. Fields are classed by total recoverable volume (o.e.), the same class in every chart: small &lt; 10, medium 10–80, giant 80–795 (≥ 500 MMboe), super-giant ≥ 795 MSm³ o.e. (≥ 5 Bboe). Shades of one hue per fluid show the class, smaller fields deeper. Liquids and gas charts put the oldest fields at the centre with younger ones alternating outward; the oil-equivalent chart uses a mixed order (each giant among smaller fields, seeded shuffle).", "Display: curves smoothed with a Gaussian of about one year (σ = 3 quarters) and drawn as B-splines (basis curves), so a field's start shows as a soft shoulder rather than a step. Hover values are unsmoothed. The grey silhouette is only a reveal on first view.", "Underlying units: Reserves list NGL in million tonnes (× 1.9 to Sm³ o.e.), production lists it in MSm³ already. With that, oil + gas + NGL + condensate reproduces Sodir's o.e. totals to 0.02.", "Sleipner Øst, Sleipner Vest and Gungne are one stream (362 MSm³ o.e.): their production was reported under Sleipner Øst until about 2013, so they balance only as a group.", "Not in the stack: production reported under discoveries with no field (16/1-12 Troldhaugen, 33/9-6 Delta, 7220/11-1 Alta) and Sindre (no 2025 reserves row). All are small.", "Cross-border fields carry the Norwegian share only. All ten balance within 0.9 MSm³ o.e., which confirms Sodir's reserves and production use the same share.", "Colour: three fluid colours from SubScout's Tide preset. Light mode passes all six palette checks. Dark mode uses a pale NGL &amp; condensate tone to keep colour-blind separation, outside the lightness band: a declared exception."];
 const OPEN = ["Column order: oil, gas, oil equivalent as asked; the total in the middle would flank it with its parts.", "Undiscovered resources are left out for now (placeholder). The hatched bar at today is contingent resources only.", "Hindsight: add the contemporaneous estimate as a ghost outline on the bulb itself (2004 onward only; earlier field-level estimates are not in FactPages).", "Smoothing strength (σ) and the seeded shuffle are parameters: pick by eye.", "Maps: quadrant choropleth shown. Alternatives: hex bins, or proportional circles per field with a time slider.", "Port the stream graph into SubScout as a generic <code>stream</code> chart type (vertical/horizontal, centred offset, morph between orders)."];
 
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
@@ -279,27 +276,28 @@ function layout(chart, order) {
   }
   return { sers, x0, x1, tot };
 }
+const ORDER_OF = { liq: "age", gas: "age", oe: "mixed" };
 const LAY = {};
-for (const o of Object.keys(ORDERS)) LAY[o] = Object.fromEntries(CHARTS.map(c => [c.key, layout(c.key, ORDERS[o])]));
+CHARTS.forEach(c => { LAY[c.key] = layout(c.key, ORDERS[ORDER_OF[c.key]]); });
 const RAW = Object.fromEntries(CHARTS.map(c => [c.key, dates.map((_, t) => d3.sum(fields, f => f.w[c.key][t]))]));
 const peakT = d3.maxIndex(RAW.oe);
-let order = "mixed", revealed = false;
+let revealed = false;
 const shade = (hue, c) => css(`--${hue}-${c}`);
 const fillOf = (chart, f) => shade(chart === "oe" ? (f.dom === "gas" ? "gas" : "oil") : (chart === "gas" ? "gas" : "oil"), f.cls);
 
 function legend() {
   document.getElementById("bulb-legend").innerHTML =
     `<span class="ramp"><b>Field size</b>${CL.map(c => `<span><i style="background:linear-gradient(90deg,var(--oil-${c.idx}) 50%,var(--gas-${c.idx}) 50%)"></i>${c.label} <span class="m2">${c.range}</span></span>`).join("")}</span>` +
-    `<span class="m">Size = the field's total recoverable volume, MSm³ o.e. (giant ≥ 500 MMboe, super-giant ≥ 5 Bboe), the same class in all three charts. Orange: oil, NGL &amp; condensate; blue: gas. In the oil-equivalent chart a field takes the colour of its main fluid.</span>`;
+    `<span class="m">Size = the field's total recoverable volume, MSm³ o.e. (giant ≥ 500 MMboe, super-giant ≥ 5 Bboe), the same class in all three charts. Blue: oil, NGL &amp; condensate; orange: gas. Smaller fields are the deeper shades. In the oil-equivalent chart a field takes the colour of its main fluid.</span>`;
 }
 
 function drawBulb() {
   bulb.querySelectorAll("svg").forEach(s => s.remove());
   legend();
   const W = bulb.clientWidth, narrow = W < 640;
-  const mL = narrow ? 4 : 150, mR = narrow ? 30 : 40, mT = 46, mB = 26, gap = narrow ? 6 : 22;
+  const mL = narrow ? 4 : 150, mR = narrow ? 30 : 190, mT = 46, mB = 26, gap = narrow ? 6 : 22;
   const H = Math.round(Math.min(Math.max(W * 1.25, 1000), 1500)), plotH = H - mT - mB;
-  const maxes = CHARTS.map(c => d3.max(LAY.mixed[c.key].tot));
+  const maxes = CHARTS.map(c => d3.max(LAY[c.key].tot));
   const k = (W - mL - mR - 2 * gap) / d3.sum(maxes);
   let acc = mL; const cx = maxes.map(m => { const c = acc + m * k / 2; acc += m * k + gap; return c; });
   const y = d3.scaleTime([new Date(S.axis_start, 0, 1), new Date(S.axis_end, 11, 31)], [mT + plotH, mT]);
@@ -309,37 +307,38 @@ function drawBulb() {
   svg.append("defs").append("pattern").attr("id", "hatch").attr("patternUnits", "userSpaceOnUse").attr("width", 5).attr("height", 5)
     .attr("patternTransform", "rotate(45)").append("rect").attr("width", 1).attr("height", 5).attr("fill", css("--hatch"));
 
-  svg.append("rect").attr("x", x0p).attr("width", W - x0p).attr("y", mT).attr("height", yNow - mT).attr("fill", css("--raised")).attr("opacity", .55);
+  svg.append("rect").attr("x", x0p).attr("width", W - mR + 34 - x0p).attr("y", mT).attr("height", yNow - mT).attr("fill", css("--raised")).attr("opacity", .55);
   svg.append("text").attr("class", "lbl").attr("x", narrow ? 4 : mL).attr("y", mT + 16).text(`Next ten years, to ${S.axis_end}`);
   const ax = svg.append("g").attr("class", "axis"), yr = d3.range(1970, S.axis_end + 1, 5).map(v => new Date(v, 0, 1));
   ax.selectAll("line").data(yr).join("line").attr("x1", x0p).attr("x2", W).attr("y1", y).attr("y2", y).attr("stroke-dasharray", "1 3");
-  ax.selectAll("text").data(yr).join("text").attr("x", W).attr("y", d => y(d) - 4).attr("text-anchor", "end").text(d => d.getFullYear());
+  ax.selectAll("line").attr("x2", W - mR + 34);
+  ax.selectAll("text").data(yr).join("text").attr("x", W - mR + 34).attr("y", d => y(d) - 4).attr("text-anchor", "end").text(d => d.getFullYear());
   CHARTS.forEach((c, j) => svg.append("text").attr("class", "coltitle").attr("x", cx[j]).attr("y", 18).attr("text-anchor", "middle").text(narrow && c.key === "liq" ? "Liquids" : narrow && c.key === "oe" ? "Oil eq." : c.title));
   CHARTS.forEach((c, j) => svg.append("text").attr("class", "lbl").attr("x", cx[j]).attr("y", 34).attr("text-anchor", "middle").text(`peak ${fmt(c.key === "oe" ? S.peak : d3.max(RAW[c.key]))}`));
 
-  const curve = d3.curveBumpY;
+  const curve = d3.curveBasis;
   const def = (v, t) => v[t] > 0 || (t + 1 < n && v[t + 1] > 0) || (t > 0 && v[t - 1] > 0);
   const areaOf = (lay, i, j) => d3.area().curve(curve).y((_, t) => y(dates[t]))
     .x0((_, t) => cx[j] + lay.x0[i][t] * k).x1((_, t) => cx[j] + lay.x1[i][t] * k)
     .defined((_, t) => def(fields[i].sm[CHARTS[j].key], t))(dates) || "";
-  const silOf = j => d3.area().curve(curve).y((_, t) => y(dates[t])).x0((_, t) => cx[j] - LAY[order][CHARTS[j].key].tot[t] * k / 2)
-    .x1((_, t) => cx[j] + LAY[order][CHARTS[j].key].tot[t] * k / 2).defined((_, t) => def(LAY[order][CHARTS[j].key].tot, t))(dates);
+  const silOf = j => d3.area().curve(curve).y((_, t) => y(dates[t])).x0((_, t) => cx[j] - LAY[CHARTS[j].key].tot[t] * k / 2)
+    .x1((_, t) => cx[j] + LAY[CHARTS[j].key].tot[t] * k / 2).defined((_, t) => def(LAY[CHARTS[j].key].tot, t))(dates);
 
   const G = CHARTS.map((c, j) => {
-    const lay = LAY[order][c.key], g = svg.append("g");
+    const lay = LAY[c.key], g = svg.append("g");
     const data = lay.sers.map(i => ({ i, f: fields[i] }));
     const fill = g.append("g").selectAll("path").data(data, d => d.i).join("path").attr("d", d => areaOf(lay, d.i, j)).attr("fill", d => fillOf(c.key, d.f));
     // softened seams: a wide, faint band of the background either side, then a thin solid line
     const seamA = g.append("g").attr("pointer-events", "none").selectAll("path").data(data, d => d.i).join("path").attr("d", d => areaOf(lay, d.i, j))
-      .attr("fill", "none").attr("stroke", css("--canvas")).attr("stroke-opacity", .38).attr("stroke-width", narrow ? 1.2 : 2.4).attr("stroke-linejoin", "round");
+      .attr("fill", "none").attr("stroke", css("--canvas")).attr("stroke-opacity", .22).attr("stroke-width", narrow ? .7 : 1.2).attr("stroke-linejoin", "round");
     const seamB = g.append("g").attr("pointer-events", "none").selectAll("path").data(data, d => d.i).join("path").attr("d", d => areaOf(lay, d.i, j))
-      .attr("fill", "none").attr("stroke", css("--canvas")).attr("stroke-width", narrow ? .3 : .55).attr("stroke-linejoin", "round");
+      .attr("fill", "none").attr("stroke", css("--canvas")).attr("stroke-width", narrow ? .25 : .45).attr("stroke-linejoin", "round");
     const sil = g.append("path").attr("d", silOf(j)).attr("fill", css("--silhouette")).attr("pointer-events", "none").attr("opacity", revealed ? 0 : 1);
     return { g, fill, seamA, seamB, sil, lay, j };
   });
 
   // today, and found-but-not-sanctioned as a placeholder in the oil-equivalent chart
-  svg.append("line").attr("x1", x0p).attr("x2", W).attr("y1", yNow).attr("y2", yNow).attr("stroke", css("--ink"));
+  svg.append("line").attr("x1", x0p).attr("x2", W - mR + 34).attr("y1", yNow).attr("y2", yNow).attr("stroke", css("--ink"));
   const jo = 2, pw = (RAW.oe[n - 1] + S.pending.contingent) * k;
   svg.append("rect").attr("x", cx[jo] - pw / 2).attr("width", pw).attr("y", yNow - 13).attr("height", 9).attr("fill", "url(#hatch)").attr("stroke", css("--hatch")).attr("stroke-width", .6);
   svg.append("text").attr("class", "lbl").attr("x", cx[jo]).attr("y", yNow - 20).attr("text-anchor", "middle").text(`+${fmt(S.pending.contingent)} found, not yet sanctioned`);
@@ -358,24 +357,25 @@ function drawBulb() {
     roots.selectAll("*").remove(); labels.selectAll("*").remove();
     const named = new Set(S.rooted), lab = new Set(S.labelled);
     CHARTS.forEach((c, j) => {
-      const lay = LAY[order][c.key];
+      const lay = LAY[c.key];
       const top = [...lay.sers].sort((a, b) => d3.max(fields[b].w[c.key]) - d3.max(fields[a].w[c.key])).slice(0, c.key === "oe" ? 10 : 4);
       top.forEach(i => {
         const f = fields[i], tl = Math.min(n - 1, f.entry_i + 10), w = (lay.x1[i][tl] - lay.x0[i][tl]) * k;
         if (w < 30 || (c.key === "oe" && !lab.has(f.key))) return;
         labels.append("text").attr("class", "flabel").attr("x", cx[j] + (lay.x0[i][tl] + lay.x1[i][tl]) / 2 * k).attr("y", y(dates[tl])).attr("dy", "0.35em").attr("text-anchor", "middle").text(narrow ? f.name.split(" ").pop() : f.name);
       });
-      if (c.key !== "oe") return;
-      lay.sers.forEach(i => {
-        const f = fields[i]; if (!named.has(f.key) || !f.discovered) return;
-        const te = f.entry_i, xe = cx[j] + (lay.x0[i][te + 2] + lay.x1[i][te + 2]) / 2 * k, yd = y(new Date(f.discovered, 6, 1));
-        roots.append("line").attr("x1", xe).attr("x2", xe).attr("y1", yd).attr("y2", y(dates[te]));
-        roots.append("circle").attr("cx", xe).attr("cy", yd).attr("r", 2.6);
-        if (!narrow || f.first) roots.append("text").attr("x", xe > W - 190 ? xe - 5 : xe + 5).attr("text-anchor", xe > W - 190 ? "end" : "start").attr("y", yd).attr("dy", "0.35em").text(f.entry_i > 60 ? `found ${f.discovered}` : `${narrow ? "" : f.name + ", "}found ${f.discovered}`);
-      });
     });
   }
   place();
+  if (!narrow) {  // discovery years of the first and largest fields, right of the year scale
+    const xn = W - mR + 48;
+    roots.append("text").attr("class", "dhead").attr("x", xn - 10).attr("y", y(new Date(d3.max(fields.filter(f => S.rooted.includes(f.key)), f => f.discovered), 6, 1)) - 26).text("Discovered");
+    fields.filter(f => S.rooted.includes(f.key) && f.discovered).forEach(f => {
+      const yd = y(new Date(f.discovered, 6, 1));
+      roots.append("line").attr("x1", xn - 10).attr("x2", xn - 4).attr("y1", yd).attr("y2", yd);
+      roots.append("text").attr("x", xn).attr("y", yd).attr("dy", "0.35em").text(`${f.name} ${f.discovered}`);
+    });
+  }
   labels.attr("opacity", revealed ? 1 : 0); roots.attr("opacity", revealed ? 1 : 0);
 
   // hover: one field lights up in all three charts
@@ -415,27 +415,8 @@ function drawBulb() {
     roots.transition().delay(r ? 0 : 2300).duration(r ? 0 : 500).attr("opacity", 1);
   };
   bulb._grey = () => { revealed = false; G.forEach(gg => gg.sil.interrupt().attr("opacity", 1)); labels.attr("opacity", 0); roots.attr("opacity", 0); };
-  bulb._order = to => {
-    const r = reduce(); order = to;
-    labels.transition().duration(r ? 0 : 150).attr("opacity", 0);
-    G.forEach(gg => {
-      const from = gg.lay, dest = LAY[to][CHARTS[gg.j].key]; gg.lay = dest;
-      const tw = sel => sel.transition().duration(r ? 0 : 1100).ease(d3.easeCubicInOut).attrTween("d", d => q => {
-        const tmp = { x0: { [d.i]: from.x0[d.i].map((v, t) => v + (dest.x0[d.i][t] - v) * q) }, x1: { [d.i]: from.x1[d.i].map((v, t) => v + (dest.x1[d.i][t] - v) * q) } };
-        return areaOf(tmp, d.i, gg.j);
-      });
-      tw(gg.fill); tw(gg.seamA); tw(gg.seamB).end().then(() => { place(); labels.transition().duration(r ? 0 : 300).attr("opacity", revealed ? 1 : 0); }).catch(() => {});
-    });
-  };
 }
-document.getElementById("o-mixed").onclick = () => setOrder("mixed");
-document.getElementById("o-age").onclick = () => setOrder("age");
 document.getElementById("replay").onclick = () => { bulb._grey(); setTimeout(() => bulb._reveal(), 400); };
-function setOrder(o) {
-  if (o === order) return;
-  ["mixed", "age"].forEach(k => document.getElementById(`o-${k}`).setAttribute("aria-pressed", k === o));
-  bulb._order(o);
-}
 const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting && !revealed) { bulb._reveal(); io.disconnect(); } }), { threshold: 0.25 });
 
 // ---------------- hindsight
