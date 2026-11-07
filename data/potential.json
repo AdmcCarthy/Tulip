@@ -1,0 +1,26 @@
+{
+ "resource_accounts": {
+  "produced": 8969,
+  "reserves": 2165,
+  "contingent_fields": 582,
+  "contingent_discoveries": 526,
+  "undiscovered": 3480
+ },
+ "undiscovered_range": {
+  "low_p95": 2200,
+  "high_p05": 6200,
+  "as_of": "Resource report 2020"
+ },
+ "undiscovered_by_area": {
+  "North sea": 545,
+  "Norwegian sea": 760,
+  "Barents sea": 2190
+ },
+ "dropped_carriers": [
+  "16/1-12 Troldhaugen",
+  "33/9-6 DELTA",
+  "7220/11-1 (Alta)",
+  "SINDRE"
+ ],
+ "last_month": "2026-08"
+}

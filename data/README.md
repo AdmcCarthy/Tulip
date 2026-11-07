@@ -1,0 +1,24 @@
+# Data
+
+All data from **Sodir** (Norwegian Offshore Directorate), Norwegian Licence for Open Government Data
+(NLOD 2.0), credited as "Source: Sodir". `data/raw/` is fetched by `scripts/fetch_sodir.py` and not
+committed; everything else here is built by `scripts/build_data.py`. Don't hand-edit.
+
+| File | What | Confidence |
+|---|---|---|
+| `fields.csv` | One row per stream (field or field group): area, fluids, discovery year, PDO, production start, recoverable/remaining by fluid, QC gap, centroid | Observed / Derived |
+| `streams.json` | Quarterly remaining reserves per field per fluid (oil; NGL+condensate; gas), MSm³ o.e. | Derived |
+| `totals_monthly.csv` | NCS total remaining by fluid, monthly | Derived |
+| `hindsight.csv` | Each year's Sodir estimate of remaining (versions 2004–2025) vs today's back-projection, same fields | Derived |
+| `quadrants_remaining.geojson`, `snapshots_fields.csv` | Remaining by quadrant at 1975…2025 | Derived |
+| `potential.json` | Sodir resource accounts 31.12.2025 (norskpetroleum.no spreadsheet) + undiscovered range | Observed / Interpreted |
+| `land_simple.geojson` | Sodir FactMaps basemap land, clipped and simplified | Observed |
+
+Raw sources (accessed 2026-11-07): FactPages tables `field`, `field_reserves`, `field_in_place_volumes`,
+`field_production_monthly`, `field_activity_status_hst`, `field_description`, `field_operator_hst`,
+`discovery`, `discovery_reserves`; FactMaps layers 7100 (fields), 1002 (quadrants), basemap 5 (land).
+Resource accounts: norskpetroleum.no/wp-content/uploads/74-Ressursregnskap-totalt-tabell-20022026.xlsx.
+
+Known quirks: NGL in reserves is million tonnes (× 1.9), in production MSm³. Sleipner Øst/Vest/Gungne
+balance only as a group. Test production precedes the production-start status for Troll, Oseberg,
+Balder, Grane, Mime, Gimle. Undiscovered P95/P05 range is a placeholder from the 2020 resource report.
