@@ -66,6 +66,9 @@ const CSS = `
 .tl-legend .tl-grp{display:inline-flex;flex-wrap:wrap;gap:4px 10px;align-items:center}
 .tl-note-inline{color:var(--ss-text-muted)}
 .tl-maps{display:flex;flex-wrap:wrap;gap:10px}
+.tl-legend-compact{font-size:11px;gap:2px 10px;margin-bottom:4px}
+.tl-legend-compact .tl-grp{gap:2px 8px}
+.tl-legend-compact i{width:10px;height:10px;margin-right:3px}
 .tl-ev-y{font:500 11.5px var(--ss-font-mono);fill:var(--ss-text);letter-spacing:.04em}
 .tl-ev{font:400 12.5px var(--ss-font-body);fill:var(--ss-text-muted)}
 `;
@@ -81,6 +84,12 @@ export function classLegend(legendEl, classes) {
   if (!legendEl) return;
   const P = pal();
   const fam = [["Small to large", classes.filter((c) => c.family === 0)], ["Giant and above", classes.filter((c) => c.family === 1)]];
+  if (legendEl.clientWidth && legendEl.clientWidth < 560) {
+    legendEl.innerHTML = `<div class="tl-legend tl-legend-compact"><span class="tl-grp"><b>Field size</b>` +
+      classes.map((c) => `<span><i style="background:linear-gradient(90deg,${P.oil[c.idx]} 50%,${P.gas[c.idx]} 50%)"></i>${c.short === "Super-giant" ? "Super" : c.short}</span>`).join("") +
+      `</span><span class="tl-note-inline">small → large; left half oil, right half gas</span></div>`;
+    return;
+  }
   legendEl.innerHTML = `<div class="tl-legend">` + fam.map(([t, cs]) => `<span class="tl-grp"><b>${t}</b>` +
     cs.map((c) => `<span><i style="background:linear-gradient(90deg,${P.oil[c.idx]} 50%,${P.gas[c.idx]} 50%)"></i>${c.short} <span class="tl-note-inline">${c.range}</span></span>`).join("") + "</span>").join("") +
     `<span class="tl-note-inline">Million boe recoverable. Eucalyptus green: oil, NGL and condensate; clay: gas. Smaller fields are fainter; the smallest almost vanish into the seams.</span></div>`;

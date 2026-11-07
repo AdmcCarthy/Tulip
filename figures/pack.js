@@ -30,7 +30,7 @@ export default function create(el, { bulb: B }, opts = {}) {
   function draw(width, state = {}, { animate = false } = {}) {
     state = { t: "rec", focus: null, ...state };
     const resized = width !== W;
-    W = width; H = Math.round(Math.max(360, Math.min(W * 0.85, (window.innerHeight || 800) * 0.72)));
+    W = width; H = Math.round(W < 560 ? Math.max(210, Math.min(W * 0.85, (window.innerHeight || 800) * 0.31)) : Math.max(360, Math.min(W * 0.85, (window.innerHeight || 800) * 0.72)));
     svg.attr("viewBox", [0, 0, W, H]).attr("height", H).attr("role", "img").attr("aria-label", "Circle packing of fields grouped by sea, area and hub");
     const prev = new Map();
     if (root && !resized) svg.selectAll("circle.n").each(function (d) { prev.set(d.data.id, [+this.getAttribute("cx"), +this.getAttribute("cy"), +this.getAttribute("r")]); });

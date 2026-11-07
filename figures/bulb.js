@@ -114,7 +114,7 @@ export default function create(el, { bulb: B }, opts = {}) {
     const above = fig ? el.getBoundingClientRect().top - fig.getBoundingClientRect().top : 0;
     const room = narrow || !fig ? Infinity : vh - 56 - above - 24; // wide layout pins the figure 56px from the top
     const H = poster ? Math.max(480, Math.round(opts.poster.height()))
-      : Math.round(Math.max(narrow ? 285 : 361, Math.min(W * 1.235, vh * (narrow ? 0.475 : 0.684), room, 1045)));
+      : Math.round(Math.max(narrow ? 220 : 361, Math.min(W * 1.235, vh * (narrow ? 0.3 : 0.684), room, 1045)));
     const k = (W - mL - mR - 2 * gap) / d3.sum(maxW);
     let acc = mL;
     const cx = maxW.map((m) => { const c = acc + (m * k) / 2; acc += m * k + gap; return c; });

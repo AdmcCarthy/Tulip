@@ -10,7 +10,7 @@ through monthly production. The story follows SubScout's `creaming-curve` arc (e
 tail, what's left), with a hindsight section: the same fields held a third more than was estimated
 at the time.
 
-A [SubScout](https://github.com/AdmcCarthy/SubScout) story (v0.3.2): `story.md` (narrative, steps,
+A [SubScout](https://github.com/AdmcCarthy/SubScout) story (v0.4.0): `story.md` (narrative, steps,
 figure blocks), `story.py` (datasets and every number the prose quotes, each with method, source and
 confidence) and `figures/` (custom figure modules: the three-column stream graph on Canvas, circle
 packing, creaming curve, rotated maps). Read and Present modes, Sm³ / boe toggle, light and dark.
