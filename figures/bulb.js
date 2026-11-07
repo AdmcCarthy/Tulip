@@ -72,7 +72,7 @@ export default function create(el, { bulb: B }, opts = {}) {
   }
   function ensure(st) {
     const e = entry(st);
-    if (e.W !== geo.W || e.sch !== scheme()) { paint(e.c, st); e.W = geo.W; e.sch = scheme(); }
+    if (e.W !== geo.W || e.H !== geo.H || e.sch !== scheme()) { paint(e.c, st); e.W = geo.W; e.H = geo.H; e.sch = scheme(); }
     return e;
   }
   function prepareAhead() {
@@ -106,12 +106,15 @@ export default function create(el, { bulb: B }, opts = {}) {
   });
 
   function build(W) {
-    const narrow = W < 560, mL = narrow ? 4 : 12, mR = narrow ? 30 : 46, mT = 44, mB = 8, gap = narrow ? 6 : 16;
+    const narrow = W < 560, poster = !!opts.poster;
+    const mL = poster ? 330 : narrow ? 4 : 12, mR = poster ? 250 : narrow ? 30 : 46, mT = poster ? 48 : 44, mB = 8, gap = poster ? 30 : narrow ? 6 : 16;
     const vh = window.innerHeight || 800;
-    // 10% shorter than v0.2, and never taller than the room left by the figure's header, notes and top bar
-    const fig = el.closest(".ss-figure"), other = fig ? fig.offsetHeight - el.offsetHeight : 0;
-    const room = narrow ? Infinity : vh - 64 - other;
-    const H = Math.round(Math.max(narrow ? 270 : 340, Math.min(W * 1.17, vh * (narrow ? 0.36 : 0.65), room, 990)));
+    // 5% shorter than v0.2; on the page, capped so the figure's title and legend stay on screen
+    const fig = el.closest(".ss-figure");
+    const above = fig ? el.getBoundingClientRect().top - fig.getBoundingClientRect().top : 0;
+    const room = narrow || !fig ? Infinity : vh - 56 - above - 24; // wide layout pins the figure 56px from the top
+    const H = poster ? Math.max(480, Math.round(opts.poster.height()))
+      : Math.round(Math.max(narrow ? 285 : 361, Math.min(W * 1.235, vh * (narrow ? 0.475 : 0.684), room, 1045)));
     const k = (W - mL - mR - 2 * gap) / d3.sum(maxW);
     let acc = mL;
     const cx = maxW.map((m) => { const c = acc + (m * k) / 2; acc += m * k + gap; return c; });
@@ -120,7 +123,7 @@ export default function create(el, { bulb: B }, opts = {}) {
     // decimal year -> pixel row: linear, from two points of the time scale
     const y0 = y(new Date(2000, 0, 1)), sy = y(new Date(2010, 0, 1)) - y0;
     const mats = cx.map((c) => new DOMMatrix([k * dpr, 0, 0, (sy / 10) * dpr, c * dpr, (y0 - 2000 * (sy / 10)) * dpr]));
-    return { W, H, narrow, mL, mR, mT, mB, k, cx, y, dpr, mats };
+    return { W, H, narrow, poster, mL, mR, mT, mB, k, cx, y, dpr, mats };
   }
 
   function paint(c, state) {
@@ -151,6 +154,46 @@ export default function create(el, { bulb: B }, opts = {}) {
     ctx.globalAlpha = 1;
   }
 
+  // Full-screen view: the story's events in the left margin, discovery years right of the year scale.
+  // Stack labels so blocks never overlap; each block keeps a short leader to its exact year.
+  function dodge(items, lineH) {
+    const out = [...items].sort((a, b) => a.y - b.y);
+    let bottom = -Infinity;
+    for (const it of out) {
+      const h = it.lines * lineH;
+      it.top = Math.max(it.y - lineH * 0.8, bottom + 3);
+      bottom = it.top + h;
+    }
+    return out;
+  }
+
+  // Full-screen view: the story's events in the left margin, discovery years right of the year scale.
+  function posterNotes(g, yNow, x1) {
+    const { y, mL } = g, an = svg.append("g").attr("class", "tl-ann"), LH = 15;
+    const ev = [...B.events, { date: B.dates[n - 1], year: "Today", text: "", msm3: B.now, after: "left" }].map((e) => {
+      const val = e.msm3 != null ? `${vol(e.msm3)}${e.after ? ` ${e.after}` : ""}` : "";
+      return { e, lines: val ? 2 : 1, val, y: y(parseMonth(e.date)) };
+    });
+    dodge(ev, LH).forEach((it) => {
+      an.append("line").attr("x1", mL - 6).attr("x2", x1).attr("y1", it.y).attr("y2", it.y).attr("stroke", tok("text-muted")).attr("stroke-dasharray", "2 3").attr("opacity", 0.55);
+      const ty = it.top + LH * 0.8;
+      if (Math.abs(ty - it.y) > 2) an.append("path").attr("d", `M${mL - 14},${ty - 4}L${mL - 6},${it.y}`).attr("stroke", tok("text-muted")).attr("fill", "none");
+      const t1 = an.append("text").attr("class", "tl-ev").attr("x", mL - 16).attr("y", ty).attr("dy", "-0.1em").attr("text-anchor", "end");
+      if (it.e.text) t1.append("tspan").text(`${it.e.text}  `);
+      t1.append("tspan").attr("class", "tl-ev-y").text(it.e.year);
+      if (it.val) an.append("text").attr("class", "tl-ev").attr("x", mL - 16).attr("y", ty + LH).attr("dy", "-0.1em").attr("text-anchor", "end").text(it.val);
+    });
+    const xn = x1 + 58;
+    const found = F.filter((f) => B.rooted.includes(f.key) && f.discovered).map((f) => ({ f, lines: 1, y: y(new Date(f.discovered, 6, 1)) }));
+    const placed = dodge(found, 15);
+    an.append("text").attr("class", "tl-ev-y").attr("x", xn).attr("y", placed[0].top - 12).text("DISCOVERED");
+    placed.forEach((it) => {
+      const ty = it.top + 15 * 0.8;
+      an.append("path").attr("d", `M${xn - 14},${it.y}L${xn - 8},${it.y}L${xn - 4},${ty - 4}`).attr("stroke", tok("text-muted")).attr("fill", "none");
+      an.append("text").attr("class", "tl-found").attr("x", xn).attr("y", ty).attr("dy", "-0.1em").text(`${it.f.name} ${it.f.discovered}`);
+    });
+  }
+
   function overlay(state) {
     const g = geo, { W, H, y, cx, k, mL, mR, mT } = g;
     svg.attr("viewBox", [0, 0, W, H]).attr("role", "img")
@@ -162,9 +205,11 @@ export default function create(el, { bulb: B }, opts = {}) {
     const yrs = d3.range(1970, B.axis_end + 1, 10).map((v) => new Date(v, 0, 1));
     const ax = svg.append("g");
     ax.selectAll("line").data(yrs).join("line").attr("x1", mL).attr("x2", x1).attr("y1", y).attr("y2", y).attr("stroke", tok("grid")).attr("stroke-dasharray", "1 3");
-    ax.selectAll("text").data(yrs).join("text").attr("class", "tl-axis").attr("x", W - 2).attr("y", y).attr("dy", "0.35em").attr("text-anchor", "end").text((d) => d.getFullYear());
+    const xYear = g.poster ? x1 + 40 : W - 2;
+    ax.selectAll("text").data(yrs).join("text").attr("class", "tl-axis").attr("x", xYear).attr("y", y).attr("dy", "0.35em").attr("text-anchor", "end").text((d) => d.getFullYear());
     svg.append("line").attr("x1", mL).attr("x2", x1).attr("y1", yNow).attr("y2", yNow).attr("stroke", tok("text")).attr("stroke-width", 1);
-    svg.append("text").attr("class", "tl-axis tl-strong").attr("x", W - 2).attr("y", yNow).attr("dy", "0.35em").attr("text-anchor", "end").text("Today");
+    svg.append("text").attr("class", "tl-axis tl-strong").attr("x", xYear).attr("y", yNow).attr("dy", "0.35em").attr("text-anchor", "end").text("Today");
+    if (g.poster) posterNotes(g, yNow, x1);
     PANELS.forEach((p, j) => {
       svg.append("text").attr("class", "tl-col").attr("x", cx[j]).attr("y", 14).attr("text-anchor", "middle").text(g.narrow ? p.short : p.title);
       svg.append("text").attr("class", "tl-note").attr("x", cx[j]).attr("y", 29).attr("text-anchor", "middle").text(`peak ${volShort(peakRaw[p.key])}`);
@@ -230,7 +275,8 @@ export default function create(el, { bulb: B }, opts = {}) {
   }
 
   function render(W, state, animate) {
-    if (!geo || Math.abs(W / geo.W - 1) > 0.2) geo = build(W); // small resizes scale the bitmaps instead
+    const posterH = opts.poster ? Math.max(480, Math.round(opts.poster.height())) : null;
+    if (!geo || (opts.poster ? geo.W !== W || geo.H !== posterH : Math.abs(W / geo.W - 1) > 0.2)) geo = build(W); // small resizes scale the bitmaps
     const sc = W / geo.W;
     const e = ensure(state);
     const dur = animate && !reducedMotion() ? (cur.mode === "silhouette" && state.mode !== "silhouette" ? 1600 : 600) : 0;

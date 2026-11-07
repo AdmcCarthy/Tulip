@@ -78,3 +78,14 @@ def test_ekofisk_alone_until_1977_and_no_barents_production_by_2005():
     assert live(d.index("1976-12")) == {"EKOFISK"}
     assert {"FRIGG", "COD", "VEST EKOFISK"} <= live(d.index("1977-12"))
     assert not {f["key"] for f in s["fields"] if f["area"] == "Barents sea"} & live(d.index("2005-12"))
+
+
+def test_full_screen_view(built, tmp_path):
+    import subprocess, sys
+    _, _, out = built
+    subprocess.run([sys.executable, str(ROOT / "scripts" / "build_full.py"), str(out)], check=True)
+    page = (out / "full" / "index.html").read_text()
+    assert "../figures/bulb.js" in page and "poster" in page
+    data = json.loads(page.split('id="data">')[1].split("</script>")[0])
+    years = [e["year"] for e in data["bulb"]["events"]]
+    assert years[0] == "1971" and "2000" in years and "2019" in years

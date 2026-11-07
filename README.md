@@ -10,7 +10,7 @@ through monthly production. The story follows SubScout's `creaming-curve` arc (e
 tail, what's left), with a hindsight section: the same fields held a third more than was estimated
 at the time.
 
-A [SubScout](https://github.com/AdmcCarthy/SubScout) story (v0.3.1): `story.md` (narrative, steps,
+A [SubScout](https://github.com/AdmcCarthy/SubScout) story (v0.3.2): `story.md` (narrative, steps,
 figure blocks), `story.py` (datasets and every number the prose quotes, each with method, source and
 confidence) and `figures/` (custom figure modules: the three-column stream graph on Canvas, circle
 packing, creaming curve, rotated maps). Read and Present modes, Sm³ / boe toggle, light and dark.
@@ -20,6 +20,7 @@ uv sync --all-groups
 uv run python scripts/fetch_sodir.py      # -> data/raw (Sodir FactPages + FactMaps; not committed)
 uv run python scripts/build_data.py       # -> data/
 uv run subscout build . --out _site       # -> the page
+uv run python scripts/build_full.py _site # -> _site/full/: full-screen view for screenshots (?theme=dark, ?units=boe)
 uv run pytest                             # data checks + every quoted number
 ```
 

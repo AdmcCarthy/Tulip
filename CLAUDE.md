@@ -37,4 +37,6 @@ McCarthy, petroleum geoscience domain expert. Follow SubScout's CLAUDE.md and st
   only cross-fade; keep it that way or the perf gate (SubScout scripts/perf.py, 4x throttle) fails.
 - Declared exceptions live in the chart blocks (direct-labels, north-up); the truth gate still applies.
 - The first scrolly uses SubScout's `layout=wide` (v0.3.1): full-width figure frame, cards in a lane.
-  The bulb's height is 10% below v0.2 and capped to fit the viewport with its header and notes.
+  The bulb's height is 5% below v0.2 and capped so its title and legend fit on screen.
+- Full-screen view: scripts/build_full.py writes _site/full/ (bulb.js poster mode: events from story.py
+  in the left margin, discovery years right of the year scale, labels dodge each other). For screenshots.

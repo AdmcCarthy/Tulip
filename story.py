@@ -62,12 +62,32 @@ def datasets(d):
             "rec_liq": round(float(rl), 1), "rec_gas": round(float(rg), 1),
         })
     pot = d["potential"]["resource_accounts"]
+    t = _totals(d)
+    fp = f["first_production"].astype(str).str[:7]
+
+    def jump(day: str) -> float:
+        x = pd.Timestamp(day + "-01")
+        return round(float(t.oe.loc[x] - t.oe.loc[x - pd.DateOffset(months=1)]), 1)
+
+    lead = t.gas > t.liq
+    gas_lead = next(x for x in lead.index if lead.loc[x:].all())
+    events = [  # timeline annotations for the full-screen view; dates and values from the data
+        {"date": fp["EKOFISK"], "year": fp["EKOFISK"][:4], "text": "First oil: Ekofisk"},
+        {"date": fp["STATFJORD"], "year": fp["STATFJORD"][:4], "text": "Statfjord on stream"},
+        {"date": fp["OSEBERG"], "year": f'{fp["GULLFAKS"][:4]}–{fp["OSEBERG"][2:4]}', "text": "Gullfaks and Oseberg"},
+        {"date": fp["TROLL"], "year": fp["TROLL"][:4], "text": "Troll adds", "msm3": jump(fp["TROLL"])},
+        {"date": f"{t.oe.idxmax():%Y-%m}", "year": f"{t.oe.idxmax():%Y}", "text": "Peak:", "msm3": round(float(t.oe.max()), 1), "after": "left"},
+        {"date": f"{gas_lead:%Y-%m}", "year": f"{gas_lead:%Y}", "text": "Gas outweighs oil and liquids from here"},
+        {"date": fp["ORMEN LANGE"], "year": fp["ORMEN LANGE"][:4], "text": "Ormen Lange and Snøhvit: the move north"},
+        {"date": fp["JOHAN SVERDRUP"], "year": fp["JOHAN SVERDRUP"][:4], "text": "Johan Sverdrup adds", "msm3": jump(fp["JOHAN SVERDRUP"])},
+    ]
     bulb = {
         "dates": s["dates"], "fields": rows, "classes": CLASSES, "axis_start": 1966,
         "axis_end": int(s["dates"][-1][:4]) + 10, "smooth_sigma": 3,
         "pending": pot["contingent_fields"] + pot["contingent_discoveries"],
         "rooted": ROOTED, "hub_names": hubs.HUB_NAMES,
         "peak": round(float(_totals(d).oe.max()), 1),
+        "events": events, "now": round(float(t.oe.iloc[-1]), 1),
     }
     h = d["hindsight"]
     hind = pd.concat([

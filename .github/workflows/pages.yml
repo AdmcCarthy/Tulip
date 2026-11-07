@@ -25,6 +25,8 @@ jobs:
         run: uv run pytest -q
       - name: Build the story with SubScout (fails on errors; warnings fail below)
         run: uv run subscout build . --out _site
+      - name: Full-screen view of the main figure (full/)
+        run: uv run python scripts/build_full.py _site
       - name: No build warnings (untraced numbers, unused metrics, arc beats)
         run: python3 -c 'import json,sys;w=json.load(open("_site/build-report.json"))["warnings"];print("\n".join(w));sys.exit(1 if w else 0)' 
       - uses: actions/configure-pages@v5

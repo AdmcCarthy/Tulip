@@ -147,6 +147,8 @@ focus: [JOHAN SVERDRUP]
 ```
 :::
 
+See all three columns full screen, with the main events marked, in the [full-screen view](full/).
+
 ## Less was known at the time
 
 Every width in the figure uses today's estimate. That is hindsight. At the end of 2004, Sodir's field

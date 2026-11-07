@@ -64,6 +64,8 @@ const CSS = `
 .tl-legend .tl-grp{display:inline-flex;flex-wrap:wrap;gap:4px 10px;align-items:center}
 .tl-note-inline{color:var(--ss-text-muted)}
 .tl-maps{display:flex;flex-wrap:wrap;gap:10px}
+.tl-ev-y{font:500 11.5px var(--ss-font-mono);fill:var(--ss-text);letter-spacing:.04em}
+.tl-ev{font:400 12.5px var(--ss-font-body);fill:var(--ss-text-muted)}
 `;
 if (!document.getElementById("tl-css")) {
   const s = document.createElement("style");
