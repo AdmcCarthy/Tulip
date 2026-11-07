@@ -39,4 +39,5 @@ McCarthy, petroleum geoscience domain expert. Follow SubScout's CLAUDE.md and st
 - The first scrolly uses SubScout's `layout=wide` (v0.3.1): full-width figure frame, cards in a lane.
   The bulb's height is 5% below v0.2 and capped so its title and legend fit on screen.
 - Full-screen view: scripts/build_full.py writes _site/full/ (bulb.js poster mode: events from story.py
-  in the left margin, discovery years right of the year scale, labels dodge each other). For screenshots.
+  in the left margin, discovery years right of the year scale, labels dodge each other; dashed discovery-to-
+  first-oil lines for Troll and Johan Sverdrup; Light/Dark toggle). For screenshots.

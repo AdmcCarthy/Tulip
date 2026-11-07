@@ -183,6 +183,19 @@ export default function create(el, { bulb: B }, opts = {}) {
       t1.append("tspan").attr("class", "tl-ev-y").text(it.e.year);
       if (it.val) an.append("text").attr("class", "tl-ev").attr("x", mL - 16).attr("y", ty + LH).attr("dy", "-0.1em").attr("text-anchor", "end").text(it.val);
     });
+    // discovery-to-first-oil lines for selected fields, in the oil-equivalent column
+    const L = LAY.oe, j = 2;
+    (opts.poster.roots ?? []).forEach((key) => {
+      const i = F.findIndex((f) => f.key === key);
+      if (i < 0 || !(i in L.x0) || !F[i].discovered) return;
+      const f = F[i], te = f.entry, tt = Math.min(n - 1, te + 2);
+      const xe = g.cx[j] + ((L.x0[i][tt] + L.x1[i][tt]) / 2) * g.k, yd = y(new Date(f.discovered, 6, 1)), ye = y(dates[te]);
+      an.append("line").attr("x1", xe).attr("x2", xe).attr("y1", yd).attr("y2", ye).attr("stroke", tok("text")).attr("stroke-width", 1.1).attr("stroke-dasharray", "3 3");
+      an.append("circle").attr("cx", xe).attr("cy", yd).attr("r", 3.2).attr("fill", tok("surface")).attr("stroke", tok("text")).attr("stroke-width", 1.3);
+      an.append("circle").attr("cx", xe).attr("cy", ye).attr("r", 2.4).attr("fill", tok("text"));
+      an.append("text").attr("class", "tl-found").attr("x", xe + 7).attr("y", yd).attr("dy", "0.35em").text(`${f.name} found ${f.discovered}`);
+      an.append("text").attr("class", "tl-label").attr("x", xe + 7).attr("y", ye).attr("dy", "1.1em").text(`first oil ${f.first_prod.slice(0, 4)}`);
+    });
     const xn = x1 + 58;
     const found = F.filter((f) => B.rooted.includes(f.key) && f.discovered).map((f) => ({ f, lines: 1, y: y(new Date(f.discovered, 6, 1)) }));
     const placed = dodge(found, 15);

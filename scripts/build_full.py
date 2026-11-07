@@ -57,12 +57,16 @@ def main(site: Path) -> None:
   footer {{ padding: 8px 32px 16px; font-size: 12px; color: var(--ss-text-muted); display: flex; flex-wrap: wrap; gap: 4px 20px; }}
   footer b {{ font: 500 11px var(--ss-font-mono); letter-spacing: .06em; text-transform: uppercase; margin-right: 6px; color: var(--ss-text); }}
   .tl-col {{ font-size: 14px !important; }}
-  .back {{ position: fixed; top: 12px; right: 16px; font-size: 12px; color: var(--ss-link); }}
-  @media print {{ .back {{ display: none; }} }}
+  .tools {{ position: fixed; top: 14px; right: 24px; display: flex; gap: 14px; align-items: center; z-index: 5; }}
+  .back {{ font-size: 12px; color: var(--ss-link); }}
+  @media print {{ .tools {{ display: none; }} }}
 </style>
 </head>
 <body>
-<a class="back" href="../">Back to the story</a>
+<div class="tools">
+  <div class="ss-seg" id="ctl-theme" role="group" aria-label="Colour scheme"><button data-value="light">Light</button><button data-value="dark">Dark</button></div>
+  <a class="back" href="../">Back to the story</a>
+</div>
 <header>
   <div class="kicker">{html.escape(fm.get('kicker', ''))}</div>
   <h1>{html.escape(title)}</h1>
@@ -78,15 +82,18 @@ def main(site: Path) -> None:
 </footer>
 <script type="application/json" id="data">{json.dumps({"bulb": bulb}, ensure_ascii=False).replace("</", "<\\/")}</script>
 <script type="module">
-  import {{ theme, units, onSchemeChange }} from "../runtime/js/subscout.js";
+  import {{ theme, units, onSchemeChange, bindSeg }} from "../runtime/js/subscout.js";
   import create from "../figures/bulb.js";
   const q = new URLSearchParams(location.search);
   if (q.get("theme")) theme.set(q.get("theme"));
+  // Light/Dark only: resolve "system" to what the reader sees now, so one of the two is always pressed
+  if (theme.get() === "system") theme.set(matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  bindSeg(document.getElementById("ctl-theme"), theme);
   if (q.get("units")) units.set(q.get("units"));
   if (units.get() === "boe") document.getElementById("unit-note").textContent = "million boe (1 Sm³ o.e. = 6.29 boe)";
   const data = JSON.parse(document.getElementById("data").textContent);
   const el = document.getElementById("fig");
-  const chart = create(el, data, {{ legendEl: document.getElementById("legend"), states: [{{ mode: "colour" }}], poster: {{ height: () => el.parentElement.clientHeight }} }});
+  const chart = create(el, data, {{ legendEl: document.getElementById("legend"), states: [{{ mode: "colour" }}], poster: {{ height: () => el.parentElement.clientHeight, roots: ["TROLL", "JOHAN SVERDRUP"] }} }});
   const draw = () => chart.draw(el.clientWidth, {{ mode: "colour" }});
   draw();
   let w = 0;
