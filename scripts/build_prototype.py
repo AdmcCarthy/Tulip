@@ -103,7 +103,7 @@ def main() -> None:
         f"Width of a field at month <i>m</i> = Sodir's remaining reserves at 31.12.2025 + its reported production after <i>m</i> (minus production in 2026 for later months). Today's widths therefore equal Sodir's remaining reserves ({f0(fi.remaining_oe.sum())} MSm³ o.e., matching the resource accounts) and shut-down fields taper to zero.",
         "Streams start at Sodir's first <i>Producing</i> status date. Test production before that (Troll from 1990, Oseberg 1986, Balder 1991, Grane 1996) is kept in the volumes but does not start the stream. Discovery year is carried for the creaming curve and annotations.",
         f"{int(m.not_yet_producing.sum())} fields approved but not yet producing enter at their PDO approval. Five fields that started in 2026 (Symra, Ørn, Alve Nord, Idun Nord, Eirin) enter in 2026.",
-        "Fluids: oil, NGL and condensate are grouped as liquids; gas on its own. Fields are classed by total recoverable volume (o.e.), the same class in every chart: small &lt; 10, medium 10–80, giant 80–795 (≥ 500 MMboe), super-giant ≥ 795 MSm³ o.e. (≥ 5 Bboe). Shades of one hue per fluid show the class, smaller fields deeper. Liquids and gas charts put the oldest fields at the centre with younger ones alternating outward; the oil-equivalent chart uses a mixed order (each giant among smaller fields, seeded shuffle).",
+        "Fluids: oil, NGL and condensate are grouped as liquids; gas on its own. Fields are classed by total recoverable volume (o.e.), the same class in every chart: small &lt; 10; medium split by doubling into 10–20, 20–40 and 40–80 (about 63–126, 126–252, 252–503 MMboe); giant ≥ 80 MSm³ o.e. (≥ 500 MMboe). Shades of one hue per fluid show the class, smaller fields deeper. Liquids and gas charts put the oldest fields at the centre with younger ones alternating outward; the oil-equivalent chart uses a mixed order (each giant among smaller fields, seeded shuffle).",
         "Display: curves smoothed with a Gaussian of about one year (σ = 3 quarters) and drawn as B-splines (basis curves), so a field's start shows as a soft shoulder rather than a step. Hover values are unsmoothed. The grey silhouette is only a reveal on first view.",
         "Underlying units: Reserves list NGL in million tonnes (× 1.9 to Sm³ o.e.), production lists it in MSm³ already. With that, oil + gas + NGL + condensate reproduces Sodir's o.e. totals to 0.02.",
         f"Sleipner Øst, Sleipner Vest and Gungne are one stream ({f0(sleip.recoverable_oe)} MSm³ o.e.): their production was reported under Sleipner Øst until about 2013, so they balance only as a group.",
@@ -122,11 +122,12 @@ def main() -> None:
 
     fields = [{"name": r.field.title(), "area": r.area, "discovery_year": None if pd.isna(r.discovery_year) else int(r.discovery_year),
                "recoverable_oe": r.recoverable_oe, "dominant_fluid": r.dominant_fluid} for r in m.itertuples()]
-    classes = [  # per-fluid recoverable volume, MSm³ o.e.; giant = 500 MMboe, super-giant = 5 Bboe
+    classes = [  # total recoverable volume, MSm³ o.e.; medium split by doubling; giant = 500 MMboe
         {"idx": 0, "label": "Small", "range": "< 10", "max": 10},
-        {"idx": 1, "label": "Medium", "range": "10–80", "max": 80},
-        {"idx": 2, "label": "Giant", "range": "80–795", "max": 795},
-        {"idx": 3, "label": "Super-giant", "range": "≥ 795", "max": 1e12},
+        {"idx": 1, "label": "Medium", "range": "10–20", "max": 20},
+        {"idx": 2, "label": "Medium", "range": "20–40", "max": 40},
+        {"idx": 3, "label": "Medium", "range": "40–80", "max": 80},
+        {"idx": 4, "label": "Giant", "range": "≥ 80", "max": 1e12},
     ]
 
     def cls(v: float) -> int:
@@ -154,7 +155,7 @@ def main() -> None:
                "axis_start": 1966, "axis_end": int(dates[-1].year) + 10,
                "pending": {"contingent": pot["resource_accounts"]["contingent_fields"] + pot["resource_accounts"]["contingent_discoveries"]},
                "rooted": ["EKOFISK", "FRIGG", "STATFJORD", "GULLFAKS", "TROLL", "ORMEN LANGE", "JOHAN SVERDRUP"],
-               "labelled": top_keys, "smooth_sigma": 3, "peak": round(float(t.oe.max()), 1)}
+               "labelled": top_keys, "smooth_sigma": 3, "giant_cls": 4, "peak": round(float(t.oe.max()), 1)}
     for f in fields:
         f["area"] = f["area"].replace(" sea", " Sea")
 

@@ -6,7 +6,8 @@ McCarthy, petroleum geoscience domain expert. Follow SubScout's CLAUDE.md and st
 - Key figure: three linked vertical stream graphs on one scale (liquids, gas, oil equivalent), time running UP
   (1966 to today + 10 years); one stream per field, shade = field size class by total o.e. (same in all three),
   liquids/gas charts oldest-at-centre (younger alternate outward), o.e. chart mixed order (keep the swirl);
-  oil = blue, gas = orange, smaller fields deeper shades; Gaussian smoothing + basis curves; thin seams;
+  oil = moss green (SubScout fjord), gas = orange (ochre), smaller fields deeper shades; 5 classes by total o.e.:
+  <10, 10–20, 20–40, 40–80 (medium split by doubling), giant ≥80; Gaussian smoothing + basis curves; thin seams;
   outlines in the background colour so the many small fields blend and the giants stand out.
 - Method: width(m) = Sodir remaining (31.12.2025) + production after m. Streams start at the first
   "Producing" status (production date); discovery year is kept for annotation. Shut-down fields taper to 0.
