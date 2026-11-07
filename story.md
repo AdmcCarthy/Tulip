@@ -54,7 +54,7 @@ space above.
 Each thread is one field: oil, NGL and condensate in green, gas in orange, the two added together
 on the right. At its widest, early in 2000, the shelf had {{ peak_total | volume }} left to produce.
 Today {{ now_total | volume }} remain, {{ fall_since_peak | pct }} less. The oldest fields sit at
-the centre of each column and younger ones outward; deep shades are small fields and pale shades
+the centre of each column and younger ones outward; faint shades are small fields and strong shades
 giants.
 
 ```chart
@@ -123,7 +123,7 @@ focus: [TROLL]
 ### Many small fields
 
 {{ n_sub_giant }} of the {{ n_fields }} fields are below giant size. Between them they hold
-{{ sub_giant_share | pct }} of the volume: the deep-coloured threads at the edges of each column.
+{{ sub_giant_share | pct }} of the volume: the faint threads at the edges of each column.
 Most are produced through an existing platform rather than one of their own.
 
 ```chart

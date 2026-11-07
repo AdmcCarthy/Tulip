@@ -28,7 +28,7 @@ export default function create(el, { bulb: B }, opts = {}) {
     g.append("text").attr("class", "tl-note").attr("x", m.l).attr("y", 10).text("Recoverable, million Sm³ o.e.");
     svg.append("g").selectAll("circle").data(data).join("circle")
       .attr("cx", (d) => x(d.discovered)).attr("cy", (d) => y(d.rec_liq + d.rec_gas)).attr("r", W < 560 ? 3.6 : 4.6)
-      .attr("fill", (d) => shade(d.dom, d.cls)).attr("stroke", tok("surface")).attr("stroke-width", 1.4)
+      .attr("fill", (d) => shade(d.dom, d.cls)).attr("stroke", (d) => (d.cls === 0 ? tok("text-muted") : tok("surface"))).attr("stroke-width", (d) => (d.cls === 0 ? 0.7 : 1.4))
       .on("pointermove", (ev, d) => tip().show(`<b>${d.name}</b><br><span class="ss-k">${d.area} · found ${d.discovered}</span><br>Recoverable ${vol(d.rec_liq + d.rec_gas)}<br><span class="ss-k">${B.classes[d.cls].short}, mainly ${d.dom === "gas" ? "gas" : "oil and liquids"}</span>`, ev.clientX, ev.clientY))
       .on("pointerleave", () => tip().hide());
     data.filter((d) => d.rec_liq + d.rec_gas > (W < 560 ? 500 : 330) && d.name !== "Gullfaks").forEach((d) =>

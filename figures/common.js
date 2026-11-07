@@ -2,18 +2,18 @@
 // lookup, units and a shared tooltip. Uses SubScout's runtime for tokens, units and scheme changes.
 import { token, tooltip as ssTooltip, units, UNITS, onSchemeChange, reducedMotion } from "../runtime/js/subscout.js";
 
-// Six size classes per fluid (small -> super-giant). Light: smaller = deeper; dark: smaller = brighter.
-// Oil (with NGL and condensate) in green families, gas in brick/amber families; oil is kept darker than
-// gas in each class so the two stay apart for colour-blind readers (checked: >= 6.3 dE x100 worst case).
+// Six size classes per fluid (small -> super-giant). Light: smaller = paler, the smallest almost the white
+// of the seams; dark: smaller = closer to the dark background. Oil (with NGL and condensate) in greens,
+// gas in ambers and bricks. (Trial 2026-11-07; the previous ramps ran the other way.)
 const PAL = {
   light: {
-    oil: ["#063215", "#005126", "#00703e", "#1a8f69", "#5eb198", "#9dd5c7"],
-    gas: ["#a0412e", "#c35a25", "#dd7610", "#eb9939", "#f2bc79", "#f7ddb7"],
+    oil: ["#eef7f2", "#9dd5c7", "#5eb198", "#1a8f69", "#00703e", "#005126"],
+    gas: ["#fcf2e8", "#f2bc79", "#eb9939", "#dd7610", "#c35a25", "#a0412e"],
     silhouette: "#8798a6",
   },
   dark: {
-    oil: ["#91d993", "#60bc71", "#329d5a", "#067f5c", "#10614d", "#17433b"],
-    gas: ["#ffeee8", "#ffcab2", "#ffa663", "#df8b1e", "#af761e", "#7c5d29"],
+    oil: ["#1e302c", "#10614d", "#067f5c", "#329d5a", "#60bc71", "#91d993"],
+    gas: ["#2c2621", "#7c5d29", "#af761e", "#df8b1e", "#ffa663", "#ffcab2"],
     silhouette: "#6e8aa0",
   },
 };
@@ -81,5 +81,5 @@ export function classLegend(legendEl, classes) {
   const fam = [["Small to large", classes.filter((c) => c.family === 0)], ["Giant and above", classes.filter((c) => c.family === 1)]];
   legendEl.innerHTML = `<div class="tl-legend">` + fam.map(([t, cs]) => `<span class="tl-grp"><b>${t}</b>` +
     cs.map((c) => `<span><i style="background:linear-gradient(90deg,${P.oil[c.idx]} 50%,${P.gas[c.idx]} 50%)"></i>${c.short} <span class="tl-note-inline">${c.range}</span></span>`).join("") + "</span>").join("") +
-    `<span class="tl-note-inline">Million boe recoverable. Green: oil, NGL and condensate; orange: gas. Smaller fields are deeper shades.</span></div>`;
+    `<span class="tl-note-inline">Million boe recoverable. Green: oil, NGL and condensate; orange: gas. Smaller fields are fainter; the smallest almost vanish into the seams.</span></div>`;
 }
