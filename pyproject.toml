@@ -1,6 +1,6 @@
 [project]
 name = "tulip"
-version = "0.2.0"
+version = "0.3.0"
 description = "Tulip: a SubScout data story on the Norwegian continental shelf's remaining reserves over time"
 requires-python = ">=3.12"
 dependencies = [
@@ -21,7 +21,7 @@ dev = ["pytest>=8", "ruff>=0.6"]
 package = false
 
 [tool.uv.sources]
-subscout = { git = "https://github.com/AdmcCarthy/SubScout", tag = "v0.3.0" }
+subscout = { git = "https://github.com/AdmcCarthy/SubScout", tag = "v0.3.1" }
 
 [tool.pytest.ini_options]
 pythonpath = ["scripts"]

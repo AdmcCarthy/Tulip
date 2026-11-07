@@ -758,8 +758,8 @@ wheels = [
 
 [[package]]
 name = "subscout"
-version = "0.3.0"
-source = { git = "https://github.com/AdmcCarthy/SubScout?tag=v0.3.0#26b027d0932d23c60645a881211c8990bd2b5e92" }
+version = "0.3.1"
+source = { git = "https://github.com/AdmcCarthy/SubScout?tag=v0.3.1#92c3270cdf29b21275dfd3643870e015f39070c9" }
 dependencies = [
     { name = "coloraide" },
     { name = "jinja2" },
@@ -772,7 +772,7 @@ dependencies = [
 
 [[package]]
 name = "tulip"
-version = "0.2.0"
+version = "0.3.0"
 source = { virtual = "." }
 dependencies = [
     { name = "subscout" },
@@ -792,7 +792,7 @@ pipeline = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "subscout", git = "https://github.com/AdmcCarthy/SubScout?tag=v0.3.0" }]
+requires-dist = [{ name = "subscout", git = "https://github.com/AdmcCarthy/SubScout?tag=v0.3.1" }]
 
 [package.metadata.requires-dev]
 dev = [

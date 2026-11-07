@@ -1,5 +1,8 @@
 # Tulip: working rules
 
+**"Tulip" is only the repo name.** The page is titled *What the shelf has left*; never call the figure a
+tulip, bulb or flower (or stem, neck, bloom) in reader-facing text. Plain words: shape, total, threads.
+
 A SubScout story (github.com/AdmcCarthy/SubScout) on NCS remaining reserves over time. Owner: Adam
 McCarthy, petroleum geoscience domain expert. Follow SubScout's CLAUDE.md and styleguide.
 
@@ -33,3 +36,5 @@ McCarthy, petroleum geoscience domain expert. Follow SubScout's CLAUDE.md and st
 - figures/bulb.js renders on Canvas with one pre-painted canvas per scroll state (opts.states) so steps
   only cross-fade; keep it that way or the perf gate (SubScout scripts/perf.py, 4x throttle) fails.
 - Declared exceptions live in the chart blocks (direct-labels, north-up); the truth gate still applies.
+- The first scrolly uses SubScout's `layout=wide` (v0.3.1): full-width figure frame, cards in a lane.
+  The bulb's height is 10% below v0.2 and capped to fit the viewport with its header and notes.

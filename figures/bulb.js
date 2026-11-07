@@ -108,7 +108,10 @@ export default function create(el, { bulb: B }, opts = {}) {
   function build(W) {
     const narrow = W < 560, mL = narrow ? 4 : 12, mR = narrow ? 30 : 46, mT = 44, mB = 8, gap = narrow ? 6 : 16;
     const vh = window.innerHeight || 800;
-    const H = Math.round(Math.max(narrow ? 300 : 380, Math.min(W * 1.3, vh * (narrow ? 0.4 : 0.72), 1100)));
+    // 10% shorter than v0.2, and never taller than the room left by the figure's header, notes and top bar
+    const fig = el.closest(".ss-figure"), other = fig ? fig.offsetHeight - el.offsetHeight : 0;
+    const room = narrow ? Infinity : vh - 64 - other;
+    const H = Math.round(Math.max(narrow ? 270 : 340, Math.min(W * 1.17, vh * (narrow ? 0.36 : 0.65), room, 990)));
     const k = (W - mL - mR - 2 * gap) / d3.sum(maxW);
     let acc = mL;
     const cx = maxW.map((m) => { const c = acc + (m * k) / 2; acc += m * k + gap; return c; });

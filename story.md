@@ -1,7 +1,7 @@
 ---
-title: Tulip
-short_title: "Tulip · NCS reserves"
-dek: Norway found its biggest oil and gas fields first. What the shelf still had to produce swelled into a bulb, peaked as the century turned and has narrowed ever since, held up by a few giants and the many smaller fields around them.
+title: What the shelf has left
+short_title: "What the shelf has left"
+dek: Norway found its biggest oil and gas fields first. The volume its continental shelf still had to produce grew for three decades, peaked as the century turned and has fallen ever since, held up by a few giants and the many smaller fields around them.
 kicker: NCS · Remaining reserves 1971–2026 · Sodir
 byline: Adam McCarthy
 date: 2026-11-07
@@ -42,18 +42,20 @@ data:
 Every oil and gas field has a volume it can still produce. Sodir, the Norwegian Offshore
 Directorate, publishes today's estimate for each field and every month of production since 1971.
 Add the production back, month by month, and you can draw what each field had left at any point in
-its life. Stack all {{ n_fields }} fields and the Norwegian continental shelf draws a tulip: a thin
-stem, a swelling bulb and a narrowing neck.
+its life. Stack all {{ n_fields }} fields and the whole shelf takes one shape: a narrow base in the
+1970s, a broad middle around 2000 and a narrowing top today.
 
-Read the shape upwards. Time runs from the first oil at the bottom to today, with ten years of open
+Read the figure upwards. Time runs from the first oil at the bottom to today, with ten years of open
 space above.
 
-::: step {beat=early-giants kicker="The whole shelf"}
-### One shape, fifty-five years
+::: step {beat=early-giants kicker="The whole shelf" layout=wide}
+### Oil, gas and the two together
 
-In grey, the total: what the shelf still had to produce in each month since 1971. At its widest,
-early in 2000, that was {{ peak_total | volume }}. Today {{ now_total | volume }}
-remain, {{ fall_since_peak | pct }} less than at the peak.
+Each thread is one field: oil, NGL and condensate in green, gas in orange, the two added together
+on the right. At its widest, early in 2000, the shelf had {{ peak_total | volume }} left to produce.
+Today {{ now_total | volume }} remain, {{ fall_since_peak | pct }} less. The oldest fields sit at
+the centre of each column and younger ones outward; deep shades are small fields and pale shades
+giants.
 
 ```chart
 id: bulb
@@ -61,7 +63,7 @@ type: custom
 module: figures/bulb.js
 data: bulb
 register: outcrop
-state: { mode: silhouette }
+state: { mode: colour }
 title: Remaining reserves peaked in 2000 and have fallen by {{ fall_since_peak | pct }} since
 subtitle: Remaining recoverable volume per field, million Sm³ o.e., time running up
 source: sodir
@@ -72,24 +74,11 @@ exception: { rule: direct-labels, reason: "Around 1,200 streams: shade encodes s
 ```
 :::
 
-::: step {beat=early-giants kicker="Three views"}
-### Oil, gas and the two together
-
-The same volumes split by fluid and coloured by field size: oil, NGL and condensate in green, gas
-in orange, oil equivalent on the right. The oldest fields sit at the centre and younger ones grow
-outward. Deep shades are small fields; pale shades are giants.
-
-```chart
-use: bulb
-mode: colour
-```
-:::
-
 ::: step {beat=early-giants kicker="1969–1979"}
-### The stem: Ekofisk
+### The first field: Ekofisk
 
 Ekofisk was found in 1969 and came on stream in June 1971. Until Frigg, Cod and Vest Ekofisk joined
-in 1977 it was the whole bulb: {{ ekofisk_rec | volume }} recoverable by today's estimate, and still among the largest fields
+in 1977 it was the whole shelf: {{ ekofisk_rec | volume }} recoverable by today's estimate, and still among the largest fields
 on the shelf.
 
 ```chart
@@ -119,7 +108,7 @@ focus: [STATFJORD, GULLFAKS, OSEBERG, SNORRE]
 ### Gas at the heart
 
 Troll was found in 1979 and began production in 1995. It added {{ troll_jump | volume }} to the
-bulb in a single month: {{ troll_rec | volume }} recoverable, the only super-giant on the shelf. In
+shelf's total in a single month: {{ troll_rec | volume }} recoverable, the only super-giant on the shelf. In
 1980 gas was {{ gas_share_1980 | pct }} of what was left. It has outweighed oil, NGL and condensate
 together since the end of 2003, and today {{ gas_share_now | pct }} of the remainder is gas.
 
@@ -145,11 +134,11 @@ classes: [0, 1, 2]
 :::
 
 ::: step {beat=long-tail kicker="2019"}
-### A late bloom
+### A late giant
 
 Johan Sverdrup was found in 2010 on the Utsira High, in a part of the North Sea that had been
 explored for four decades. When it started in October 2019 it added {{ sverdrup_jump | volume }} at
-once: the last big shoulder on the bulb.
+once: the last big step outward in the shape.
 
 ```chart
 use: bulb
@@ -158,13 +147,13 @@ focus: [JOHAN SVERDRUP]
 ```
 :::
 
-## The bulb was thinner at the time
+## Less was known at the time
 
-Every width in the bulb uses today's estimate. That is hindsight. At the end of 2004, Sodir's field
+Every width in the figure uses today's estimate. That is hindsight. At the end of 2004, Sodir's field
 tables put {{ then_2004 | volume }} left in the {{ n_fields_2004 }} fields then booked. We now know
 those same fields held {{ known_2004 | volume }}, {{ growth_2004 | pct }} more. The difference is
-reserve growth: better recovery, more wells and longer field lives. The bulb kept refilling from the
-inside.
+reserve growth: better recovery, more wells and longer field lives. Existing fields kept adding
+reserves from the inside.
 
 ```chart
 id: hindsight
@@ -281,16 +270,16 @@ t: now
 ```
 :::
 
-## What keeps the tulip in flower
+## What keeps the shelf producing
 
-The neck is narrowing. Production in the past twelve months would use up today's remaining reserves
+The top of the shape is narrowing. Production in the past twelve months would use up today's remaining reserves
 in about {{ rp_years | round:0 }} years if nothing were added. That is a ratio, not a forecast:
 production declines as fields age, and reserves grow as they did after 2004. Another
 {{ contingent | volume }} has been found but not yet sanctioned.
 
-What the bulb shows is how Norway has kept it in flower so far: a handful of giants found early,
+What the figure shows is how Norway has kept the shelf producing so far: a handful of giants found early,
 reserve growth inside them, and a long tail of smaller fields tied back to the platforms the giants
-built. Whether the next ten years add another shoulder depends on exploration and on sanctioning
+built. Whether the next ten years add another step outward depends on exploration and on sanctioning
 what has already been found. *Interpreted.*
 
 ::: appendix
