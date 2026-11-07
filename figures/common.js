@@ -4,16 +4,18 @@ import { token, tooltip as ssTooltip, units, UNITS, onSchemeChange, reducedMotio
 
 // Six size classes per fluid (small -> super-giant). Light: smaller = paler, the smallest almost the white
 // of the seams; dark: smaller = closer to the dark background. Oil (with NGL and condensate) in greens,
-// gas in ambers and bricks. (Trial 2026-11-07; the previous ramps ran the other way.)
+// gas in sand to peach; pastel (low chroma) so the thick giant bodies stay calm. Generated in OKLCH:
+// oil hue 172, gas hues 85 -> 56. Pastels limit colour-blind separation of oil vs gas (worst ~4-5 dE x100);
+// the columns and seams carry that distinction.
 const PAL = {
   light: {
-    oil: ["#eef7f2", "#9dd5c7", "#5eb198", "#1a8f69", "#00703e", "#005126"],
-    gas: ["#fcf2e8", "#f2bc79", "#eb9939", "#dd7610", "#c35a25", "#a0412e"],
+    oil: ["#eaf7f2", "#b1d8ca", "#92c6b5", "#76b3a0", "#5fa18d", "#48907b"],
+    gas: ["#fbf6ec", "#f0ddbf", "#e8c89f", "#ddb183", "#d19b6c", "#c2865a"],
     silhouette: "#8798a6",
   },
   dark: {
-    oil: ["#1e302c", "#10614d", "#067f5c", "#329d5a", "#60bc71", "#91d993"],
-    gas: ["#2c2621", "#7c5d29", "#af761e", "#df8b1e", "#ffa663", "#ffcab2"],
+    oil: ["#1e2925", "#274a40", "#346657", "#458270", "#5c9e8a", "#74bca5"],
+    gas: ["#2d281f", "#59472a", "#7e6036", "#a57949", "#c79263", "#e8ac82"],
     silhouette: "#6e8aa0",
   },
 };
@@ -81,5 +83,5 @@ export function classLegend(legendEl, classes) {
   const fam = [["Small to large", classes.filter((c) => c.family === 0)], ["Giant and above", classes.filter((c) => c.family === 1)]];
   legendEl.innerHTML = `<div class="tl-legend">` + fam.map(([t, cs]) => `<span class="tl-grp"><b>${t}</b>` +
     cs.map((c) => `<span><i style="background:linear-gradient(90deg,${P.oil[c.idx]} 50%,${P.gas[c.idx]} 50%)"></i>${c.short} <span class="tl-note-inline">${c.range}</span></span>`).join("") + "</span>").join("") +
-    `<span class="tl-note-inline">Million boe recoverable. Green: oil, NGL and condensate; orange: gas. Smaller fields are fainter; the smallest almost vanish into the seams.</span></div>`;
+    `<span class="tl-note-inline">Million boe recoverable. Green: oil, NGL and condensate; sand: gas. Smaller fields are fainter; the smallest almost vanish into the seams.</span></div>`;
 }

@@ -194,7 +194,7 @@ export default function create(el, { bulb: B }, opts = {}) {
       an.append("circle").attr("cx", xe).attr("cy", yd).attr("r", 3.2).attr("fill", tok("surface")).attr("stroke", tok("text")).attr("stroke-width", 1.3);
       an.append("circle").attr("cx", xe).attr("cy", ye).attr("r", 2.4).attr("fill", tok("text"));
       an.append("text").attr("class", "tl-found").attr("x", xe + 7).attr("y", yd).attr("dy", "0.35em").text(`${f.name} found ${f.discovered}`);
-      an.append("text").attr("class", "tl-label").attr("x", xe + 7).attr("y", ye).attr("dy", "1.1em").text(`first oil ${f.first_prod.slice(0, 4)}`);
+      an.append("text").attr("class", "tl-label").attr("x", xe + 7).attr("y", ye).attr("dy", "1.1em").text(`first ${f.dom === "gas" ? "gas" : "oil"} ${f.first_prod.slice(0, 4)}`);
     });
     const xn = x1 + 58;
     const found = F.filter((f) => B.rooted.includes(f.key) && f.discovered).map((f) => ({ f, lines: 1, y: y(new Date(f.discovered, 6, 1)) }));
