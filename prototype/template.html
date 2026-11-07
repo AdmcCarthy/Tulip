@@ -8,11 +8,11 @@
 :root {
   --canvas: #f3f7fb; --surface: #fdfeff; --raised: #ecf1f5;
   --ink: #2d3439; --muted: #596c7b; --rule: #ccd6dd; --grid: #d4d4d4; --link: #20565c;
-  --oil: #21767e; --liq: #7c50a8; --gas: #cc6700; --context: #b4b4b4;
+  --oil: #008171; --liq: #7c50a8; --gas: #c96900; --context: #b4b4b4;
   --accent: #1a7f88; --hatch: #596c7b;
   --seq-0: #ecf3f8; --seq-1: #c2d0dc; --seq-2: #96aec2; --seq-3: #6f8da5; --seq-4: #526c82; --seq-5: #3c4d5b; --seq-6: #272f35;
   --land: #e2e9ef;
-  --oil-0: #20474b; --oil-1: #1f666d; --oil-2: #3c959e; --oil-3: #6cb2b9; --oil-4: #a2cdd2; --gas-0: #603204; --gas-1: #8f4200; --gas-2: #cc6700; --gas-3: #e38d42; --gas-4: #f0b689; --silhouette: #8798a6;
+  --oil-0: #00372e; --oil-1: #005b48; --oil-2: #008171; --oil-3: #08a2af; --oil-4: #72bed1; --oil-5: #b9deee; --gas-0: #88341e; --gas-1: #ac4a09; --gas-2: #c96900; --gas-3: #df8b1e; --gas-4: #eab26b; --gas-5: #f4dab2; --silhouette: #8798a6;
   --f-display: "Newsreader", "Iowan Old Style", Georgia, serif;
   --f-body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
   --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
@@ -20,20 +20,20 @@
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --canvas: #0e1820; --surface: #15212a; --raised: #1e2b35;
   --ink: #f5fdff; --muted: #b4c7d7; --rule: #2c3a45; --grid: #33424d; --link: #86d2da;
-  --oil: #6ec0c9; --liq: #e7c7ff; --gas: #c36800; --context: #7f7f7f;
+  --oil: #2fbda7; --liq: #e7c7ff; --gas: #e57b24; --context: #7f7f7f;
   --accent: #55b3bd; --hatch: #b4c7d7;
   --seq-0: #2b2e31; --seq-1: #424b52; --seq-2: #576a78; --seq-3: #6e8aa0; --seq-4: #8cabc4; --seq-5: #b3cce1; --seq-6: #deeefb;
   --land: #1e2b35;
-  --oil-0: #d7fafd; --oil-1: #ace3e9; --oil-2: #6ec0c9; --oil-3: #428c93; --oil-4: #3c6266; --gas-0: #ffead0; --gas-1: #ffc791; --gas-2: #f99539; --gas-3: #bc6500; --gas-4: #7e4e25; --silhouette: #6e8aa0;
+  --oil-0: #abfaec; --oil-1: #80d8bd; --oil-2: #2fbda7; --oil-3: #0098a4; --oil-4: #1f7183; --oil-5: #2b4d5a; --gas-0: #ffc0ae; --gas-1: #fb966a; --gas-2: #e57b24; --gas-3: #b56d00; --gas-4: #885700; --gas-5: #584018; --silhouette: #6e8aa0;
   color-scheme: dark; } }
 :root[data-theme="dark"] {
   --canvas: #0e1820; --surface: #15212a; --raised: #1e2b35;
   --ink: #f5fdff; --muted: #b4c7d7; --rule: #2c3a45; --grid: #33424d; --link: #86d2da;
-  --oil: #6ec0c9; --liq: #e7c7ff; --gas: #c36800; --context: #7f7f7f;
+  --oil: #2fbda7; --liq: #e7c7ff; --gas: #e57b24; --context: #7f7f7f;
   --accent: #55b3bd; --hatch: #b4c7d7;
   --seq-0: #2b2e31; --seq-1: #424b52; --seq-2: #576a78; --seq-3: #6e8aa0; --seq-4: #8cabc4; --seq-5: #b3cce1; --seq-6: #deeefb;
   --land: #1e2b35;
-  --oil-0: #d7fafd; --oil-1: #ace3e9; --oil-2: #6ec0c9; --oil-3: #428c93; --oil-4: #3c6266; --gas-0: #ffead0; --gas-1: #ffc791; --gas-2: #f99539; --gas-3: #bc6500; --gas-4: #7e4e25; --silhouette: #6e8aa0;
+  --oil-0: #abfaec; --oil-1: #80d8bd; --oil-2: #2fbda7; --oil-3: #0098a4; --oil-4: #1f7183; --oil-5: #2b4d5a; --gas-0: #ffc0ae; --gas-1: #fb966a; --gas-2: #e57b24; --gas-3: #b56d00; --gas-4: #885700; --gas-5: #584018; --silhouette: #6e8aa0;
   color-scheme: dark; }
 
 * { box-sizing: border-box; }
@@ -276,7 +276,7 @@ function layout(chart, order) {
   }
   return { sers, x0, x1, tot };
 }
-const ORDER_OF = { liq: "age", gas: "age", oe: "mixed" };
+const ORDER_OF = { liq: "age", gas: "age", oe: "age" };
 const LAY = {};
 CHARTS.forEach(c => { LAY[c.key] = layout(c.key, ORDERS[ORDER_OF[c.key]]); });
 const RAW = Object.fromEntries(CHARTS.map(c => [c.key, dates.map((_, t) => d3.sum(fields, f => f.w[c.key][t]))]));
@@ -286,9 +286,10 @@ const shade = (hue, c) => css(`--${hue}-${c}`);
 const fillOf = (chart, f) => shade(chart === "oe" ? (f.dom === "gas" ? "gas" : "oil") : (chart === "gas" ? "gas" : "oil"), f.cls);
 
 function legend() {
-  document.getElementById("bulb-legend").innerHTML =
-    `<span class="ramp"><b>Field size</b>${CL.map(c => `<span><i style="background:linear-gradient(90deg,var(--oil-${c.idx}) 50%,var(--gas-${c.idx}) 50%)"></i>${c.label} <span class="m2">${c.range}</span></span>`).join("")}</span>` +
-    `<span class="m">Size = the field's total recoverable volume, MSm³ o.e. (giant ≥ 500 MMboe; medium split by doubling: 10–20, 20–40, 40–80), the same class in all three charts. Green: oil, NGL &amp; condensate; orange: gas. Smaller fields are the deeper shades. In the oil-equivalent chart a field takes the colour of its main fluid.</span>`;
+  const fam = [["Below giant", CL.filter(c => c.family === 0)], ["Giant and above", CL.filter(c => c.family === 1)]];
+  document.getElementById("bulb-legend").innerHTML = fam.map(([t, cs]) => `<span class="ramp"><b>${t}</b>` +
+    cs.map(c => `<span><i style="background:linear-gradient(90deg,var(--oil-${c.idx}) 50%,var(--gas-${c.idx}) 50%)"></i>${c.range}</span>`).join("") + "</span>").join("") +
+    `<span class="m">Field size = total recoverable volume, million boe, on a log scale in half-decade steps anchored on giant (500 MMboe) and super-giant (5 Bboe). Two linked colour families per fluid: below giant (moss greens; rust to orange for gas) and giant and above (teal to pale blue; amber to pale gold). Green: oil, NGL &amp; condensate; orange: gas. Smaller fields are deeper. In the oil-equivalent chart a field takes the colour of its main fluid.</span>`;
 }
 
 function drawBulb() {
@@ -400,7 +401,7 @@ function drawBulb() {
         <div class="row"><span><span class="sw" style="background:${shade("oil", f.cls)}"></span>Oil, NGL, cond.</span><span>${fmt1(lv)}</span></div>
         <div class="row"><span><span class="sw" style="background:${shade("gas", f.cls)}"></span>Gas</span><span>${fmt1(gv)}</span></div>
         <div class="row"><b>Total</b><b>${fmt1(tot)} MSm³ o.e.</b></div><div class="row m"><span>${d3.format(".1%")(tot / RAW.oe[t])} of the NCS</span><span>≈ ${fmt(boe(tot))} MMboe</span></div>
-        <div class="m" style="margin-top:6px">${CL[f.cls].label} (${CL[f.cls].range}): ${fmt1(f.rec_liq + f.rec_gas)} MSm³ o.e. recoverable</div>`;
+        <div class="m" style="margin-top:6px">${CL[f.cls].label}, ${CL[f.cls].range} MMboe: ${fmt1(f.rec_liq + f.rec_gas)} MSm³ o.e. recoverable</div>`;
     }
     tip.innerHTML = html; tip.style.opacity = 1;
     const bw = bulb.clientWidth, sc = bw / W;
