@@ -3,6 +3,10 @@
 **"Tulip" is only the repo name.** The page is titled *What the shelf has left*; never call the figure a
 tulip, bulb or flower (or stem, neck, bloom) in reader-facing text. Plain words: shape, total, threads.
 
+@../../shared/idiom/CORE.md
+
+Voice and structure of written work (README, docs, published pages) follow Idiom's CORE.md and house style: British English, impersonal, one creative headline then plain varied headings, a section ends on its last point. The import is harmless when the file is absent (CI).
+
 A SubScout story (github.com/AdmcCarthy/SubScout) on NCS remaining reserves over time. Owner: Adam
 McCarthy, petroleum geoscience domain expert. Follow SubScout's CLAUDE.md and styleguide.
 
