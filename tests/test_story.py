@@ -89,3 +89,19 @@ def test_full_screen_view(built, tmp_path):
     data = json.loads(page.split('id="data">')[1].split("</script>")[0])
     years = [e["year"] for e in data["bulb"]["events"]]
     assert years[0] == "1971" and "2000" in years and "2019" in years
+
+
+def test_every_annual_table_understated_its_fields():
+    """The prose says every annual table from 2004 to 2024 booked less than its fields turned out to hold."""
+    h = pd.read_csv(D / "hindsight.csv").set_index("year")
+    assert (h.loc[2004:2024, "known_now"] > h.loc[2004:2024, "estimated_then"]).all()
+    assert h.loc[2025, "known_now"] == pytest.approx(h.loc[2025, "estimated_then"])  # equal by construction, so excluded
+
+
+def test_contingent_share_matches_resource_accounts(built):
+    _, ledger, _ = built
+    pot = json.loads((D / "potential.json").read_text())["resource_accounts"]
+    f = pd.read_csv(D / "fields.csv")
+    want = (pot["contingent_fields"] + pot["contingent_discoveries"]) / f.remaining_oe.sum()
+    assert float(ledger["contingent_share"]["value"]) == pytest.approx(want, abs=1e-5)
+    assert 0.4 < want < 0.7  # the prose says "equal to" about half again

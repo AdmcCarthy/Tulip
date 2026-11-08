@@ -147,6 +147,7 @@ def metrics(d):
         "n_hubs": m(int(n_hubs), "Host fields with at least one tie-back", fp, "interpreted"),
         "big2_share": m(f.loc[["TROLL", "JOHAN SVERDRUP"], "remaining_oe"].sum() / f.remaining_oe.sum(), "Troll and Johan Sverdrup share of remaining reserves (31.12.2025)", fp, "derived"),
         "contingent": m((pot["contingent_fields"] + pot["contingent_discoveries"]) * M, "Contingent resources in fields and discoveries, Sodir resource accounts 31.12.2025", "ra", "observed", "Sm³ o.e."),
+        "contingent_share": m((pot["contingent_fields"] + pot["contingent_discoveries"]) / f.remaining_oe.sum(), "Contingent resources (fields and discoveries) as a share of remaining reserves, both Sodir 31.12.2025", "ra", "derived"),
         "xb_max_gap": m(f.loc[f.cross_border, "balance_gap_oe"].abs().max() * M, "Largest mass-balance gap among cross-border fields (recoverable minus produced minus remaining)", fp, "derived", "Sm³ o.e."),
         "rp_years": m(t.oe.iloc[-1] / last12, f"Remaining reserves divided by production in the twelve months to {now:%B %Y}, years; assumes production holds at today's rate and no new reserves", fp, "interpreted"),
     }

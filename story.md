@@ -1,7 +1,7 @@
 ---
 title: What the shelf has left
 short_title: "What the shelf has left"
-dek: Norway found its biggest oil and gas fields first. The volume its continental shelf still had to produce grew for three decades, peaked as the century turned and has fallen ever since, held up by a few giants and the many smaller fields around them.
+dek: Norway found its largest oil and gas fields first, and the volume left to produce on its continental shelf peaked as the century turned. It has fallen since. The fields went on to deliver more than the tables of the time booked, one late giant came on stream, and a further volume has been found and awaits a decision.
 kicker: NCS · Remaining reserves 1971–2026 · Sodir
 byline: Adam McCarthy
 date: 2026-11-07
@@ -41,8 +41,8 @@ data:
 
 Every oil and gas field has a volume it can still produce. Sodir, the Norwegian Offshore
 Directorate, publishes today's estimate for each field and every month of production since 1971.
-Add the production back, month by month, and you can draw what each field had left at any point in
-its life. Stack all {{ n_fields }} fields and the whole shelf takes one shape: a narrow base in the
+Add the production back, month by month, and what each field had left at any point in its life
+can be drawn. Stack all {{ n_fields }} fields and the whole shelf takes one shape: a narrow base in the
 1970s, a broad middle around 2000 and a narrowing top today.
 
 Read the figure upwards. Time runs from the first oil at the bottom to today, with ten years of open
@@ -90,7 +90,7 @@ focus: [EKOFISK]
 :::
 
 ::: step {beat=early-giants kicker="1979–1992"}
-### The giants arrive
+### Statfjord, Gullfaks, Oseberg and Snorre came on stream between 1979 and 1992
 
 Statfjord came on stream in 1979, Gullfaks and Oseberg in the late 1980s, Snorre in 1992. The
 {{ n_giants }} giants, fields of more than {{ 500 | param }} million barrels of oil equivalent, hold
@@ -106,7 +106,7 @@ focus: [STATFJORD, GULLFAKS, OSEBERG, SNORRE]
 :::
 
 ::: step {beat=early-giants kicker="1995"}
-### Gas at the heart
+### Troll turned the shelf towards gas
 
 Troll was found in 1979 and began production in 1995. It added {{ troll_jump | volume }} to the
 shelf's total in a single month: {{ troll_rec | volume }} recoverable, the only super-giant on the shelf. In
@@ -121,7 +121,7 @@ focus: [TROLL]
 :::
 
 ::: step {beat=long-tail kicker="The long tail"}
-### Many small fields
+### Most fields are below giant size
 
 {{ n_sub_giant }} of the {{ n_fields }} fields are below giant size. Between them they hold
 {{ sub_giant_share | pct }} of the volume: the faint threads at the edges of each column.
@@ -135,11 +135,11 @@ classes: [0, 1, 2]
 :::
 
 ::: step {beat=long-tail kicker="2019"}
-### A late giant
+### A giant in ground explored for four decades
 
 Johan Sverdrup was found in 2010 on the Utsira High, in a part of the North Sea that had been
 explored for four decades. When it started in October 2019 it added {{ sverdrup_jump | volume }} at
-once: the last big step outward in the shape.
+once: the last big step outward in the shape so far.
 
 ```chart
 use: bulb
@@ -150,11 +150,12 @@ focus: [JOHAN SVERDRUP]
 
 See all three columns full screen, with the main events marked, in the [full-screen view](full/).
 
-## Less was known at the time
+## The 2004 tables understated what the fields held
 
 Every width in the figure uses today's estimate. That is hindsight. At the end of 2004, Sodir's field
-tables put {{ then_2004 | volume }} left in the {{ n_fields_2004 }} fields then booked. We now know
-those same fields held {{ known_2004 | volume }}, {{ growth_2004 | pct }} more. The difference is
+tables put {{ then_2004 | volume }} left in the {{ n_fields_2004 }} fields then booked. Those same
+fields are now known to have held {{ known_2004 | volume }}, {{ growth_2004 | pct }} more, and every
+annual table from 2004 to 2024 booked less than its fields turned out to hold. The difference is
 reserve growth: better recovery, more wells and longer field lives. Existing fields kept adding
 reserves from the inside.
 
@@ -177,11 +178,11 @@ unit: million Sm³ o.e.
 notes: "Estimated at the time: Sodir's field reserve table for that year. Known now: today's remaining plus production since, for the same fields. Field-level estimates before 2004 are not published in FactPages."
 ```
 
-## The biggest came first
+## Most of the giants were found before 1990
 
 Plot each field's size against the year it was found and the classic creaming curve appears. The
-giants cluster before 1990; most later discoveries are small. Johan Sverdrup is the exception that
-keeps exploration in a mature basin worthwhile.
+giants cluster before 1990; most later discoveries are small. Johan Sverdrup, found in 2010, shows that a
+giant can still turn up in a mature basin.
 
 ```chart
 id: creaming
@@ -240,7 +241,7 @@ exception: { rule: direct-labels, reason: "Circle packing with four levels: larg
 :::
 
 ::: step {beat=long-tail kicker="1995"}
-### 1995: the giants still full
+### At the end of 1995 the North Sea giants were still full
 
 Each circle now shows what that field had left at the end of 1995. The North Sea giants dominate;
 the Norwegian Sea is still filling.
@@ -252,7 +253,7 @@ t: "1995-12"
 :::
 
 ::: step {beat=long-tail kicker="2005"}
-### 2005: drawing down
+### By 2005 the Norwegian Sea carries more of the weight
 
 Ten years on, Statfjord, Gullfaks and Oseberg have shrunk, and Haltenbanken in the Norwegian Sea
 carries more of the weight. The Barents Sea has no producing field yet; Snøhvit starts in 2007.
@@ -264,10 +265,10 @@ t: "2005-12"
 :::
 
 ::: step {beat=whats-left kicker="Today"}
-### What is left
+### What is left is concentrated in two fields
 
 Today the remainder is concentrated: Troll and Johan Sverdrup hold {{ big2_share | pct }} of it.
-Around them, hubs keep producing through ever smaller tie-backs.
+Around them, hubs keep producing through tie-backs.
 
 ```chart
 use: pack
@@ -275,17 +276,17 @@ t: now
 ```
 :::
 
-## What keeps the shelf producing
+## What has kept the shelf producing, and what it depends on
 
 The top of the shape is narrowing. Production in the past twelve months would use up today's remaining reserves
-in about {{ rp_years | round:0 }} years if nothing were added. That is a ratio, not a forecast:
-production declines as fields age, and reserves grow as they did after 2004. Another
-{{ contingent | volume }} has been found but not yet sanctioned.
+in about {{ rp_years | round:0 }} years if nothing were added. That is a ratio, not a forecast: production declines as
+fields age, and reserves have grown before, as they did after 2004.
 
-What the figure shows is how Norway has kept the shelf producing so far: a handful of giants found early,
-reserve growth inside them, and a long tail of smaller fields tied back to the platforms the giants
-built. Whether the next ten years add another step outward depends on exploration and on sanctioning
-what has already been found. *Interpreted.*
+What has held the shelf up so far is specific: a handful of giants found early, reserve growth inside them, one late
+giant, and a long tail of smaller fields tied back to the platforms the giants built. A further
+{{ contingent | volume }} has been found and not yet sanctioned, equal to {{ contingent_share | pct }} of what the
+producing fields had left at the end of 2025. Contingent resources are not reserves, and some will not be developed. Whether the next ten
+years add another step outward depends on exploration, and on sanctioning what has already been found. *Interpreted.*
 
 ::: appendix
 ### Method
