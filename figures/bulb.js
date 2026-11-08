@@ -25,6 +25,8 @@ function gaussian(v, sig) {
 }
 
 export default function create(el, { bulb: B }, opts = {}) {
+  // Poster mode (full-screen view, and every export/print plate): events in the left margin, discovery years on the right
+  const POSTER = opts.poster ?? (opts.export ? { height: () => opts.height(), roots: ["TROLL", "JOHAN SVERDRUP"] } : null);
   const drawLegend = () => classLegend(opts.legendEl, B.classes);
   drawLegend();
   const n = B.dates.length;
@@ -76,7 +78,7 @@ export default function create(el, { bulb: B }, opts = {}) {
     return e;
   }
   function prepareAhead() {
-    if (idleQ) return;
+    if (idleQ || opts.export) return; // a plate shows one state: no need to paint the others ahead
     const todo = (opts.states ?? []).map((st) => ({ mode: "colour", ...st }));
     const step = () => {
       const st = todo.shift();
@@ -106,20 +108,20 @@ export default function create(el, { bulb: B }, opts = {}) {
   });
 
   function build(W) {
-    const narrow = W < 560, poster = !!opts.poster;
+    const narrow = W < 560, poster = !!POSTER;
     const mL = poster ? 330 : narrow ? 4 : 12, mR = poster ? 250 : narrow ? 30 : 46, mT = poster ? 48 : 44, mB = 8, gap = poster ? 30 : narrow ? 6 : 16;
     const vh = window.innerHeight || 800;
     // 5% shorter than v0.2; on the page, capped so the figure's title and legend stay on screen
     const fig = el.closest(".ss-figure");
     const above = fig ? el.getBoundingClientRect().top - fig.getBoundingClientRect().top : 0;
     const room = narrow || !fig ? Infinity : vh - 56 - above - 24; // wide layout pins the figure 56px from the top
-    const H = poster ? Math.max(480, Math.round(opts.poster.height()))
+    const H = poster ? Math.max(480, Math.round(POSTER.height()))
       : Math.round(Math.max(narrow ? 220 : 361, Math.min(W * 1.235, vh * (narrow ? 0.3 : 0.684), room, 1045)));
     const k = (W - mL - mR - 2 * gap) / d3.sum(maxW);
     let acc = mL;
     const cx = maxW.map((m) => { const c = acc + (m * k) / 2; acc += m * k + gap; return c; });
     const y = d3.scaleTime([new Date(B.axis_start, 0, 1), new Date(B.axis_end, 11, 31)], [H - mB, mT]);
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const dpr = Math.min(opts.print ? 6 : 2, opts.pixelRatio ?? (window.devicePixelRatio || 1)); // print plates ask for more device pixels
     // decimal year -> pixel row: linear, from two points of the time scale
     const y0 = y(new Date(2000, 0, 1)), sy = y(new Date(2010, 0, 1)) - y0;
     const mats = cx.map((c) => new DOMMatrix([k * dpr, 0, 0, (sy / 10) * dpr, c * dpr, (y0 - 2000 * (sy / 10)) * dpr]));
@@ -185,7 +187,7 @@ export default function create(el, { bulb: B }, opts = {}) {
     });
     // discovery-to-first-oil lines for selected fields, in the oil-equivalent column
     const L = LAY.oe, j = 2;
-    (opts.poster.roots ?? []).forEach((key) => {
+    (POSTER.roots ?? []).forEach((key) => {
       const i = F.findIndex((f) => f.key === key);
       if (i < 0 || !(i in L.x0) || !F[i].discovered) return;
       const f = F[i], te = f.entry, tt = Math.min(n - 1, te + 2);
@@ -288,8 +290,8 @@ export default function create(el, { bulb: B }, opts = {}) {
   }
 
   function render(W, state, animate) {
-    const posterH = opts.poster ? Math.max(480, Math.round(opts.poster.height())) : null;
-    if (!geo || (opts.poster ? geo.W !== W || geo.H !== posterH : Math.abs(W / geo.W - 1) > 0.2)) geo = build(W); // small resizes scale the bitmaps
+    const posterH = POSTER ? Math.max(480, Math.round(POSTER.height())) : null;
+    if (!geo || (POSTER ? geo.W !== W || geo.H !== posterH : Math.abs(W / geo.W - 1) > 0.2)) geo = build(W); // small resizes scale the bitmaps
     const sc = W / geo.W;
     const e = ensure(state);
     const dur = animate && !reducedMotion() ? (cur.mode === "silhouette" && state.mode !== "silhouette" ? 1600 : 600) : 0;

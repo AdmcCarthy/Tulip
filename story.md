@@ -59,6 +59,7 @@ giants.
 
 ```chart
 id: bulb
+export: true
 type: custom
 module: figures/bulb.js
 data: bulb
@@ -159,6 +160,7 @@ reserves from the inside.
 
 ```chart
 id: hindsight
+export: true
 type: line
 data: hind
 x: year
@@ -183,6 +185,7 @@ keeps exploration in a mature basin worthwhile.
 
 ```chart
 id: creaming
+export: true
 type: custom
 module: figures/cream.js
 data: bulb

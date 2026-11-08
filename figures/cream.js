@@ -10,7 +10,7 @@ export default function create(el, { bulb: B }, opts = {}) {
   let W = 0;
   function draw(width) {
     W = width;
-    const H = Math.round(Math.max(280, Math.min(W * 0.5, 440))), m = { t: 18, r: 14, b: 26, l: 46 };
+    const H = opts.export ? Math.round(opts.height()) : Math.round(Math.max(280, Math.min(W * 0.5, 440))), m = { t: 18, r: 14, b: 26, l: 46 };
     svg.attr("viewBox", [0, 0, W, H]).attr("height", H).attr("role", "img").attr("aria-label", "Scatter of field size against discovery year, log scale");
     svg.selectAll("*").remove();
     const x = d3.scaleLinear([1965, 2026], [m.l, W - m.r]);
