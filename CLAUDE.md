@@ -45,3 +45,11 @@ McCarthy, petroleum geoscience domain expert. Follow SubScout's CLAUDE.md and st
 - Full-screen view: scripts/build_full.py writes _site/full/ (bulb.js poster mode: events from story.py
   in the left margin, discovery years right of the year scale, labels dodge each other; dashed discovery-to-
   first-oil lines for Troll and Johan Sverdrup; Light/Dark toggle). For screenshots.
+
+## Idiom (private repo)
+
+Idiom is Adam McCarthy's private repo (`github.com/AdmcCarthy/Idiom`; `gh repo clone AdmcCarthy/Idiom` with access, normally linked at
+`../../shared/idiom`) of voice, house style, working rules and the lookup tables agents use first: `DIRECTORY.md` says which repo already
+does a job, `DATASETS.md` gives every dataset's terms, attribution line and status. Read the relevant one before choosing a repo or
+using data, and update it when you learn something new. Never copy anything from its `personal/` or `working/` folders into this repo
+or quote it in public output; if the folder is not available, say so and carry on with this file.
