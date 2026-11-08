@@ -2,6 +2,7 @@
 // the panel (north arrow shows the turn); framed on the quadrants that ever held reserves and the
 // Norway–Denmark boundary. Sequential slate ramp, distinct from the fluid colours.
 import { tok, vol, tip, scheme } from "./common.js";
+import { paintSvg } from "./relief.js";
 
 const YEARS = ["1975", "1985", "1995", "2005", "2015", "2025"];
 const TH = [10, 50, 100, 250, 500, 1000];
@@ -11,7 +12,7 @@ const RAMP = {
 };
 const ANGLE = 18;
 
-export default function create(el, { quads: Q, land: LAND, borders: BORDERS }) {
+export default function create(el, { quads: Q, relief: R, land: LAND, borders: BORDERS }) {
   el.innerHTML = "";
   const legend = d3.select(el).append("div").attr("class", "tl-legend");
   const grid = d3.select(el).append("div").attr("class", "tl-maps");
@@ -32,10 +33,10 @@ export default function create(el, { quads: Q, land: LAND, borders: BORDERS }) {
       const tot = d3.sum(Q.features, (f) => f.properties[yr] || 0);
       const svg = grid.append("svg").attr("viewBox", [0, 0, cw, ch]).style("width", `${cw}px`).style("height", `${ch}px`).style("overflow", "hidden")
         .attr("role", "img").attr("aria-label", `Remaining reserves by quadrant, end of ${yr}`);
-      svg.append("path").datum(LAND).attr("d", path).attr("fill", tok("surface-raised"));
+      paintSvg(svg.append("g"), R, path, { width: cw, height: ch, land: LAND, seaCap: 500 });
       svg.append("path").datum(BORDERS).attr("d", path).attr("fill", "none").attr("stroke", tok("text-muted")).attr("stroke-width", 0.7).attr("stroke-dasharray", "3 2");
       svg.append("g").selectAll("path").data(Q.features.filter((f) => (f.properties[yr] || 0) > 0)).join("path").attr("d", path)
-        .attr("fill", (f) => col(f.properties[yr])).attr("stroke", tok("surface")).attr("stroke-width", 0.6)
+        .attr("fill", (f) => col(f.properties[yr])).attr("stroke", tok("text-muted")).attr("stroke-opacity", 0.55).attr("stroke-width", 0.5)
         .on("pointermove", (ev, f) => tip().show(`<b>Quadrant ${f.properties.q}</b><br><span class="ss-k">End of ${yr}</span><br>${vol(f.properties[yr], 1)} remaining`, ev.clientX, ev.clientY))
         .on("pointerleave", () => tip().hide());
       svg.append("text").attr("class", "tl-year").attr("x", 6).attr("y", 16).text(yr);

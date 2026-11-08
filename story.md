@@ -27,6 +27,11 @@ sources:
     url: https://www.norskpetroleum.no/en/petroleum-resources/resource-accounts/
     accessed: 2026-11-07
     note: Totals by resource class (norskpetroleum.no spreadsheet)
+  sodir_relief:
+    name: Sodir FactPages and FactMaps; base map Relief (Copernicus DEM GLO-90, EMODnet Bathymetry)
+    url: https://github.com/AdmcCarthy/Relief
+    accessed: 2026-11-09
+    note: Quadrants and field reserves from Sodir (NLOD 2.0). Land heights Copernicus DEM GLO-90 © DLR e.V. 2010-2014 and © Airbus 2014-2018, provided under COPERNICUS by the European Union and ESA; sea-floor depths EMODnet Bathymetry Consortium (2024), generalised by Relief to a 2 km cell (4 km for the Barents Sea).
 data:
   streams: data/streams.json
   fields: data/fields.csv
@@ -36,6 +41,7 @@ data:
   snap: data/snapshots_fields.csv
   quads: data/quadrants_remaining.geojson
   land: data/land_simple.geojson
+  relief: data/relief_shelf.json
   borders: data/borders.geojson
 ---
 
@@ -207,10 +213,10 @@ the Norwegian and Barents Seas, up from {{ north_share_1995 | pct }} at the end 
 id: maps
 type: custom
 module: figures/maps.js
-data: [quads, land, borders]
+data: [quads, relief, land, borders]
 title: Remaining reserves spread north as the North Sea giants drained
 subtitle: Remaining recoverable volume by Sodir quadrant at the end of each snapshot year
-source: sodir
+source: sodir_relief
 confidence: derived
 notes: Fields assigned to the quadrant holding a point inside their outline. Dashed lines are agreed maritime boundaries.
 exception: { rule: north-up, reason: "Maps rotated so the shelf runs up each panel and the frame leaves out empty land to the east; a north arrow marks the turn." }

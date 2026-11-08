@@ -31,3 +31,8 @@ Performance is checked with SubScout's `scripts/perf.py` (4x CPU throttle, no fr
 
 Data: Sodir (Norwegian Offshore Directorate), Norwegian Licence for Open Government Data (NLOD 2.0);
 method in [`data/README.md`](data/README.md) and on the page under "How we know". Code: MIT.
+
+The quadrant maps sit on [Relief](https://github.com/AdmcCarthy/Relief) (Copernicus DEM GLO-90 and EMODnet Bathymetry) in its Detuned
+style at context strength, converted to longitude and latitude once by `scripts/build_relief_base.py` so the base and the Sodir
+quadrants are projected together. Relief has no single region over the whole shelf, so the base joins `north_sea`, `norwegian_sea` and
+`barents_sea`; beyond them (Sweden, Finland, the Baltic) a flat tint and the plain Sodir land outline show as a straight edge.
