@@ -184,27 +184,11 @@ Take out the {{ n_giants }} giants and {{ n_sub_giant }} fields remain, each bel
 barrels of oil equivalent recoverable. At the shelf's peak they held {{ sub_at_peak | volume }}, {{ sub_share_peak | pct }}
 of what was left. Today they hold {{ sub_now | volume }}, {{ sub_share_now | pct }}. The {{ n_large }} large fields hold
 {{ large_share_sub | pct }} of that and are left out of the figures below. These follow the {{ n_small }} small and
-{{ n_medium }} medium fields: first together, then each on its own, all on the scale of the total.
+{{ n_medium }} medium fields: first together, then each on its own, on a scale stretched far enough to read.
 
-```chart
-id: small_trio
-export: true
-type: custom
-module: figures/bulb_trio_same.js
-data: bulb
-state: { mode: colour }
-title: Small and medium fields hold {{ sm_share_now | pct }} of the shelf today
-subtitle: Remaining volume per field, million Sm³ o.e., small and medium together, small alone and medium alone, on one scale with the total
-source: sodir
-confidence: derived
-unit: million Sm³ o.e.; 1 Sm³ o.e. = 6.29 boe
-notes: Small is under 50 MMboe recoverable, medium 50 to 160; large fields (160 to 500) and giants are left out. The three graphs share the scale of the total above; the bar gives a width. Width = Sodir's estimate at 31.12.2025 plus production since each month (hindsight). Shades are stepped up two places in the size ramp so the two classes stay visible; the legend shows the shades used.
-exception: { rule: direct-labels, reason: "Around 85 streams: shade encodes two size classes in two linked colour families, with a legend, hover and labels where a stream is wide enough instead of direct labels on all. Width has no axis; the bar gives a width." }
-```
-
-Together they hold {{ sm_now | volume }} today: {{ small_now | volume }} in small fields and {{ medium_now | volume }} in
-medium ones. Stretch the scale and the shapes show. From 2000 to 2014 the volume left in small and medium fields
-together stayed between {{ sm_lo_0014 | volume }} and {{ sm_hi_0014 | volume }}. It then rose to {{ sm_peak | volume }}
+Together they hold {{ sm_now | volume }} today, {{ sm_share_now | pct }} of the shelf: {{ small_now | volume }} in small fields
+and {{ medium_now | volume }} in medium ones. On the scale of the total they would be slivers, so the figure stretches the
+scale. From 2000 to 2014 the volume left in small and medium fields together stayed between {{ sm_lo_0014 | volume }} and {{ sm_hi_0014 | volume }}. It then rose to {{ sm_peak | volume }}
 at the end of 2023 and has eased since. Medium fields held more than small ones in every year from 2000.
 
 ```chart
@@ -219,7 +203,7 @@ subtitle: Remaining volume per field, million Sm³ o.e., small and medium togeth
 source: sodir
 confidence: derived
 unit: million Sm³ o.e.; 1 Sm³ o.e. = 6.29 boe
-notes: Same data and colours as the figure above, on a larger scale shared by the three graphs (the note in the figure gives how much larger; the bar gives a width). Width = Sodir's estimate at 31.12.2025 plus production since each month (hindsight). Fields approved but not yet producing enter at the approval date, at their full volume.
+notes: Small is under 50 MMboe recoverable, medium 50 to 160; large fields (160 to 500) and giants are left out. The three graphs share one scale, larger than the total's (the note in the figure gives how many times; the bar gives a width). Width = Sodir's estimate at 31.12.2025 plus production since each month (hindsight). Fields approved but not yet producing enter at the approval date, at their full volume. Shades are stepped up two places in the size ramp so the two classes stay visible; the legend shows the shades used.
 exception: { rule: direct-labels, reason: "Around 85 streams: shade encodes two size classes in two linked colour families, with a legend, hover and labels where a stream is wide enough instead of direct labels on all. Width has no axis; the bar gives a width." }
 ```
 

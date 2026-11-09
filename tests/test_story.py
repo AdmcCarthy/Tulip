@@ -23,7 +23,7 @@ def built(tmp_path_factory):
 def test_builds_without_errors_or_warnings(built):
     rep, _, out = built
     assert rep.errors == [] and rep.warnings == []
-    for m in ("bulb", "bulb_pair", "bulb_total", "bulb_trio", "bulb_trio_same", "bulb_trio_stretched", "pack", "cream", "maps", "common"):
+    for m in ("bulb", "bulb_pair", "bulb_total", "bulb_trio", "bulb_trio_stretched", "pack", "cream", "maps", "common"):
         assert (out / "figures" / f"{m}.js").exists()
 
 
