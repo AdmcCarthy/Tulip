@@ -31,8 +31,14 @@ export default function create(el, { bulb: B }, opts = {}) {
       .attr("fill", (d) => shade(d.dom, d.cls)).attr("stroke", (d) => (d.cls === 0 ? tok("text-muted") : tok("surface"))).attr("stroke-width", (d) => (d.cls === 0 ? 0.7 : 1.4))
       .on("pointermove", (ev, d) => tip().show(`<b>${d.name}</b><br><span class="ss-k">${d.area} · found ${d.discovered}</span><br>Recoverable ${vol(d.rec_liq + d.rec_gas)}<br><span class="ss-k">${B.classes[d.cls].short}, mainly ${d.dom === "gas" ? "gas" : "oil and liquids"}</span>`, ev.clientX, ev.clientY))
       .on("pointerleave", () => tip().hide());
-    data.filter((d) => d.rec_liq + d.rec_gas > (W < 560 ? 500 : 330) && d.name !== "Gullfaks").forEach((d) =>
-      svg.append("text").attr("class", "tl-label").attr("x", x(d.discovered) + 7).attr("y", y(d.rec_liq + d.rec_gas)).attr("dy", "0.35em").text(d.name));
+    // name the biggest fields, largest first; a name that would run into another or off the edge is left to the hover
+    const taken = [];
+    data.filter((d) => d.rec_liq + d.rec_gas > (W < 560 ? 500 : 330) && d.name !== "Gullfaks").sort((a, b) => b.rec_liq + b.rec_gas - (a.rec_liq + a.rec_gas)).forEach((d) => {
+      const lx = x(d.discovered) + 7, ly = y(d.rec_liq + d.rec_gas), tw = d.name.length * 6.8, box = [lx, ly - 8, lx + tw, ly + 8];
+      if (box[2] > W - 2 || taken.some((o) => box[0] < o[2] && box[2] > o[0] && box[1] < o[3] && box[3] > o[1])) return;
+      taken.push(box);
+      svg.append("text").attr("class", "tl-label").attr("x", lx).attr("y", ly).attr("dy", "0.35em").text(d.name);
+    });
   }
   return { draw, repaint() { drawLegend(); if (W) draw(W); } };
 }

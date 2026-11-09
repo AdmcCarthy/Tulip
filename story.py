@@ -133,15 +133,15 @@ def datasets(d):
     }
     h = d["hindsight"]
     hind = pd.concat([
-        pd.DataFrame({"year": h.year, "series": "Estimated at the time", "value": h.estimated_then}),
+        pd.DataFrame({"year": h.year, "series": "Estimated then", "value": h.estimated_then}),
         pd.DataFrame({"year": h.year, "series": "Known now", "value": h.known_now}),
     ])
     sm = _small(d)
     cum = []
     for y in range(2005, 2026):  # since the end of 2004, outside the giants, cumulative
         added, on_stream, produced = _flows(sm, 2005, y)
-        cum += [{"year": y, "series": "Added, approved or on stream", "value": added},
-                {"year": y, "series": "Added, on stream", "value": on_stream},
+        cum += [{"year": y, "series": "Added, all", "value": added},
+                {"year": y, "series": "Added, started", "value": on_stream},
                 {"year": y, "series": "Produced", "value": produced}]
     return {"bulb": bulb, "hind": hind, "small_flows": pd.DataFrame(cum)}
 
@@ -230,6 +230,7 @@ def metrics(d):
         "north_share_now": m(north_now, "Share of remaining reserves in the Norwegian and Barents Seas today", fp, "derived"),
         "north_share_1995": m(north_95, "Share of remaining reserves north of 62°N, end of 1995", fp, "derived"),
         "n_tied": m(int(tied), "Fields produced through another field's facilities", fp, "interpreted"),
+        "n_tied_sub": m(int(((f.hub != f.index) & ~giants).sum()), "Fields below giant size produced through another field's facilities", fp, "interpreted"),
         "n_hubs": m(int(n_hubs), "Host fields with at least one tie-back", fp, "interpreted"),
         "big2_share": m(f.loc[["TROLL", "JOHAN SVERDRUP"], "remaining_oe"].sum() / f.remaining_oe.sum(), "Troll and Johan Sverdrup share of remaining reserves (31.12.2025)", fp, "derived"),
         "contingent": m((pot["contingent_fields"] + pot["contingent_discoveries"]) * M, "Contingent resources in fields and discoveries, Sodir resource accounts 31.12.2025", "ra", "observed", "Sm³ o.e."),

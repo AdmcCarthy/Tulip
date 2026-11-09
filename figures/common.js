@@ -53,6 +53,7 @@ export const fmtMonth = d3.timeFormat("%B %Y");
 const CSS = `
 .tl-axis,.tl-note{font:400 11px var(--ss-font-body);fill:var(--ss-text-muted)}
 .tl-strong{fill:var(--ss-text);font-weight:600}
+.tl-axis.tl-strong{paint-order:stroke;stroke:var(--ss-surface);stroke-width:4px;stroke-linejoin:round}
 .tl-col{font:600 12.5px var(--ss-font-body);fill:var(--ss-text)}
 .tl-big{font:500 17px var(--ss-font-display);fill:var(--ss-text);paint-order:stroke;stroke:var(--ss-surface);stroke-width:4px}
 .tl-label{font:600 11.5px var(--ss-font-body);fill:var(--ss-text);paint-order:stroke;stroke:var(--ss-surface);stroke-width:3px;stroke-linejoin:round;pointer-events:none}

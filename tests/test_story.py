@@ -233,3 +233,23 @@ def test_cumulative_additions_chart():
     produced = sum(g["produced"].get(y, 0.0) for y in range(2005, 2026))
     # the chart title says additions "have only kept pace": on-stream additions end below production, within 5%
     assert on < produced and on > 0.95 * produced
+
+
+def test_most_fields_below_giant_size_are_tied_back(built):
+    """The prose says most fields below giant size are produced through another field's platform."""
+    _, ledger, _ = built
+    f = pd.read_csv(D / "fields.csv").set_index("field")
+    sub = f[f.recoverable_oe * 6.29 < 500]
+    tied = int((sub.hub != sub.index).sum())
+    assert _m(ledger, "n_tied_sub") == tied
+    assert tied > len(sub) / 2  # "most"
+
+
+def test_every_figure_marked_for_export_has_its_high_resolution_page(built):
+    """Each `export: true` chart in the story gets a proof artboard and payload that Plate renders to print files."""
+    _, _, out = built
+    ids = ["bulb", "total", "small_trio_stretched", "small_flows", "hindsight", "creaming"]
+    for i in ids:
+        assert (out / "export" / i / "index.html").exists() and (out / "export" / i / "payload.json").exists(), i
+    page = (out / "index.html").read_text(encoding="utf-8")
+    assert all(f"export/{i}/" in page for i in ids)  # and the story links to each one
