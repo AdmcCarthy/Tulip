@@ -253,7 +253,7 @@ export default function create(el, { bulb: B }, opts = {}) {
         if (!box || taken.some((o) => box[0] < o[2] && box[2] > o[0] && box[1] < o[3] && box[3] > o[1])) continue;
         taken.push(box);
         const txt = svg.append("text").attr("class", "tl-flabel").attr("text-anchor", "middle").attr("dy", "0.35em")
-          .attr("fill", d3.lab(colour).l > 62 ? "#1c1a17" : "#fff").text(f.name);
+          .style("fill", d3.lab(colour).l > 62 ? "#1c1a17" : "#fff").text(f.name); // inline: the page's own text rules must not recolour it
         txt.attr("transform", rot ? `translate(${cxp},${cyp}) rotate(-90)` : `translate(${cxp},${cyp})`);
       }
     });

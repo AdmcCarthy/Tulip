@@ -58,7 +58,7 @@ space above.
 ### Gas and oil, side by side
 
 Each thread is one field: gas in red and orange on the left, oil, NGL and condensate in green on the
-right, with the years and the main events between them. At its widest, early in 2000, the shelf had
+right, with the years between them; the full-screen view adds the main events. At its widest, early in 2000, the shelf had
 {{ peak_total | volume }} left to produce, oil and gas together. Today {{ now_total | volume }} remain,
 {{ fall_since_peak | pct }} less. The oldest fields sit at the centre of each graph and younger ones
 outward; pale shades are small fields and strong shades giants.
