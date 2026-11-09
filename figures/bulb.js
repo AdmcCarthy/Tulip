@@ -32,18 +32,24 @@ export default function create(el, { bulb: B }, opts = {}) {
   const PANELS = (opts.panels ?? ALL_PANELS.map((p) => p.key)).map((k) => ALL_PANELS.find((p) => p.key === k));
   const GUT = !!opts.gutter && PANELS.length === 2;
   const jOE = PANELS.findIndex((p) => p.key === "oe");
-  const drawLegend = () => classLegend(opts.legendEl, B.classes);
+  // opts.classes: draw only these size classes (the view without the giants); opts.lift steps their shades up
+  // the ramp so pale classes stay visible; opts.ghost: the whole shelf's outline behind them, at the same scale
+  const only = opts.classes ? new Set(opts.classes) : null, lift = opts.lift ?? 0;
+  const drawLegend = () => classLegend(opts.legendEl, only ? B.classes.filter((c) => only.has(c.idx)) : B.classes, lift);
   drawLegend();
   const n = B.dates.length;
   const dates = B.dates.map(parseMonth);
-  const F = B.fields.map((f) => {
+  // whole-shelf totals (every field, whichever are drawn): the scale reference and the ghost outline
+  const allSm = Object.fromEntries(["liq", "gas", "oe"].map((key) => [key, gaussian(Float32Array.from({ length: n }, (_, t) => d3.sum(B.fields, (f) => (key === "oe" ? f.liq[t] + f.gas[t] : f[key][t]))), B.smooth_sigma)]));
+  const ghost = opts.ghost ? allSm.oe : null;
+  const F = B.fields.filter((f) => !only || only.has(f.cls)).map((f) => {
     const oe = f.liq.map((v, t) => v + f.gas[t]);
     return { ...f, raw: { liq: f.liq, gas: f.gas, oe }, sm: { liq: gaussian(f.liq, B.smooth_sigma), gas: gaussian(f.gas, B.smooth_sigma), oe: gaussian(oe, B.smooth_sigma) } };
   });
   // oldest at the centre, younger alternating left and right
   const order = [];
   [...F.keys()].sort((a, b) => F[a].entry - F[b].entry).forEach((i, k) => (k % 2 ? order.unshift(i) : order.push(i)));
-  const LAY = Object.fromEntries([...new Set([...PANELS.map((p) => p.key), ...(opts.scaleWith ?? [])])].map((key) => {
+  const LAY = Object.fromEntries(PANELS.map((p) => p.key).map((key) => {
     const sers = order.filter((i) => F[i].raw[key].some((v) => v > 0));
     const x0 = {}, x1 = {}, tot = new Float32Array(n);
     sers.forEach((i) => { x0[i] = new Float32Array(n); x1[i] = new Float32Array(n); });
@@ -56,8 +62,8 @@ export default function create(el, { bulb: B }, opts = {}) {
   }));
   // totals for all three series, whichever graphs are drawn: the hover quotes them all
   const RAW = Object.fromEntries(ALL_PANELS.map(({ key }) => [key, dates.map((_, t) => d3.sum(F, (f) => f.raw[key][t]))]));
-  const peakRaw = Object.fromEntries(ALL_PANELS.map(({ key }) => [key, key === "oe" ? B.peak : d3.max(RAW[key])]));
-  const maxW = PANELS.map(({ key }) => d3.max(LAY[key].tot));
+  const peakRaw = Object.fromEntries(ALL_PANELS.map(({ key }) => [key, key === "oe" && !only ? B.peak : d3.max(RAW[key])]));
+  const maxW = PANELS.map(({ key }) => (key === "oe" && ghost ? d3.max(ghost) : d3.max(LAY[key].tot)));
 
   el.innerHTML = "";
   el.classList.add("tl-bulb");
@@ -113,6 +119,12 @@ export default function create(el, { bulb: B }, opts = {}) {
     return { sers, seams, sil };
   });
 
+  const GHOST = ghost && jOE >= 0 ? (() => {
+    const p = new Path2D();
+    d3.area().curve(d3.curveBasis).context(p).defined((_, t) => def(ghost, t)).y((_, t) => yr[t]).x0((_, t) => -ghost[t] / 2).x1((_, t) => ghost[t] / 2)(dates);
+    return p;
+  })() : null;
+
   function build(W) {
     const narrow = W < 560, poster = !!POSTER;
     // gutter layout: years (and, when wide enough, the events) sit between the two graphs, not in the margins
@@ -126,8 +138,10 @@ export default function create(el, { bulb: B }, opts = {}) {
     const H = poster ? Math.max(480, Math.round(POSTER.height()))
       : Math.round(Math.max(narrow ? 220 : 361, Math.min(W * 1.235, vh * (narrow ? 0.3 : 0.684), room, 1045)));
     let k = (W - mL - mR - (GUT ? gw : (PANELS.length - 1) * gap)) / d3.sum(maxW);
-    // opts.scaleWith: the same pixels per million Sm³ as a pair of graphs drawn at this width (see bulb_pair.js)
-    if (opts.scaleWith) k = (W - mL - (poster ? 250 : narrow ? 4 : 12) - (narrow ? 46 : 80)) / d3.sum(opts.scaleWith.map((key) => d3.max(LAY[key].tot)));
+    // the pixels per million Sm³ of the pair of graphs (gas, oil) drawn at this width, for every field (see bulb_pair.js):
+    // opts.scaleWith draws on that scale; opts.scaleNote says how far this figure's own scale is stretched from it
+    const kRef = (W - mL - (poster ? 250 : narrow ? 4 : 12) - (narrow ? 46 : 80)) / (d3.max(allSm.gas) + d3.max(allSm.liq));
+    if (opts.scaleWith) k = kRef;
     let acc = opts.scaleWith ? mL + (W - mL - mR - d3.sum(maxW) * k) / 2 : mL; // centred in its frame
     const cx = maxW.map((m) => { const c = acc + (m * k) / 2; acc += m * k + (GUT ? gw : gap); return c; });
     const gx = GUT ? cx[0] + (maxW[0] * k) / 2 + gw / 2 : 0; // centre line of the gutter
@@ -136,7 +150,7 @@ export default function create(el, { bulb: B }, opts = {}) {
     // decimal year -> pixel row: linear, from two points of the time scale
     const y0 = y(new Date(2000, 0, 1)), sy = y(new Date(2010, 0, 1)) - y0;
     const mats = cx.map((c) => new DOMMatrix([k * dpr, 0, 0, (sy / 10) * dpr, c * dpr, (y0 - 2000 * (sy / 10)) * dpr]));
-    return { W, H, narrow, poster, mL, mR, mT, mB, k, cx, y, dpr, mats, gw, gx };
+    return { W, H, narrow, poster, mL, mR, mT, mB, k, kRef, cx, y, dpr, mats, gw, gx };
   }
 
   function paint(c, state) {
@@ -148,13 +162,19 @@ export default function create(el, { bulb: B }, opts = {}) {
       NORM.forEach((p, j) => { const q = new Path2D(); q.addPath(p.sil, g.mats[j]); ctx.fillStyle = P.silhouette; ctx.fill(q); });
       return;
     }
+    if (GHOST) { // the whole shelf, faint, behind the streams drawn
+      const q = new Path2D(); q.addPath(GHOST, g.mats[jOE]);
+      ctx.globalAlpha = 0.3; ctx.fillStyle = P.silhouette; ctx.fill(q);
+      ctx.globalAlpha = 0.8; ctx.strokeStyle = P.silhouette; ctx.lineWidth = 1.2 * g.dpr; ctx.stroke(q);
+      ctx.globalAlpha = 1;
+    }
     const focus = state.focus?.length ? new Set(state.focus) : null;
     const cls = state.classes?.length ? new Set(state.classes) : null;
     const on = (f) => (!focus || focus.has(f.key)) && (!cls || cls.has(f.cls));
     NORM.forEach((p, j) => {
       const key = PANELS[j].key, groups = new Map();
       for (const s of p.sers) {
-        const f = F[s.i], colour = key === "oe" ? shade(f.dom, f.cls) : shade(key, f.cls), id = `${colour}|${on(f) ? 1 : 0}`;
+        const f = F[s.i], ci = Math.min(5, f.cls + lift), colour = key === "oe" ? shade(f.dom, ci) : shade(key, ci), id = `${colour}|${on(f) ? 1 : 0}`;
         if (!groups.has(id)) groups.set(id, { colour, alpha: on(f) ? 1 : 0.2, path: new Path2D() });
         groups.get(id).path.addPath(s.p, g.mats[j]);
       }
@@ -239,8 +259,9 @@ export default function create(el, { bulb: B }, opts = {}) {
       const ranked = L.sers.map((i) => ({ i, peak: d3.max(F[i].sm[p.key]) })).sort((a, b) => b.peak - a.peak).slice(0, max);
       for (const { i } of ranked) {
         const f = F[i], tl = Math.min(n - 1, d3.maxIndex(f.sm[p.key]) + 2), w = (L.x1[i][tl] - L.x0[i][tl]) * k, tw = f.name.length * 6.6;
-        const colour = p.key === "oe" ? shade(f.dom, f.cls) : shade(p.key, f.cls);
+        const colour = p.key === "oe" ? shade(f.dom, Math.min(5, f.cls + lift)) : shade(p.key, Math.min(5, f.cls + lift));
         const cxp = cx[j] + ((L.x0[i][tl] + L.x1[i][tl]) / 2) * k, cyp = y(dates[tl]);
+        if (cyp < y(dates[n - 1]) + 10) continue; // not on the Today line, where the label would be cut
         let box = null, rot = false;
         if (w >= tw + 12) box = [cxp - tw / 2, cyp - 8, cxp + tw / 2, cyp + 8];
         else if (w >= 14) {
@@ -280,7 +301,14 @@ export default function create(el, { bulb: B }, opts = {}) {
       svg.append("text").attr("class", "tl-note").attr("x", cx[j]).attr("y", 29).attr("text-anchor", "middle").text(`peak ${volShort(peakRaw[p.key])}`);
     });
     // found but not sanctioned: placeholder width at today in the oil-equivalent column
-    if (jOE >= 0) {
+    if (opts.scaleBar || opts.scaleNote) { // width has no axis: say what a width is, and how far this scale is stretched
+      const v = [10, 20, 50, 100, 200, 500, 1000, 2000].find((s) => s * k >= 90) ?? 2000, w = v * k, bx = mL + 6, by = mT + 38;
+      svg.append("line").attr("x1", bx).attr("x2", bx + w).attr("y1", by).attr("y2", by).attr("stroke", tok("text")).attr("stroke-width", 1.5);
+      [bx, bx + w].forEach((px) => svg.append("line").attr("x1", px).attr("x2", px).attr("y1", by - 4).attr("y2", by + 4).attr("stroke", tok("text")).attr("stroke-width", 1.5));
+      svg.append("text").attr("class", "tl-note").attr("x", bx).attr("y", by - 8).text(`Width: ${vol(v)}`);
+      if (opts.scaleNote) svg.append("text").attr("class", "tl-note").attr("x", bx).attr("y", by + 18).text(`Scale ${fmt1(k / g.kRef)} times that of the total above`);
+    }
+    if (jOE >= 0 && !only) {
       const pw = (RAW.oe[n - 1] + B.pending) * k;
       const pat = svg.append("defs").append("pattern").attr("id", "tl-hatch").attr("patternUnits", "userSpaceOnUse").attr("width", 5).attr("height", 5).attr("patternTransform", "rotate(45)");
       pat.append("rect").attr("width", 1).attr("height", 5).attr("fill", tok("text-muted"));
@@ -324,7 +352,7 @@ export default function create(el, { bulb: B }, opts = {}) {
       let hit = null;
       PANELS.forEach((p, j) => { const L = LAY[p.key], v = (px - cx[j]) / k; for (const i of L.sers) if (v >= L.x0[i][t] && v <= L.x1[i][t] && L.x1[i][t] > L.x0[i][t]) { hit = i; break; } });
       hov.selectAll("*").remove();
-      let html = `<b>${fmtMonth(dates[t])}</b><br><span class="ss-k">All fields, remaining</span><br>Liquids ${vol(RAW.liq[t])}<br>Gas ${vol(RAW.gas[t])}<br><b>Total ${vol(RAW.oe[t])}</b>`;
+      let html = `<b>${fmtMonth(dates[t])}</b><br><span class="ss-k">${only ? "Fields outside the giants" : "All fields"}, remaining</span><br>Liquids ${vol(RAW.liq[t])}<br>Gas ${vol(RAW.gas[t])}<br><b>Total ${vol(RAW.oe[t])}</b>`;
       if (hit != null) {
         const f = F[hit], lv = f.raw.liq[t], gv = f.raw.gas[t];
         PANELS.forEach((p, j) => {
@@ -335,7 +363,7 @@ export default function create(el, { bulb: B }, opts = {}) {
         });
         const c = B.classes[f.cls];
         html = `<b>${f.name}</b>${f.cross_border ? " <span class='ss-k'>(Norwegian share)</span>" : ""}<br><span class="ss-k">${f.area}${f.discovered ? ` · found ${f.discovered}` : ""}${f.first_prod ? ` · on stream ${f.first_prod.slice(0, 4)}` : ""}${f.status === "Shut down" ? " · shut down" : ""}</span>
-          <br><span class="ss-k">${fmtMonth(dates[t])}, remaining</span><br>Liquids ${vol(lv, 1)}<br>Gas ${vol(gv, 1)}<br><b>Total ${vol(lv + gv, 1)}</b> <span class="ss-k">(${d3.format(".1%")((lv + gv) / RAW.oe[t])} of the shelf)</span>
+          <br><span class="ss-k">${fmtMonth(dates[t])}, remaining</span><br>Liquids ${vol(lv, 1)}<br>Gas ${vol(gv, 1)}<br><b>Total ${vol(lv + gv, 1)}</b> <span class="ss-k">(${d3.format(".1%")((lv + gv) / (only ? d3.sum(B.fields, (x) => x.liq[t] + x.gas[t]) : RAW.oe[t]))} of the shelf)</span>
           <br><span class="ss-k">${c.short}, ${c.range} MMboe recoverable</span>`;
       }
       tip().show(html, ev.clientX, ev.clientY);

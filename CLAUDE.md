@@ -51,6 +51,13 @@ McCarthy, petroleum geoscience domain expert. Follow SubScout's CLAUDE.md and st
   in the left margin, discovery years right of the year scale, labels dodge each other; dashed discovery-to-
   first-oil lines for Troll and Johan Sverdrup; Light/Dark toggle). For screenshots.
 
+- Without the giants (fields under 500 MMboe, size classes 0 to 2): `figures/bulb_sub_same.js` (the total's scale, the whole
+  shelf as a grey outline) and `figures/bulb_sub.js` (stretched scale, with a width bar and a note of the stretch);
+  bulb.js options `classes`, `lift` (steps shades up the ramp), `ghost`, `scaleWith`, `scaleNote`, `scaleBar`.
+  A field is "added" in the quarter it enters its stream at its remaining volume then; fields approved and not yet
+  producing enter at approval (these drive the 2023 jump); "produced" = added minus the change in what is left
+  (story.py `_small`, `_flows`; tests recompute from the raw files). Hindsight: older fields carry more reserve growth.
+
 ## Idiom (private repo)
 
 Idiom is Adam McCarthy's private repo (`github.com/AdmcCarthy/Idiom`; `gh repo clone AdmcCarthy/Idiom` with access, normally linked at

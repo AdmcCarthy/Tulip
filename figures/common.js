@@ -86,10 +86,12 @@ if (!document.getElementById("tl-css")) {
 }
 
 /** Size-class legend: two linked families, oil | gas swatch pairs. */
-export function classLegend(legendEl, classes) {
+export function classLegend(legendEl, classes, lift = 0) {
   if (!legendEl) return;
   const P = pal();
-  const fam = [["Small to large", classes.filter((c) => c.family === 0)], ["Giant and above", classes.filter((c) => c.family === 1)]];
+  // lift: the figure steps these classes up the ramp so pale classes stay visible; the swatches follow
+  classes = classes.map((c) => ({ ...c, idx: Math.min(5, c.idx + lift) }));
+  const fam = [["Small to large", classes.filter((c) => c.family === 0)], ["Giant and above", classes.filter((c) => c.family === 1)]].filter(([, cs]) => cs.length);
   if (legendEl.clientWidth && legendEl.clientWidth < 560) {
     legendEl.innerHTML = `<div class="tl-legend tl-legend-compact"><span class="tl-grp"><b>Field size</b>` +
       classes.map((c) => `<span><i style="background:linear-gradient(90deg,${P.oil[c.idx]} 50%,${P.gas[c.idx]} 50%)"></i>${c.short === "Super-giant" ? "Super" : c.short}</span>`).join("") +
