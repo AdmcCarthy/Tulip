@@ -55,18 +55,22 @@ def _small(d) -> dict:
     dates = s["dates"]
     yr = np.array([int(x[:4]) for x in dates])
     sub, big, adds = np.zeros(len(dates)), np.zeros(len(dates)), []
+    by_cls, n_cls = np.zeros((3, len(dates))), [0, 0, 0]  # small, medium, large: remaining by quarter, and fields
     for x in s["fields"]:
         r = f.loc[x["key"]]
         tot = np.array(x["v"]["oil"]) + np.array(x["v"]["liquids"]) + np.array(x["v"]["gas"])
-        if size_class(r.recoverable_oil + r.recoverable_liquids + r.recoverable_gas) >= 3:
+        c = size_class(r.recoverable_oil + r.recoverable_liquids + r.recoverable_gas)
+        if c >= 3:
             big += tot
             continue
+        n_cls[c] += 1
+        by_cls[c] += tot
         if not tot.any():  # a field with no stream of its own (Troll Brent B, Hugin satellites): nothing to add
             continue
         sub += tot
         e = int(np.argmax(tot > 0))
         adds.append({"key": x["key"], "year": int(yr[e]), "vol": float(tot[e]), "producing": not bool(r.not_yet_producing)})
-    return {"dates": dates, "yr": yr, "sub": sub, "big": big, "adds": adds}
+    return {"dates": dates, "yr": yr, "sub": sub, "big": big, "adds": adds, "by_cls": by_cls, "n_cls": n_cls}
 
 
 def _end(sm: dict, year: int) -> float:
@@ -166,10 +170,12 @@ def metrics(d):
     n_hubs = (f.hub.value_counts() > 1).sum()
     sm = _small(d)
     sub, big = sm["sub"], sm["big"]
-    ipk, ipk_sub = int(np.argmax(sub + big)), int(np.argmax(sub))
+    ipk = int(np.argmax(sub + big))
     a0514, on0514, p0514 = _flows(sm, 2005, 2014)
     a1525, on1525, p1525 = _flows(sm, 2015, 2025)
     mid = (sm["yr"] >= 2000) & (sm["yr"] <= 2014)
+    small_med = sm["by_cls"][0] + sm["by_cls"][1]  # classes small and medium: under 160 MMboe
+    ipk_sm = int(np.argmax(small_med))
     sanct = [a for a in sm["adds"] if not a["producing"] and 2015 <= a["year"] <= 2025]
     m = metric
     fp = "sodir"
@@ -178,9 +184,17 @@ def metrics(d):
         "sub_share_peak": m(sub[ipk] / (sub[ipk] + big[ipk]), "Share of remaining reserves outside the giants at the shelf peak", fp, "derived"),
         "sub_now": m(sub[-1] * M, f"Remaining outside the giants, {sm['dates'][-1]}, Sm³ o.e.", fp, "derived", "Sm³ o.e."),
         "sub_share_now": m(sub[-1] / (sub[-1] + big[-1]), "Share of remaining reserves outside the giants today", fp, "derived"),
-        "sub_lo_0014": m(sub[mid].min() * M, "Lowest remaining outside the giants, 2000 to 2014, Sm³ o.e.", fp, "derived", "Sm³ o.e."),
-        "sub_hi_0014": m(sub[mid].max() * M, "Highest remaining outside the giants, 2000 to 2014, Sm³ o.e.", fp, "derived", "Sm³ o.e."),
-        "sub_peak": m(sub[ipk_sub] * M, f"Highest remaining outside the giants ({sm['dates'][ipk_sub]}), Sm³ o.e.", fp, "derived", "Sm³ o.e."),
+        "n_small": m(sm["n_cls"][0], "Small fields (under 50 MMboe recoverable)", fp, "derived"),
+        "n_medium": m(sm["n_cls"][1], "Medium fields (50 to 160 MMboe recoverable)", fp, "derived"),
+        "n_large": m(sm["n_cls"][2], "Large fields (160 to 500 MMboe recoverable)", fp, "derived"),
+        "large_share_sub": m(sm["by_cls"][2][-1] / sub[-1], "Share of what is left outside the giants that sits in large fields, today", fp, "derived"),
+        "small_now": m(sm["by_cls"][0][-1] * M, f"Remaining in small fields, {sm['dates'][-1]}, Sm³ o.e.", fp, "derived", "Sm³ o.e."),
+        "medium_now": m(sm["by_cls"][1][-1] * M, f"Remaining in medium fields, {sm['dates'][-1]}, Sm³ o.e.", fp, "derived", "Sm³ o.e."),
+        "sm_now": m(small_med[-1] * M, f"Remaining in small and medium fields together, {sm['dates'][-1]}, Sm³ o.e.", fp, "derived", "Sm³ o.e."),
+        "sm_share_now": m(small_med[-1] / (sub[-1] + big[-1]), "Share of remaining reserves held by small and medium fields today", fp, "derived"),
+        "sm_lo_0014": m(small_med[mid].min() * M, "Lowest remaining in small and medium fields, 2000 to 2014, Sm³ o.e.", fp, "derived", "Sm³ o.e."),
+        "sm_hi_0014": m(small_med[mid].max() * M, "Highest remaining in small and medium fields, 2000 to 2014, Sm³ o.e.", fp, "derived", "Sm³ o.e."),
+        "sm_peak": m(small_med[ipk_sm] * M, f"Highest remaining in small and medium fields ({sm['dates'][ipk_sm]}), Sm³ o.e.", fp, "derived", "Sm³ o.e."),
         "giants_fall": m((big[ipk] - big[-1]) * M, "Fall in the giants' remaining volume from the shelf peak to today, Sm³ o.e.", fp, "derived", "Sm³ o.e."),
         "sub_rise": m((sub[-1] - sub[ipk]) * M, "Rise outside the giants from the shelf peak to today, Sm³ o.e.", fp, "derived", "Sm³ o.e."),
         "offset_share": m((sub[-1] - sub[ipk]) / (big[ipk] - big[-1]), "Rise outside the giants as a share of the giants' fall since the shelf peak", fp, "derived"),

@@ -51,9 +51,14 @@ McCarthy, petroleum geoscience domain expert. Follow SubScout's CLAUDE.md and st
   in the left margin, discovery years right of the year scale, labels dodge each other; dashed discovery-to-
   first-oil lines for Troll and Johan Sverdrup; Light/Dark toggle). For screenshots.
 
-- Without the giants (fields under 500 MMboe, size classes 0 to 2): `figures/bulb_sub_same.js` (the total's scale, the whole
-  shelf as a grey outline) and `figures/bulb_sub.js` (stretched scale, with a width bar and a note of the stretch);
-  bulb.js options `classes`, `lift` (steps shades up the ramp), `ghost`, `scaleWith`, `scaleNote`, `scaleBar`.
+- Figure widths: the total (`bulb_total.js`) takes 60% of the frame (`TOTAL_FRAC` in bulb.js), with a width bar and a note of its scale
+  against the pair; nothing is labelled on its side (names go horizontal, only where the stream is wide enough).
+- Without the giants (fields under 500 MMboe, size classes 0 to 2; the first paragraph and the additions chart use all three):
+  the figures show small and medium (classes 0 and 1, under 160 MMboe) as three graphs side by side, combined, small, medium,
+  on one scale: `figures/bulb_trio_same.js` (the scale of the total) and `figures/bulb_trio_stretched.js` (stretched to fill, with a
+  note of the stretch); large fields (160 to 500) are left out of the figures and named as such in the prose. bulb.js options
+  `groups` (one graph per group of size classes, equal slots), `classes`, `lift` (steps shades up the ramp), `scaleWith`,
+  `scaleNote` ("pair" or "total"), `scaleBar`.
   A field is "added" in the quarter it enters its stream at its remaining volume then; fields approved and not yet
   producing enter at approval (these drive the 2023 jump); "produced" = added minus the change in what is left
   (story.py `_small`, `_flows`; tests recompute from the raw files). Hindsight: older fields carry more reserve growth.

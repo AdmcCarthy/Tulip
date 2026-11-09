@@ -159,7 +159,8 @@ See the figure full screen, with the main events marked, in the [full-screen vie
 ## Oil and gas added together
 
 Add the two graphs and one shape remains: the total the shelf had left to produce, month by month. Each
-thread is coloured by the fluid that dominates the field, on the same scale as the pair above.
+thread is coloured by the fluid that dominates the field. It is drawn narrower than the two graphs above add up to,
+so it can be read; the bar and the note in the figure give the scale.
 
 ```chart
 id: total
@@ -181,43 +182,45 @@ exception: { rule: direct-labels, reason: "Around 1,200 streams: shade encodes s
 
 Take out the {{ n_giants }} giants and {{ n_sub_giant }} fields remain, each below {{ 500 | param }} million
 barrels of oil equivalent recoverable. At the shelf's peak they held {{ sub_at_peak | volume }}, {{ sub_share_peak | pct }}
-of what was left. Today they hold {{ sub_now | volume }}, {{ sub_share_now | pct }}. On the scale of the total, with the
-outline of the whole shelf behind them, they are a thin core.
+of what was left. Today they hold {{ sub_now | volume }}, {{ sub_share_now | pct }}. The {{ n_large }} large fields hold
+{{ large_share_sub | pct }} of that and are left out of the figures below. These follow the {{ n_small }} small and
+{{ n_medium }} medium fields: first together, then each on its own, all on the scale of the total.
 
 ```chart
-id: small_same
+id: small_trio
 export: true
 type: custom
-module: figures/bulb_sub_same.js
+module: figures/bulb_trio_same.js
 data: bulb
 state: { mode: colour }
-title: Outside the giants, {{ sub_share_now | pct }} of the shelf is left, up from {{ sub_share_peak | pct }} at the peak
-subtitle: Remaining volume per field below 500 MMboe, million Sm³ o.e., on the scale of the total, with the whole shelf in grey
+title: Small and medium fields hold {{ sm_share_now | pct }} of the shelf today
+subtitle: Remaining volume per field, million Sm³ o.e., small and medium together, small alone and medium alone, on one scale with the total
 source: sodir
 confidence: derived
 unit: million Sm³ o.e.; 1 Sm³ o.e. = 6.29 boe
-notes: Width = Sodir's estimate at 31.12.2025 plus production since each month (hindsight), as above. Shades are stepped up two places in the size ramp so the three smaller classes stay visible; the legend shows the shades used.
-exception: { rule: direct-labels, reason: "Around 1,000 streams: shade encodes three size classes in two linked colour families, with a legend, hover and labels on the largest fields instead of direct labels on all. Width has no axis; the bar gives a width." }
+notes: Small is under 50 MMboe recoverable, medium 50 to 160; large fields (160 to 500) and giants are left out. The three graphs share the scale of the total above; the bar gives a width. Width = Sodir's estimate at 31.12.2025 plus production since each month (hindsight). Shades are stepped up two places in the size ramp so the two classes stay visible; the legend shows the shades used.
+exception: { rule: direct-labels, reason: "Around 85 streams: shade encodes two size classes in two linked colour families, with a legend, hover and labels where a stream is wide enough instead of direct labels on all. Width has no axis; the bar gives a width." }
 ```
 
-Stretch the scale and the shape of these fields shows. From 2000 to 2014 the volume left in them stayed between
-{{ sub_lo_0014 | volume }} and {{ sub_hi_0014 | volume }}. It then rose, to {{ sub_peak | volume }} at the end of 2023,
-and has eased since.
+Together they hold {{ sm_now | volume }} today: {{ small_now | volume }} in small fields and {{ medium_now | volume }} in
+medium ones. Stretch the scale and the shapes show. From 2000 to 2014 the volume left in small and medium fields
+together stayed between {{ sm_lo_0014 | volume }} and {{ sm_hi_0014 | volume }}. It then rose to {{ sm_peak | volume }}
+at the end of 2023 and has eased since. Medium fields held more than small ones in every year from 2000.
 
 ```chart
-id: small_stretched
+id: small_trio_stretched
 export: true
 type: custom
-module: figures/bulb_sub.js
+module: figures/bulb_trio_stretched.js
 data: bulb
 state: { mode: colour }
-title: Outside the giants the volume left held level to 2014, rose, and has eased since 2023
-subtitle: Remaining volume per field below 500 MMboe, million Sm³ o.e., on a stretched scale; the bar gives a width
+title: Small and medium fields held level to 2014, rose, and have eased since 2023
+subtitle: Remaining volume per field, million Sm³ o.e., small and medium together, small alone and medium alone, on a stretched scale
 source: sodir
 confidence: derived
 unit: million Sm³ o.e.; 1 Sm³ o.e. = 6.29 boe
-notes: Same data and colours as the figure above, on a larger scale (the note in the figure gives how much larger). Width = Sodir's estimate at 31.12.2025 plus production since each month (hindsight). Fields approved but not yet producing enter at the approval date, at their full volume.
-exception: { rule: direct-labels, reason: "Around 1,000 streams: shade encodes three size classes in two linked colour families, with a legend, hover and labels on the largest fields instead of direct labels on all. Width has no axis; the bar gives a width." }
+notes: Same data and colours as the figure above, on a larger scale shared by the three graphs (the note in the figure gives how much larger; the bar gives a width). Width = Sodir's estimate at 31.12.2025 plus production since each month (hindsight). Fields approved but not yet producing enter at the approval date, at their full volume.
+exception: { rule: direct-labels, reason: "Around 85 streams: shade encodes two size classes in two linked colour families, with a legend, hover and labels where a stream is wide enough instead of direct labels on all. Width has no axis; the bar gives a width." }
 ```
 
 ## Adding as fast as producing
