@@ -1,6 +1,6 @@
 // Small and medium fields: all of them together, small on its own, medium on its own, side by side. The three share
-// one scale; `stretched` blows it up to fill the frame (the bar and the note say by how much), otherwise it is the
-// scale of the total, so the graphs show how little of the shelf these fields are.
+// one scale, stretched to fill the frame (the bar and the note say by how much against the total). On the total's
+// own scale they would be slivers too thin to read, so there is no figure at that scale.
 import create from "./bulb.js";
 
 const GROUPS = [
@@ -9,5 +9,4 @@ const GROUPS = [
   { title: "Medium", short: "Medium", classes: [1] },
 ];
 
-export const same = (el, data, opts = {}) => create(el, data, { ...opts, groups: GROUPS, lift: 2, scaleWith: true, scaleBar: true, autoLabels: true });
-export const stretched = (el, data, opts = {}) => create(el, data, { ...opts, groups: GROUPS, lift: 2, scaleBar: true, scaleNote: "total", autoLabels: true });
+export default (el, data, opts = {}) => create(el, data, { ...opts, groups: GROUPS, lift: 2, scaleBar: true, scaleNote: "total", autoLabels: true });

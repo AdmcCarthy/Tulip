@@ -54,9 +54,10 @@ McCarthy, petroleum geoscience domain expert. Follow SubScout's CLAUDE.md and st
 - Figure widths: the total (`bulb_total.js`) takes 60% of the frame (`TOTAL_FRAC` in bulb.js), with a width bar and a note of its scale
   against the pair; nothing is labelled on its side (names go horizontal, only where the stream is wide enough).
 - Without the giants (fields under 500 MMboe, size classes 0 to 2; the first paragraph and the additions chart use all three):
-  the figures show small and medium (classes 0 and 1, under 160 MMboe) as three graphs side by side, combined, small, medium,
-  on one scale: `figures/bulb_trio_same.js` (the scale of the total) and `figures/bulb_trio_stretched.js` (stretched to fill, with a
-  note of the stretch); large fields (160 to 500) are left out of the figures and named as such in the prose. bulb.js options
+  the figure shows small and medium (classes 0 and 1, under 160 MMboe) as three graphs side by side, combined, small, medium,
+  on one stretched scale (`figures/bulb_trio_stretched.js`, with a bar and a note of the stretch against the total). A version on the
+  total's own scale was dropped: the graphs were slivers too thin to read. Large fields (160 to 500) are left out of the figure and
+  named as such in the prose. bulb.js options
   `groups` (one graph per group of size classes, equal slots), `classes`, `lift` (steps shades up the ramp), `scaleWith`,
   `scaleNote` ("pair" or "total"), `scaleBar`.
   A field is "added" in the quarter it enters its stream at its remaining volume then; fields approved and not yet
