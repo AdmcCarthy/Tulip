@@ -177,6 +177,81 @@ notes: Width = Sodir's estimate at 31.12.2025 plus production since each month (
 exception: { rule: direct-labels, reason: "Around 1,200 streams: shade encodes six size classes in two linked colour families, with a legend, hover and labels on the largest fields instead of direct labels on all." }
 ```
 
+## The shelf without its giants
+
+Take out the {{ n_giants }} giants and {{ n_sub_giant }} fields remain, each below {{ 500 | param }} million
+barrels of oil equivalent recoverable. At the shelf's peak they held {{ sub_at_peak | volume }}, {{ sub_share_peak | pct }}
+of what was left. Today they hold {{ sub_now | volume }}, {{ sub_share_now | pct }}. On the scale of the total, with the
+outline of the whole shelf behind them, they are a thin core.
+
+```chart
+id: small_same
+export: true
+type: custom
+module: figures/bulb_sub_same.js
+data: bulb
+state: { mode: colour }
+title: Outside the giants, {{ sub_share_now | pct }} of the shelf is left, up from {{ sub_share_peak | pct }} at the peak
+subtitle: Remaining volume per field below 500 MMboe, million Sm³ o.e., on the scale of the total, with the whole shelf in grey
+source: sodir
+confidence: derived
+unit: million Sm³ o.e.; 1 Sm³ o.e. = 6.29 boe
+notes: Width = Sodir's estimate at 31.12.2025 plus production since each month (hindsight), as above. Shades are stepped up two places in the size ramp so the three smaller classes stay visible; the legend shows the shades used.
+exception: { rule: direct-labels, reason: "Around 1,000 streams: shade encodes three size classes in two linked colour families, with a legend, hover and labels on the largest fields instead of direct labels on all. Width has no axis; the bar gives a width." }
+```
+
+Stretch the scale and the shape of these fields shows. From 2000 to 2014 the volume left in them stayed between
+{{ sub_lo_0014 | volume }} and {{ sub_hi_0014 | volume }}. It then rose, to {{ sub_peak | volume }} at the end of 2023,
+and has eased since.
+
+```chart
+id: small_stretched
+export: true
+type: custom
+module: figures/bulb_sub.js
+data: bulb
+state: { mode: colour }
+title: Outside the giants the volume left held level to 2014, rose, and has eased since 2023
+subtitle: Remaining volume per field below 500 MMboe, million Sm³ o.e., on a stretched scale; the bar gives a width
+source: sodir
+confidence: derived
+unit: million Sm³ o.e.; 1 Sm³ o.e. = 6.29 boe
+notes: Same data and colours as the figure above, on a larger scale (the note in the figure gives how much larger). Width = Sodir's estimate at 31.12.2025 plus production since each month (hindsight). Fields approved but not yet producing enter at the approval date, at their full volume.
+exception: { rule: direct-labels, reason: "Around 1,000 streams: shade encodes three size classes in two linked colour families, with a legend, hover and labels on the largest fields instead of direct labels on all. Width has no axis; the bar gives a width." }
+```
+
+## Adding as fast as producing
+
+{{ n_start_0514 }} fields outside the giants started producing between 2005 and 2014, and {{ n_start_1525 }} between
+2015 and 2025. Volume tells a quieter story. In the first period they added {{ added_0514 | volume }} and produced
+{{ produced_0514 | volume }}. In the second they added {{ added_1525 | volume }} against {{ produced_1525 | volume }} produced,
+a surplus on paper. {{ sanct_1525 | volume }} of the additions sit in {{ n_sanct_1525 }} fields approved in 2023 and 2024
+and not yet producing, among them Munin and Hugin. The fields that had started added {{ onstream_1525 | volume }},
+close to what the whole group produced.
+
+```chart
+id: small_flows
+export: true
+type: line
+data: small_flows
+x: year
+y: value
+series: series
+volume: true
+focus: [Produced]
+unit_label: "million {unit}"
+title: Additions outside the giants have only kept pace with what these fields produce
+subtitle: Cumulative from the end of 2004, million Sm³ o.e., added at the volume left when each field enters its stream
+source: sodir
+confidence: derived
+unit: million Sm³ o.e.
+notes: "Added: the volume left in a field in the quarter it enters its stream (production start, or approval for fields not yet producing). Produced: added minus the change in what is left. Every volume is today's estimate, so reserve growth after start-up is credited at start-up, and earlier fields carry more of it."
+```
+
+Small and medium fields hold the line; they do not rebuild the shelf. Since its peak the giants have lost
+{{ giants_fall | volume }} and the fields outside them have gained {{ sub_rise | volume }}, {{ offset_share | pct }} of that fall.
+Most of the rise in their share of the shelf comes from the giants' decline, not from their own growth.
+
 ## The 2004 tables understated what the fields held
 
 Every width in the figure uses today's estimate. That is hindsight. At the end of 2004, Sodir's field

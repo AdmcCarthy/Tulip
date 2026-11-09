@@ -9,6 +9,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from subscout import metric
@@ -41,6 +42,43 @@ def _totals(d) -> pd.DataFrame:
     t = t.set_index("date")
     t["liq"] = t.oil + t.liquids  # NGL and condensate grouped with oil
     return t
+
+
+def _small(d) -> dict:
+    """The shelf outside its giants (fields below 500 MMboe), quarter by quarter, in MSm³ o.e.
+
+    Remaining volumes are summed per quarter for the giants and the rest. A field is added in the quarter it
+    enters its stream (production start, or approval for the fields not yet producing), at its remaining
+    volume then. What is produced follows from the books: added minus the change in what is left.
+    """
+    s, f = d["streams"], d["fields"].set_index("field")
+    dates = s["dates"]
+    yr = np.array([int(x[:4]) for x in dates])
+    sub, big, adds = np.zeros(len(dates)), np.zeros(len(dates)), []
+    for x in s["fields"]:
+        r = f.loc[x["key"]]
+        tot = np.array(x["v"]["oil"]) + np.array(x["v"]["liquids"]) + np.array(x["v"]["gas"])
+        if size_class(r.recoverable_oil + r.recoverable_liquids + r.recoverable_gas) >= 3:
+            big += tot
+            continue
+        if not tot.any():  # a field with no stream of its own (Troll Brent B, Hugin satellites): nothing to add
+            continue
+        sub += tot
+        e = int(np.argmax(tot > 0))
+        adds.append({"key": x["key"], "year": int(yr[e]), "vol": float(tot[e]), "producing": not bool(r.not_yet_producing)})
+    return {"dates": dates, "yr": yr, "sub": sub, "big": big, "adds": adds}
+
+
+def _end(sm: dict, year: int) -> float:
+    """Remaining outside the giants at the last quarter of a year."""
+    return float(sm["sub"][np.where(sm["yr"] == year)[0][-1]])
+
+
+def _flows(sm: dict, y0: int, y1: int) -> tuple[float, float, float]:
+    """Added, added by fields already producing, and produced, y0 to y1 inclusive, outside the giants."""
+    inside = [a for a in sm["adds"] if y0 <= a["year"] <= y1]
+    added = sum(a["vol"] for a in inside)
+    return added, sum(a["vol"] for a in inside if a["producing"]), added - (_end(sm, y1) - _end(sm, y0 - 1))
 
 
 def datasets(d):
@@ -94,7 +132,14 @@ def datasets(d):
         pd.DataFrame({"year": h.year, "series": "Estimated at the time", "value": h.estimated_then}),
         pd.DataFrame({"year": h.year, "series": "Known now", "value": h.known_now}),
     ])
-    return {"bulb": bulb, "hind": hind}
+    sm = _small(d)
+    cum = []
+    for y in range(2005, 2026):  # since the end of 2004, outside the giants, cumulative
+        added, on_stream, produced = _flows(sm, 2005, y)
+        cum += [{"year": y, "series": "Added, approved or on stream", "value": added},
+                {"year": y, "series": "Added, on stream", "value": on_stream},
+                {"year": y, "series": "Produced", "value": produced}]
+    return {"bulb": bulb, "hind": hind, "small_flows": pd.DataFrame(cum)}
 
 
 def metrics(d):
@@ -119,9 +164,36 @@ def metrics(d):
     north_95 = s95[s95.lat > 62].remaining_oe.sum() / s95.remaining_oe.sum()
     tied = (f.hub != f.index).sum()
     n_hubs = (f.hub.value_counts() > 1).sum()
+    sm = _small(d)
+    sub, big = sm["sub"], sm["big"]
+    ipk, ipk_sub = int(np.argmax(sub + big)), int(np.argmax(sub))
+    a0514, on0514, p0514 = _flows(sm, 2005, 2014)
+    a1525, on1525, p1525 = _flows(sm, 2015, 2025)
+    mid = (sm["yr"] >= 2000) & (sm["yr"] <= 2014)
+    sanct = [a for a in sm["adds"] if not a["producing"] and 2015 <= a["year"] <= 2025]
     m = metric
     fp = "sodir"
     return {
+        "sub_at_peak": m(sub[ipk] * M, f"Remaining outside the giants at the quarter the shelf total peaks ({sm['dates'][ipk]}), Sm³ o.e.", fp, "derived", "Sm³ o.e."),
+        "sub_share_peak": m(sub[ipk] / (sub[ipk] + big[ipk]), "Share of remaining reserves outside the giants at the shelf peak", fp, "derived"),
+        "sub_now": m(sub[-1] * M, f"Remaining outside the giants, {sm['dates'][-1]}, Sm³ o.e.", fp, "derived", "Sm³ o.e."),
+        "sub_share_now": m(sub[-1] / (sub[-1] + big[-1]), "Share of remaining reserves outside the giants today", fp, "derived"),
+        "sub_lo_0014": m(sub[mid].min() * M, "Lowest remaining outside the giants, 2000 to 2014, Sm³ o.e.", fp, "derived", "Sm³ o.e."),
+        "sub_hi_0014": m(sub[mid].max() * M, "Highest remaining outside the giants, 2000 to 2014, Sm³ o.e.", fp, "derived", "Sm³ o.e."),
+        "sub_peak": m(sub[ipk_sub] * M, f"Highest remaining outside the giants ({sm['dates'][ipk_sub]}), Sm³ o.e.", fp, "derived", "Sm³ o.e."),
+        "giants_fall": m((big[ipk] - big[-1]) * M, "Fall in the giants' remaining volume from the shelf peak to today, Sm³ o.e.", fp, "derived", "Sm³ o.e."),
+        "sub_rise": m((sub[-1] - sub[ipk]) * M, "Rise outside the giants from the shelf peak to today, Sm³ o.e.", fp, "derived", "Sm³ o.e."),
+        "offset_share": m((sub[-1] - sub[ipk]) / (big[ipk] - big[-1]), "Rise outside the giants as a share of the giants' fall since the shelf peak", fp, "derived"),
+        "n_start_0514": m(sum(1 for a in sm["adds"] if 2005 <= a["year"] <= 2014), "Fields outside the giants entering their stream 2005 to 2014", fp, "derived"),
+        "n_start_1525": m(sum(1 for a in sm["adds"] if 2015 <= a["year"] <= 2025), "Fields outside the giants entering their stream 2015 to 2025", fp, "derived"),
+        "added_0514": m(a0514 * M, "Added outside the giants 2005 to 2014, volume left at entry, Sm³ o.e.", fp, "derived", "Sm³ o.e."),
+        "produced_0514": m(p0514 * M, "Produced outside the giants 2005 to 2014 (added minus the change in what is left), Sm³ o.e.", fp, "derived", "Sm³ o.e."),
+        "added_1525": m(a1525 * M, "Added outside the giants 2015 to 2025, volume left at entry, Sm³ o.e.", fp, "derived", "Sm³ o.e."),
+        "produced_1525": m(p1525 * M, "Produced outside the giants 2015 to 2025 (added minus the change in what is left), Sm³ o.e.", fp, "derived", "Sm³ o.e."),
+        "n_sanct_1525": m(len(sanct), "Fields outside the giants approved 2015 to 2025 and not yet producing", fp, "observed"),
+        "sanct_1525": m(sum(a["vol"] for a in sanct) * M, "Volume in those fields, Sm³ o.e.", fp, "derived", "Sm³ o.e."),
+        "onstream_1525": m(on1525 * M, "Added outside the giants 2015 to 2025 by fields already producing, Sm³ o.e.", fp, "derived", "Sm³ o.e."),
+    } | {
         "n_fields": m(len(f), "Fields and field groups in the stack (Sleipner Øst, Vest and Gungne as one)", fp, "observed"),
         "peak_total": m(t.oe.max() * M, f"Highest monthly total of remaining reserves ({pk:%B %Y}), Sm³ o.e.", fp, "derived", "Sm³ o.e."),
         "now_total": m(t.oe.iloc[-1] * M, f"Remaining reserves, {now:%B %Y}, Sm³ o.e.", fp, "derived", "Sm³ o.e."),

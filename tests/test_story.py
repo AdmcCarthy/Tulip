@@ -23,7 +23,7 @@ def built(tmp_path_factory):
 def test_builds_without_errors_or_warnings(built):
     rep, _, out = built
     assert rep.errors == [] and rep.warnings == []
-    for m in ("bulb", "bulb_pair", "bulb_total", "pack", "cream", "maps", "common"):
+    for m in ("bulb", "bulb_pair", "bulb_total", "bulb_sub", "bulb_sub_same", "pack", "cream", "maps", "common"):
         assert (out / "figures" / f"{m}.js").exists()
 
 
@@ -105,3 +105,105 @@ def test_contingent_share_matches_resource_accounts(built):
     want = (pot["contingent_fields"] + pot["contingent_discoveries"]) / f.remaining_oe.sum()
     assert float(ledger["contingent_share"]["value"]) == pytest.approx(want, abs=1e-5)
     assert 0.4 < want < 0.7  # the prose says "equal to" about half again
+
+
+def _outside_giants():
+    """Remaining outside the giants by quarter, entries and production, straight from the raw files."""
+    s = json.loads((D / "streams.json").read_text(encoding="utf-8"))
+    f = pd.read_csv(D / "fields.csv").set_index("field")
+    n = len(s["dates"])
+    yr = [int(x[:4]) for x in s["dates"]]
+    sub, big, ents, produced = [0.0] * n, [0.0] * n, [], {}
+    for x in s["fields"]:
+        tot = [a + b + c for a, b, c in zip(x["v"]["oil"], x["v"]["liquids"], x["v"]["gas"], strict=True)]
+        r = f.loc[x["key"]]
+        giant = (r.recoverable_oil + r.recoverable_liquids + r.recoverable_gas) * 6.29 >= 500
+        for t, v in enumerate(tot):
+            (big if giant else sub)[t] += v
+        if giant or not any(v > 0 for v in tot):
+            continue
+        e = next(t for t, v in enumerate(tot) if v > 0)
+        ents.append({"key": x["key"], "year": yr[e], "vol": tot[e], "producing": not bool(r.not_yet_producing)})
+        for t in range(e + 1, n):
+            produced[yr[t]] = produced.get(yr[t], 0.0) + (tot[t - 1] - tot[t])
+    return {"dates": s["dates"], "yr": yr, "sub": sub, "big": big, "ents": ents, "produced": produced}
+
+
+def _m(ledger, name):
+    return float(ledger[name]["value"].replace(",", ""))
+
+
+def test_outside_the_giants_volumes(built):
+    _, ledger, _ = built
+    g = _outside_giants()
+    sub, big = g["sub"], g["big"]
+    ipk = max(range(len(sub)), key=lambda i: sub[i] + big[i])
+    assert g["dates"][ipk].startswith("2000")  # the prose says the shelf peaked in 2000
+    assert _m(ledger, "sub_at_peak") == pytest.approx(sub[ipk] * 1e6, rel=1e-5)
+    assert _m(ledger, "sub_share_peak") == pytest.approx(sub[ipk] / (sub[ipk] + big[ipk]), rel=1e-5)
+    assert _m(ledger, "sub_now") == pytest.approx(sub[-1] * 1e6, rel=1e-5)
+    assert _m(ledger, "sub_share_now") == pytest.approx(sub[-1] / (sub[-1] + big[-1]), rel=1e-5)
+    mid = [v for v, y in zip(sub, g["yr"], strict=True) if 2000 <= y <= 2014]
+    assert _m(ledger, "sub_lo_0014") == pytest.approx(min(mid) * 1e6, rel=1e-5)
+    assert _m(ledger, "sub_hi_0014") == pytest.approx(max(mid) * 1e6, rel=1e-5)
+    # "rose ... to X at the end of 2023, and has eased since"
+    ipeak = max(range(len(sub)), key=lambda i: sub[i])
+    assert g["dates"][ipeak] == "2023-12" and sub[-1] < sub[ipeak]
+    assert _m(ledger, "sub_peak") == pytest.approx(sub[ipeak] * 1e6, rel=1e-5)
+    # "held level to 2014": the whole range 2000-2014 sits below the 2023 peak by a wide margin
+    assert max(mid) < 0.7 * sub[ipeak]
+
+
+def test_giants_fall_and_share(built):
+    _, ledger, _ = built
+    g = _outside_giants()
+    sub, big = g["sub"], g["big"]
+    ipk = max(range(len(sub)), key=lambda i: sub[i] + big[i])
+    assert _m(ledger, "giants_fall") == pytest.approx((big[ipk] - big[-1]) * 1e6, rel=1e-5)
+    assert _m(ledger, "sub_rise") == pytest.approx((sub[-1] - sub[ipk]) * 1e6, rel=1e-5)
+    assert _m(ledger, "offset_share") == pytest.approx((sub[-1] - sub[ipk]) / (big[ipk] - big[-1]), rel=1e-5)
+    # "most of the rise in their share comes from the giants' decline": hold the giants at their peak and less than half remains
+    held = sub[-1] / (sub[-1] + big[ipk]) - sub[ipk] / (sub[ipk] + big[ipk])
+    rise = sub[-1] / (sub[-1] + big[-1]) - sub[ipk] / (sub[ipk] + big[ipk])
+    assert held < 0.5 * rise
+
+
+def test_additions_and_production_outside_the_giants(built):
+    _, ledger, _ = built
+    g = _outside_giants()
+
+    def window(y0, y1):
+        inside = [e for e in g["ents"] if y0 <= e["year"] <= y1]
+        return (len(inside), sum(e["vol"] for e in inside), sum(e["vol"] for e in inside if e["producing"]),
+                sum(g["produced"].get(y, 0.0) for y in range(y0, y1 + 1)))
+
+    n1, a1, on1, p1 = window(2005, 2014)
+    n2, a2, on2, p2 = window(2015, 2025)
+    assert _m(ledger, "n_start_0514") == n1 and _m(ledger, "n_start_1525") == n2
+    for name, want in (("added_0514", a1), ("produced_0514", p1), ("added_1525", a2), ("produced_1525", p2), ("onstream_1525", on2)):
+        assert _m(ledger, name) == pytest.approx(want * 1e6, rel=1e-5), name
+    assert a2 > p2  # "a surplus on paper"
+    assert on2 == pytest.approx(p2, rel=0.02)  # "close to what the whole group produced"
+
+
+def test_sanctioned_but_not_producing():
+    g = _outside_giants()
+    sanct = [e for e in g["ents"] if not e["producing"] and 2015 <= e["year"] <= 2025]
+    assert {e["year"] for e in sanct} == {2023, 2024}  # "approved in 2023 and 2024"
+    assert {"MUNIN", "HUGIN"} <= {e["key"] for e in sanct}  # "among them Munin and Hugin"
+
+
+def test_sanctioned_count_and_volume(built):
+    _, ledger, _ = built
+    g = _outside_giants()
+    sanct = [e for e in g["ents"] if not e["producing"] and 2015 <= e["year"] <= 2025]
+    assert _m(ledger, "n_sanct_1525") == len(sanct)
+    assert _m(ledger, "sanct_1525") == pytest.approx(sum(e["vol"] for e in sanct) * 1e6, rel=1e-5)
+
+
+def test_cumulative_additions_chart():
+    g = _outside_giants()
+    on = sum(e["vol"] for e in g["ents"] if 2005 <= e["year"] <= 2025 and e["producing"])
+    produced = sum(g["produced"].get(y, 0.0) for y in range(2005, 2026))
+    # the chart title says additions "have only kept pace": on-stream additions end below production, within 5%
+    assert on < produced and on > 0.95 * produced
