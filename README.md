@@ -32,11 +32,11 @@ Performance is checked with SubScout's `scripts/perf.py` (4x CPU throttle, no fr
 Data: Sodir (Norwegian Offshore Directorate), Norwegian Licence for Open Government Data (NLOD 2.0);
 method in [`data/README.md`](data/README.md) and on the page under "Basis of analysis". Code: MIT License with Acknowledgement.
 
-The quadrant maps sit on [Relief](https://github.com/AdmcCarthy/Relief) (Copernicus DEM GLO-90 and EMODnet Bathymetry) in its Detuned
-style at context strength, converted to longitude and latitude once by `scripts/build_relief_base.py` so the base and the Sodir
-quadrants are projected together. Relief has no single region over the whole shelf, so the base joins `north_sea`, `norwegian_sea`,
-`barents_sea` and `ne_europe` (the UK, Denmark, Germany, Poland and southern Sweden) at their overview level, with `atlantic` (GEBCO 2026,
-the coarsest) filling what is left, so Sweden, Finland, the Baltic and the UK carry relief too. The earlier region wins where two meet.
+The quadrant maps are a grid on [Relief](https://github.com/AdmcCarthy/Relief) (Copernicus DEM GLO-90, EMODnet Bathymetry and, east of
+43°E, NOAA ETOPO 2022) in its Detuned style at context strength: one column per sea, each Relief's own map view of the North Sea,
+the Norwegian Sea or the Barents Sea in its own projection, and one row per snapshot year. `scripts/build_seas.py <Relief dir>` writes
+`data/seas.json` (the three views at overview level, with the quadrants and maritime boundaries in the same projection), so the base
+and the Sodir quadrants cannot drift apart and no region is joined to another.
 
 ## Licence and acknowledgement
 

@@ -65,6 +65,7 @@ const CSS = `
 .tl-area{font:600 11.5px var(--ss-font-body);fill:var(--ss-text);paint-order:stroke;stroke:var(--ss-surface);stroke-width:3px}
 .tl-hub{font:500 10.5px var(--ss-font-mono);fill:var(--ss-text-muted);paint-order:stroke;stroke:var(--ss-surface);stroke-width:3px}
 .tl-year{font:500 15px var(--ss-font-display);fill:var(--ss-text)}
+.tl-seas .tl-note:not(.tl-strong){paint-order:stroke;stroke:var(--ss-surface);stroke-width:3px;stroke-linejoin:round}
 .tl-maps .tl-year,.tl-maps .tl-note{paint-order:stroke;stroke:var(--ss-surface);stroke-width:3px;stroke-linejoin:round}
 .tl-legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;line-height:1.5;margin:0 0 8px;color:var(--ss-text)}
 .tl-legend i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:5px;vertical-align:-1px}

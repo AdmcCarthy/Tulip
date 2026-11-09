@@ -35,8 +35,12 @@ McCarthy, petroleum geoscience domain expert. Follow SubScout's CLAUDE.md and st
 - Main figure is now two graphs, gas (left) and oil/NGL/condensate (right), with the year axis and the events
   between them (`figures/bulb_pair.js`: bulb.js with `panels`, `gutter`, `autoLabels`); the oil-equivalent total is
   the third figure (`figures/bulb_total.js`, `id: total`). The events text drops out of the gutter below 900px.
-- Maps: conic projection rotated (S.map_angle) so the shelf runs up the panel; frame = quadrants with data +
-  Norway–Denmark boundary; agreed maritime boundaries drawn dashed.
+- Maps (`figures/seas.js`, data `data/seas.json` from `scripts/build_seas.py <Relief dir>`): a grid, one column per sea (North Sea,
+  Norwegian Sea, Barents Sea) and one row per snapshot year. Each column is that Relief region's own map view at its overview level, in
+  its own projection (so no rotation, no joining of regions, relief to the frame's edge), with the quadrants that held reserves and the
+  agreed maritime boundaries; an arrow in each map shows where north points. A quadrant belongs to the sea Sodir names by latitude
+  (62°N and 70°N; tested against Sodir's own sea for all 139 fields). Relief is fetched with its `scripts/fetch_data.py`; its data are
+  never committed here. The earlier conic map over a joined five-region base (and its GEBCO fill) was replaced by this.
 - Circle packing: sea → hub → field (hub parsed from Sodir development text, scripts/hubs.py); snapshots
   recoverable / left 1995 / 2005 / today; zoomable.
 - Now a SubScout story (v0.3.0 custom figures): story.md + story.py + figures/*.js; build with
