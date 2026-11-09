@@ -2,20 +2,21 @@
 // lookup, units and a shared tooltip. Uses SubScout's runtime for tokens, units and scheme changes.
 import { token, tooltip as ssTooltip, units, UNITS, onSchemeChange, reducedMotion } from "../runtime/js/subscout.js";
 
-// Six size classes per fluid (small -> super-giant). Light: smaller = paler, the smallest almost the white
-// of the seams; dark: smaller = closer to the dark background. Oil (with NGL and condensate) in greens,
-// gas in dusty clay; muted (chroma <= 0.05 in OKLCH) so the thick giant bodies stay calm.
-// Generated in OKLCH: oil (eucalyptus) hue 190, gas (clay) hues 45 -> 34. Muted colours limit colour-blind
-// separation of oil vs gas (worst ~3 dE x100); the separate columns and the seams carry that distinction.
+// Six size classes per fluid (small -> super-giant). Light: smaller = paler (cream), the smallest almost
+// the white of the seams; dark: smaller = closer to the dark background. Saturated ramps, so giants carry
+// the colour and the long tail of small fields stays pale: oil (with NGL and condensate) runs lime to deep
+// green, gas runs cream through amber and orange to crimson.
+// Hue and lightness both rise with size. Red against green is the weak pair for colour-blind readers
+// (deuteranopia: both read olive-brown); the separate columns, the seams and the lightness order carry it.
 const PAL = {
   light: {
-    oil: ["#ebf6f5", "#c1ddda", "#a7cbc8", "#92b9b5", "#7ea6a3", "#6c9490"],
-    gas: ["#fef4f0", "#f5ddd4", "#eccabe", "#dfb7aa", "#cfa498", "#bf9288"],
+    oil: ["#f1f3c8", "#cfe6a0", "#9bd27f", "#5fb56b", "#27895a", "#0b5c42"],
+    gas: ["#fdf0cc", "#fbd98e", "#f5ab5b", "#e8753f", "#d0453a", "#a8203f"],
     silhouette: "#8798a6",
   },
   dark: {
-    oil: ["#202828", "#2f4846", "#41625f", "#587d7a", "#6f9793", "#88b1ae"],
-    gas: ["#2e2724", "#59453e", "#7c5e54", "#9b766b", "#b88f83", "#d5a89d"],
+    oil: ["#1c2a22", "#2c5a3b", "#3e8a4d", "#5fb96b", "#8fe08a", "#d0f79a"],
+    gas: ["#2f2420", "#7a4a2a", "#b9692f", "#e8833a", "#f4584a", "#ff5c79"],
     silhouette: "#6e8aa0",
   },
 };
@@ -56,6 +57,10 @@ const CSS = `
 .tl-big{font:500 17px var(--ss-font-display);fill:var(--ss-text);paint-order:stroke;stroke:var(--ss-surface);stroke-width:4px}
 .tl-label{font:600 11.5px var(--ss-font-body);fill:var(--ss-text);paint-order:stroke;stroke:var(--ss-surface);stroke-width:3px;stroke-linejoin:round;pointer-events:none}
 .tl-found{font:italic 400 12.5px var(--ss-font-display);fill:var(--ss-text);paint-order:stroke;stroke:var(--ss-surface);stroke-width:3px}
+.tl-flabel{font:600 11.5px var(--ss-font-body);pointer-events:none}
+.tl-gyear{font:500 12.5px var(--ss-font-body);fill:var(--ss-text);paint-order:stroke;stroke:var(--ss-surface);stroke-width:5px;stroke-linejoin:round}
+.tl-gev{font:400 12px var(--ss-font-body);fill:var(--ss-text-muted)}
+.tl-gev b{font-weight:600;fill:var(--ss-text)}
 .tl-sea{font:500 15px var(--ss-font-display);fill:var(--ss-text);paint-order:stroke;stroke:var(--ss-surface);stroke-width:3px}
 .tl-area{font:600 11.5px var(--ss-font-body);fill:var(--ss-text);paint-order:stroke;stroke:var(--ss-surface);stroke-width:3px}
 .tl-hub{font:500 10.5px var(--ss-font-mono);fill:var(--ss-text-muted);paint-order:stroke;stroke:var(--ss-surface);stroke-width:3px}
@@ -93,5 +98,5 @@ export function classLegend(legendEl, classes) {
   }
   legendEl.innerHTML = `<div class="tl-legend">` + fam.map(([t, cs]) => `<span class="tl-grp"><b>${t}</b>` +
     cs.map((c) => `<span><i style="background:linear-gradient(90deg,${P.oil[c.idx]} 50%,${P.gas[c.idx]} 50%)"></i>${c.short} <span class="tl-note-inline">${c.range}</span></span>`).join("") + "</span>").join("") +
-    `<span class="tl-note-inline">Million boe recoverable. Eucalyptus green: oil, NGL and condensate; clay: gas. Smaller fields are fainter; the smallest almost vanish into the seams.</span></div>`;
+    `<span class="tl-note-inline">Million boe recoverable. Green: oil, NGL and condensate; red and orange: gas. Smaller fields are paler; the smallest almost vanish into the seams.</span></div>`;
 }
