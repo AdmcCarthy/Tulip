@@ -28,8 +28,13 @@ McCarthy, petroleum geoscience domain expert. Follow SubScout's CLAUDE.md and st
 - Discovery years listed right of the year scale (no in-chart roots).
 - Undiscovered resources: left out for now (placeholder). Contingent shown as hatched bar at today.
 - Open: port `stream` chart type into SubScout.
-- Palette (v7): oil green families (forest→leaf | jade→pale mint), gas (brick→orange | amber→pale gold); oil kept
-  darker than gas per class for CVD separation. Class names: small, medium, large | giant, giant, super-giant.
+- Palette (v8, punchy, after the Sodir original reference figure): oil lime→deep green, gas cream→amber→orange→crimson,
+  six size classes, pale = small. Red against green is the weak pair for colour-blind readers and v8 has NOT been
+  re-checked for CVD (v7 was); the separate graphs, seams and the lightness order carry the oil/gas distinction.
+  Class names: small, medium, large | giant, giant, super-giant.
+- Main figure is now two graphs, gas (left) and oil/NGL/condensate (right), with the year axis and the events
+  between them (`figures/bulb_pair.js`: bulb.js with `panels`, `gutter`, `autoLabels`); the oil-equivalent total is
+  the third figure (`figures/bulb_total.js`, `id: total`). The events text drops out of the gutter below 900px.
 - Maps: conic projection rotated (S.map_angle) so the shelf runs up the panel; frame = quadrants with data +
   Norway–Denmark boundary; agreed maritime boundaries drawn dashed.
 - Circle packing: sea → hub → field (hub parsed from Sodir development text, scripts/hubs.py); snapshots

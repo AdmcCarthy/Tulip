@@ -4,9 +4,11 @@
 // overlay for axes, labels and hover. State changes cross-fade two stacked canvases (opacity only).
 //
 // state: { mode: "silhouette" | "colour", focus: [field keys], classes: [size class idx], note: str }
+// opts.panels: which graphs to draw, in order (default all three). opts.gutter: with two panels, put the
+// time axis and the story's events between them. opts.autoLabels: name the biggest streams on the streams.
 import { pal, shade, tok, vol, volShort, tip, fmt1, parseMonth, fmtMonth, reducedMotion, classLegend, scheme } from "./common.js";
 
-const PANELS = [
+const ALL_PANELS = [
   { key: "liq", title: "Oil, NGL & condensate", short: "Liquids" },
   { key: "gas", title: "Gas", short: "Gas" },
   { key: "oe", title: "Oil equivalent", short: "Oil eq." },
@@ -27,6 +29,9 @@ function gaussian(v, sig) {
 export default function create(el, { bulb: B }, opts = {}) {
   // Poster mode (full-screen view, and every export/print plate): events in the left margin, discovery years on the right
   const POSTER = opts.poster ?? (opts.export ? { height: () => opts.height(), roots: ["TROLL", "JOHAN SVERDRUP"] } : null);
+  const PANELS = (opts.panels ?? ALL_PANELS.map((p) => p.key)).map((k) => ALL_PANELS.find((p) => p.key === k));
+  const GUT = !!opts.gutter && PANELS.length === 2;
+  const jOE = PANELS.findIndex((p) => p.key === "oe");
   const drawLegend = () => classLegend(opts.legendEl, B.classes);
   drawLegend();
   const n = B.dates.length;
@@ -49,8 +54,9 @@ export default function create(el, { bulb: B }, opts = {}) {
     }
     return [key, { sers, x0, x1, tot }];
   }));
-  const RAW = Object.fromEntries(PANELS.map(({ key }) => [key, dates.map((_, t) => d3.sum(F, (f) => f.raw[key][t]))]));
-  const peakRaw = Object.fromEntries(PANELS.map(({ key }) => [key, key === "oe" ? B.peak : d3.max(RAW[key])]));
+  // totals for all three series, whichever graphs are drawn: the hover quotes them all
+  const RAW = Object.fromEntries(ALL_PANELS.map(({ key }) => [key, dates.map((_, t) => d3.sum(F, (f) => f.raw[key][t]))]));
+  const peakRaw = Object.fromEntries(ALL_PANELS.map(({ key }) => [key, key === "oe" ? B.peak : d3.max(RAW[key])]));
   const maxW = PANELS.map(({ key }) => d3.max(LAY[key].tot));
 
   el.innerHTML = "";
@@ -109,7 +115,9 @@ export default function create(el, { bulb: B }, opts = {}) {
 
   function build(W) {
     const narrow = W < 560, poster = !!POSTER;
-    const mL = poster ? 330 : narrow ? 4 : 12, mR = poster ? 250 : narrow ? 30 : 46, mT = poster ? 48 : 44, mB = 8, gap = poster ? 30 : narrow ? 6 : 16;
+    // gutter layout: years (and, when wide enough, the events) sit between the two graphs, not in the margins
+    const gw = !GUT ? 0 : W < 900 ? (narrow ? 46 : 70) : 290, evts = GUT && gw >= 200;
+    const mL = GUT ? (narrow ? 4 : 12) : poster ? 330 : narrow ? 4 : 12, mR = GUT ? (narrow ? 4 : 12) : poster ? 250 : narrow ? 30 : 46, mT = poster ? 48 : 44, mB = 8, gap = poster ? 30 : narrow ? 6 : 16;
     const vh = window.innerHeight || 800;
     // 5% shorter than v0.2; on the page, capped so the figure's title and legend stay on screen
     const fig = el.closest(".ss-figure");
@@ -117,15 +125,16 @@ export default function create(el, { bulb: B }, opts = {}) {
     const room = narrow || !fig ? Infinity : vh - 56 - above - 24; // wide layout pins the figure 56px from the top
     const H = poster ? Math.max(480, Math.round(POSTER.height()))
       : Math.round(Math.max(narrow ? 220 : 361, Math.min(W * 1.235, vh * (narrow ? 0.3 : 0.684), room, 1045)));
-    const k = (W - mL - mR - 2 * gap) / d3.sum(maxW);
+    const k = (W - mL - mR - (GUT ? gw : (PANELS.length - 1) * gap)) / d3.sum(maxW);
     let acc = mL;
-    const cx = maxW.map((m) => { const c = acc + (m * k) / 2; acc += m * k + gap; return c; });
+    const cx = maxW.map((m) => { const c = acc + (m * k) / 2; acc += m * k + (GUT ? gw : gap); return c; });
+    const gx = GUT ? cx[0] + (maxW[0] * k) / 2 + gw / 2 : 0; // centre line of the gutter
     const y = d3.scaleTime([new Date(B.axis_start, 0, 1), new Date(B.axis_end, 11, 31)], [H - mB, mT]);
     const dpr = Math.min(opts.print ? 6 : 2, opts.pixelRatio ?? (window.devicePixelRatio || 1)); // print plates ask for more device pixels
     // decimal year -> pixel row: linear, from two points of the time scale
     const y0 = y(new Date(2000, 0, 1)), sy = y(new Date(2010, 0, 1)) - y0;
     const mats = cx.map((c) => new DOMMatrix([k * dpr, 0, 0, (sy / 10) * dpr, c * dpr, (y0 - 2000 * (sy / 10)) * dpr]));
-    return { W, H, narrow, poster, mL, mR, mT, mB, k, cx, y, dpr, mats };
+    return { W, H, narrow, poster, mL, mR, mT, mB, k, cx, y, dpr, mats, gw, gx, evts };
   }
 
   function paint(c, state) {
@@ -186,8 +195,8 @@ export default function create(el, { bulb: B }, opts = {}) {
       if (it.val) an.append("text").attr("class", "tl-ev").attr("x", mL - 16).attr("y", ty + LH).attr("dy", "-0.1em").attr("text-anchor", "end").text(it.val);
     });
     // discovery-to-first-oil lines for selected fields, in the oil-equivalent column
-    const L = LAY.oe, j = 2;
-    (POSTER.roots ?? []).forEach((key) => {
+    const L = LAY.oe, j = jOE;
+    (jOE < 0 ? [] : POSTER.roots ?? []).forEach((key) => {
       const i = F.findIndex((f) => f.key === key);
       if (i < 0 || !(i in L.x0) || !F[i].discovered) return;
       const f = F[i], te = f.entry, tt = Math.min(n - 1, te + 2);
@@ -209,37 +218,106 @@ export default function create(el, { bulb: B }, opts = {}) {
     });
   }
 
+  // Between the two graphs: the year axis down the middle, the story's events either side of it, each
+  // block dodged so none overlap and tied to its exact year by a short leader.
+  function wrapWords(s, w) {
+    const out = [];
+    let line = "";
+    for (const word of s.split(" ")) {
+      if (line && (line + " " + word).length > w) { out.push(line); line = word; } else line = line ? `${line} ${word}` : word;
+    }
+    return line ? [...out, line] : out;
+  }
+  function gutterNotes(g, yrs, yNow) {
+    const { y, gx, gw, mT, H } = g, an = svg.append("g").attr("class", "tl-ann"), LH = 14, half = gw / 2 - 38;
+    an.append("line").attr("x1", gx).attr("x2", gx).attr("y1", mT).attr("y2", H).attr("stroke", tok("text-muted")).attr("stroke-width", 0.75).attr("opacity", 0.5);
+    an.selectAll("text").data(yrs).join("text").attr("class", "tl-gyear").attr("x", gx).attr("y", y).attr("dy", "0.35em").attr("text-anchor", "middle").text((d) => d.getFullYear());
+    if (!g.evts) {
+      an.append("text").attr("class", "tl-gyear").style("font-weight", 700).attr("x", gx).attr("y", yNow).attr("dy", "0.35em").attr("text-anchor", "middle").text("Today");
+      return;
+    }
+    const ev = [...B.events, { date: B.dates[n - 1], year: "Today", text: "", msm3: B.now, after: "left" }].map((e, i) => {
+      const val = e.msm3 != null ? `${vol(e.msm3)}${e.after ? ` ${e.after}` : ""}` : "";
+      const lines = [...wrapWords(e.text, Math.floor(half / 5.9)), ...(val ? wrapWords(val, Math.floor(half / 5.9)) : [])];
+      return { e, side: i % 2 ? 1 : -1, lines: Math.max(1, lines.length) + 1, body: lines, y: y(parseMonth(e.date)) };
+    });
+    for (const side of [-1, 1]) {
+      dodge(ev.filter((it) => it.side === side), LH).forEach((it) => {
+        const ty = it.top + LH * 0.8, x0 = gx + side * 3, xt = gx + side * 32, anchor = side < 0 ? "end" : "start";
+        an.append("path").attr("d", `M${x0},${it.y}L${gx + side * 26},${it.y}L${xt - side * 3},${ty - 4}`).attr("stroke", tok("text-muted")).attr("fill", "none");
+        an.append("circle").attr("cx", gx).attr("cy", it.y).attr("r", 2.2).attr("fill", tok("text"));
+        const t = an.append("text").attr("class", "tl-gev").attr("x", xt).attr("y", ty).attr("text-anchor", anchor);
+        t.append("tspan").attr("class", "tl-ev-y").text(it.e.year);
+        it.body.forEach((ln) => t.append("tspan").attr("x", xt).attr("dy", `${LH}px`).text(ln));
+      });
+    }
+    an.selectAll(".tl-gyear").raise(); // decade labels sit on top of the leaders
+  }
+
+  // Name the biggest streams on the streams: horizontal where the stream is wide enough, turned to read
+  // upwards where it is narrow, black or white by the colour underneath. Greedy, so labels never overlap.
+  function autoLabels(g) {
+    const { y, cx, k } = g, taken = [], max = g.narrow ? 6 : 16;
+    PANELS.forEach((p, j) => {
+      const L = LAY[p.key];
+      const ranked = L.sers.map((i) => ({ i, peak: d3.max(F[i].sm[p.key]) })).sort((a, b) => b.peak - a.peak).slice(0, max);
+      for (const { i } of ranked) {
+        const f = F[i], tl = Math.min(n - 1, d3.maxIndex(f.sm[p.key]) + 2), w = (L.x1[i][tl] - L.x0[i][tl]) * k, tw = f.name.length * 6.6;
+        const colour = p.key === "oe" ? shade(f.dom, f.cls) : shade(p.key, f.cls);
+        const cxp = cx[j] + ((L.x0[i][tl] + L.x1[i][tl]) / 2) * k, cyp = y(dates[tl]);
+        let box = null, rot = false;
+        if (w >= tw + 12) box = [cxp - tw / 2, cyp - 8, cxp + tw / 2, cyp + 8];
+        else if (w >= 14) {
+          // vertical room: rows either side of the peak where the stream stays at least 14px wide
+          let a = tl, b = tl;
+          while (a > 0 && (L.x1[i][a - 1] - L.x0[i][a - 1]) * k >= 14) a--;
+          while (b < n - 1 && (L.x1[i][b + 1] - L.x0[i][b + 1]) * k >= 14) b++;
+          if (y(dates[a]) - y(dates[b]) >= tw + 8) { box = [cxp - 8, cyp - tw / 2, cxp + 8, cyp + tw / 2]; rot = true; }
+        }
+        if (!box || taken.some((o) => box[0] < o[2] && box[2] > o[0] && box[1] < o[3] && box[3] > o[1])) continue;
+        taken.push(box);
+        const txt = svg.append("text").attr("class", "tl-flabel").attr("text-anchor", "middle").attr("dy", "0.35em")
+          .attr("fill", d3.lab(colour).l > 62 ? "#1c1a17" : "#fff").text(f.name);
+        txt.attr("transform", rot ? `translate(${cxp},${cyp}) rotate(-90)` : `translate(${cxp},${cyp})`);
+      }
+    });
+  }
+
   function overlay(state) {
     const g = geo, { W, H, y, cx, k, mL, mR, mT } = g;
     svg.attr("viewBox", [0, 0, W, H]).attr("role", "img")
-      .attr("aria-label", "Three stream graphs of remaining reserves per field, liquids, gas and oil equivalent, from 1971 to today, time running up");
+      .attr("aria-label", `${PANELS.length === 1 ? "A stream graph" : PANELS.length === 2 ? "Two stream graphs" : "Three stream graphs"} of remaining reserves per field, ${PANELS.map((p) => p.title.toLowerCase()).join(", ")}, from 1971 to today, time running up`);
     svg.selectAll("*").remove();
-    const today = dates[n - 1], yNow = y(today), x1 = W - mR + 30;
+    const today = dates[n - 1], yNow = y(today), x1 = GUT ? W - mR : W - mR + 30;
     svg.append("rect").attr("x", mL).attr("width", x1 - mL).attr("y", mT).attr("height", yNow - mT).attr("fill", tok("surface-raised")).attr("opacity", 0.6);
     svg.append("text").attr("class", "tl-note").attr("x", mL + 4).attr("y", mT + 13).text(`Next ten years, to ${B.axis_end}`);
     const yrs = d3.range(1970, B.axis_end + 1, 10).map((v) => new Date(v, 0, 1));
     const ax = svg.append("g");
     ax.selectAll("line").data(yrs).join("line").attr("x1", mL).attr("x2", x1).attr("y1", y).attr("y2", y).attr("stroke", tok("grid")).attr("stroke-dasharray", "1 3");
     const xYear = g.poster ? x1 + 40 : W - 2;
-    ax.selectAll("text").data(yrs).join("text").attr("class", "tl-axis").attr("x", xYear).attr("y", y).attr("dy", "0.35em").attr("text-anchor", "end").text((d) => d.getFullYear());
+    if (!GUT) ax.selectAll("text").data(yrs).join("text").attr("class", "tl-axis").attr("x", xYear).attr("y", y).attr("dy", "0.35em").attr("text-anchor", "end").text((d) => d.getFullYear());
     svg.append("line").attr("x1", mL).attr("x2", x1).attr("y1", yNow).attr("y2", yNow).attr("stroke", tok("text")).attr("stroke-width", 1);
-    svg.append("text").attr("class", "tl-axis tl-strong").attr("x", xYear).attr("y", yNow).attr("dy", "0.35em").attr("text-anchor", "end").text("Today");
-    if (g.poster) posterNotes(g, yNow, x1);
+    if (!GUT) svg.append("text").attr("class", "tl-axis tl-strong").attr("x", xYear).attr("y", yNow).attr("dy", "0.35em").attr("text-anchor", "end").text("Today");
+    if (GUT) gutterNotes(g, yrs, yNow);
+    else if (g.poster) posterNotes(g, yNow, x1);
     PANELS.forEach((p, j) => {
       svg.append("text").attr("class", "tl-col").attr("x", cx[j]).attr("y", 14).attr("text-anchor", "middle").text(g.narrow ? p.short : p.title);
       svg.append("text").attr("class", "tl-note").attr("x", cx[j]).attr("y", 29).attr("text-anchor", "middle").text(`peak ${volShort(peakRaw[p.key])}`);
     });
     // found but not sanctioned: placeholder width at today in the oil-equivalent column
-    const pw = (RAW.oe[n - 1] + B.pending) * k;
-    const pat = svg.append("defs").append("pattern").attr("id", "tl-hatch").attr("patternUnits", "userSpaceOnUse").attr("width", 5).attr("height", 5).attr("patternTransform", "rotate(45)");
-    pat.append("rect").attr("width", 1).attr("height", 5).attr("fill", tok("text-muted"));
-    svg.append("rect").attr("x", cx[2] - pw / 2).attr("width", pw).attr("y", yNow - 11).attr("height", 8).attr("fill", "url(#tl-hatch)").attr("stroke", tok("text-muted")).attr("stroke-width", 0.6);
-    svg.append("text").attr("class", "tl-note").attr("x", cx[2]).attr("y", yNow - 16).attr("text-anchor", "middle").text(g.narrow ? "not yet sanctioned" : `+${volShort(B.pending)} found, not yet sanctioned`);
+    if (jOE >= 0) {
+      const pw = (RAW.oe[n - 1] + B.pending) * k;
+      const pat = svg.append("defs").append("pattern").attr("id", "tl-hatch").attr("patternUnits", "userSpaceOnUse").attr("width", 5).attr("height", 5).attr("patternTransform", "rotate(45)");
+      pat.append("rect").attr("width", 1).attr("height", 5).attr("fill", tok("text-muted"));
+      svg.append("rect").attr("x", cx[jOE] - pw / 2).attr("width", pw).attr("y", yNow - 11).attr("height", 8).attr("fill", "url(#tl-hatch)").attr("stroke", tok("text-muted")).attr("stroke-width", 0.6);
+      svg.append("text").attr("class", "tl-note").attr("x", cx[jOE]).attr("y", yNow - 16).attr("text-anchor", "middle").text(g.narrow ? "not yet sanctioned" : `+${volShort(B.pending)} found, not yet sanctioned`);
+    }
     if (state.mode === "silhouette") {
       const t = d3.maxIndex(RAW.oe);
-      svg.append("text").attr("class", "tl-big").attr("x", cx[2]).attr("y", y(dates[t])).attr("text-anchor", "middle").attr("dy", "0.35em").text(vol(B.peak));
+      if (jOE >= 0) svg.append("text").attr("class", "tl-big").attr("x", cx[jOE]).attr("y", y(dates[t])).attr("text-anchor", "middle").attr("dy", "0.35em").text(vol(B.peak));
       return;
     }
+    if (opts.autoLabels && !(state.focus?.length)) autoLabels(g);
     // labels for focused fields, and their discovery year in the oil-equivalent column
     const keys = state.focus ?? [];
     keys.forEach((key) => {

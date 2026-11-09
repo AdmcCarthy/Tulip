@@ -23,7 +23,7 @@ def built(tmp_path_factory):
 def test_builds_without_errors_or_warnings(built):
     rep, _, out = built
     assert rep.errors == [] and rep.warnings == []
-    for m in ("bulb", "pack", "cream", "maps", "common"):
+    for m in ("bulb", "bulb_pair", "bulb_total", "pack", "cream", "maps", "common"):
         assert (out / "figures" / f"{m}.js").exists()
 
 
@@ -85,7 +85,7 @@ def test_full_screen_view(built, tmp_path):
     _, _, out = built
     subprocess.run([sys.executable, str(ROOT / "scripts" / "build_full.py"), str(out)], check=True)
     page = (out / "full" / "index.html").read_text()
-    assert "../figures/bulb.js" in page and "poster" in page
+    assert "../figures/bulb_pair.js" in page and "poster" in page
     data = json.loads(page.split('id="data">')[1].split("</script>")[0])
     years = [e["year"] for e in data["bulb"]["events"]]
     assert years[0] == "1971" and "2000" in years and "2019" in years

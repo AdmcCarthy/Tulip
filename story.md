@@ -55,19 +55,19 @@ Read the figure upwards. Time runs from the first oil at the bottom to today, wi
 space above.
 
 ::: step {beat=early-giants kicker="The whole shelf" layout=wide}
-### Oil, gas and the two together
+### Gas and oil, side by side
 
-Each thread is one field: oil, NGL and condensate in eucalyptus green, gas in clay, the two added together
-on the right. At its widest, early in 2000, the shelf had {{ peak_total | volume }} left to produce.
-Today {{ now_total | volume }} remain, {{ fall_since_peak | pct }} less. The oldest fields sit at
-the centre of each column and younger ones outward; faint shades are small fields and strong shades
-giants.
+Each thread is one field: gas in red and orange on the left, oil, NGL and condensate in green on the
+right, with the years and the main events between them. At its widest, early in 2000, the shelf had
+{{ peak_total | volume }} left to produce, oil and gas together. Today {{ now_total | volume }} remain,
+{{ fall_since_peak | pct }} less. The oldest fields sit at the centre of each graph and younger ones
+outward; pale shades are small fields and strong shades giants.
 
 ```chart
 id: bulb
 export: true
 type: custom
-module: figures/bulb.js
+module: figures/bulb_pair.js
 data: bulb
 register: outcrop
 state: { mode: colour }
@@ -77,7 +77,7 @@ source: sodir
 confidence: derived
 unit: million Sm³ o.e.; 1 Sm³ o.e. = 6.29 boe
 notes: Width = Sodir's estimate at 31.12.2025 plus production since each month (hindsight). Streams start at each field's production start and are smoothed over about a year for display; hover values are not smoothed.
-exception: { rule: direct-labels, reason: "Around 1,200 streams: shade encodes six size classes in two linked colour families per fluid, with a legend, hover and selective labels instead of direct labels. Width has no axis; the columns share one scale and the hover gives values." }
+exception: { rule: direct-labels, reason: "Around 1,200 streams: shade encodes six size classes in two linked colour families per fluid, with a legend, hover and labels on the largest fields instead of direct labels on all. Width has no axis; the two graphs share one scale and the hover gives values." }
 ```
 :::
 
@@ -130,7 +130,7 @@ focus: [TROLL]
 ### Most fields are below giant size
 
 {{ n_sub_giant }} of the {{ n_fields }} fields are below giant size. Between them they hold
-{{ sub_giant_share | pct }} of the volume: the faint threads at the edges of each column.
+{{ sub_giant_share | pct }} of the volume: the pale threads at the edges of each graph.
 Most are produced through an existing platform rather than one of their own.
 
 ```chart
@@ -154,7 +154,28 @@ focus: [JOHAN SVERDRUP]
 ```
 :::
 
-See all three columns full screen, with the main events marked, in the [full-screen view](full/).
+See the figure full screen, with the main events marked, in the [full-screen view](full/).
+
+## Oil and gas added together
+
+Add the two graphs and one shape remains: the total the shelf had left to produce, month by month. Each
+thread is coloured by the fluid that dominates the field, on the same scale as the pair above.
+
+```chart
+id: total
+export: true
+type: custom
+module: figures/bulb_total.js
+data: bulb
+state: { mode: colour }
+title: Oil and gas together peaked in 2000 and have fallen by {{ fall_since_peak | pct }} since
+subtitle: Remaining recoverable volume per field, oil and gas added, million Sm³ o.e., time running up
+source: sodir
+confidence: derived
+unit: million Sm³ o.e.; 1 Sm³ o.e. = 6.29 boe
+notes: Width = Sodir's estimate at 31.12.2025 plus production since each month (hindsight). Streams start at each field's production start and are smoothed over about a year for display; hover values are not smoothed. Colour follows the larger of a field's recoverable gas and recoverable oil, NGL and condensate.
+exception: { rule: direct-labels, reason: "Around 1,200 streams: shade encodes six size classes in two linked colour families, with a legend, hover and labels on the largest fields instead of direct labels on all." }
+```
 
 ## The 2004 tables understated what the fields held
 

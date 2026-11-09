@@ -83,7 +83,7 @@ def main(site: Path) -> None:
 <script type="application/json" id="data">{json.dumps({"bulb": bulb}, ensure_ascii=False).replace("</", "<\\/")}</script>
 <script type="module">
   import {{ theme, units, onSchemeChange, bindSeg }} from "../runtime/js/subscout.js";
-  import create from "../figures/bulb.js";
+  import create from "../figures/bulb_pair.js";
   const q = new URLSearchParams(location.search);
   if (q.get("theme")) theme.set(q.get("theme"));
   // Light/Dark only: resolve "system" to what the reader sees now, so one of the two is always pressed
