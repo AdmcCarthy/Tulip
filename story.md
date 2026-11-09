@@ -241,7 +241,7 @@ title: A few large hubs carry clusters of small tie-backs
 subtitle: Sea, area, hub and field; circle area = recoverable volume, million Sm³ o.e.
 source: sodir
 confidence: interpreted
-notes: Hubs read from Sodir's development descriptions (tied back, connected or processed at a named field's facility), chains resolved to the final host. Areas are the nearest named area in each sea, with a few overrides; see How we know.
+notes: Hubs read from Sodir's development descriptions (tied back, connected or processed at a named field's facility), chains resolved to the final host. Areas are the nearest named area in each sea, with a few overrides; see Basis of analysis.
 exception: { rule: direct-labels, reason: "Circle packing with four levels: larger circles are labelled, hover and zoom give the rest." }
 ```
 :::
