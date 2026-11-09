@@ -129,7 +129,7 @@ focus: [TROLL]
 
 {{ n_sub_giant }} of the {{ n_fields }} fields are below giant size. Between them they hold
 {{ sub_giant_share | pct }} of the volume: the pale threads at the edges of each graph.
-Most are produced through an existing platform rather than one of their own.
+{{ n_tied_sub }} of them are produced through another field's platform rather than one of their own.
 
 ```chart
 use: bulb
@@ -152,13 +152,23 @@ focus: [JOHAN SVERDRUP]
 ```
 :::
 
+::: step {beat=long-tail kicker="All fields"}
+Put every field back, giants and small ones alike, and the shape is whole again: {{ now_total | volume }} left, {{ fall_since_peak | pct }} below the peak in 2000.
+
+```chart
+use: bulb
+mode: colour
+classes: [0, 1, 2, 3, 4, 5]
+```
+:::
+
 See the figure full screen, with the main events marked, in the [full-screen view](full/).
 
 ## Oil and gas added together
 
 Add the two graphs and one shape remains: the total the shelf had left to produce, month by month. Each
 thread is coloured by the fluid that dominates the field. It is drawn narrower than the two graphs above add up to,
-so it can be read; the bar and the note in the figure give the scale.
+so it can be read; on wider screens a bar and a note in the figure give the scale.
 
 ```chart
 id: total
@@ -201,7 +211,7 @@ subtitle: Remaining volume per field, million Sm³ o.e., small and medium togeth
 source: sodir
 confidence: derived
 unit: million Sm³ o.e.; 1 Sm³ o.e. = 6.29 boe
-notes: Small is under 50 MMboe recoverable, medium 50 to 160; large fields (160 to 500) and giants are left out. The three graphs share one scale, larger than the total's (the note in the figure gives how many times; the bar gives a width). Width = Sodir's estimate at 31.12.2025 plus production since each month (hindsight). Fields approved but not yet producing enter at the approval date, at their full volume. Shades are stepped up two places in the size ramp so the two classes stay visible; the legend shows the shades used.
+notes: Small is under 50 MMboe recoverable, medium 50 to 160; large fields (160 to 500) and giants are left out. The three graphs share one scale, larger than the total's (on wider screens the note in the figure gives how many times and the bar gives a width). Width = Sodir's estimate at 31.12.2025 plus production since each month (hindsight). Fields approved but not yet producing enter at the approval date, at their full volume. Shades are stepped up two places in the size ramp so the two classes stay visible; the legend shows the shades used.
 exception: { rule: direct-labels, reason: "Around 85 streams: shade encodes two size classes in two linked colour families, with a legend, hover and labels where a stream is wide enough instead of direct labels on all. Width has no axis; the bar gives a width." }
 ```
 
@@ -223,14 +233,14 @@ x: year
 y: value
 series: series
 volume: true
-focus: [Produced]
+focus: ["Added, all", "Added, started", Produced]
 unit_label: "million {unit}"
 title: Additions outside the giants have only kept pace with what these fields produce
 subtitle: Cumulative from the end of 2004, million Sm³ o.e., added at the volume left when each field enters its stream
 source: sodir
 confidence: derived
 unit: million Sm³ o.e.
-notes: "Added: the volume left in a field in the quarter it enters its stream (production start, or approval for fields not yet producing). Produced: added minus the change in what is left. Every volume is today's estimate, so reserve growth after start-up is credited at start-up, and earlier fields carry more of it."
+notes: "Added: the volume left in a field in the quarter it enters its stream (production start, or approval for fields not yet producing). Added, all counts every such field, including those approved and not yet producing; Added, started counts only fields that have begun production. Produced: added minus the change in what is left. Every volume is today's estimate, so reserve growth after start-up is credited at start-up, and earlier fields carry more of it."
 ```
 
 Small and medium fields hold the line; they do not rebuild the shelf. Since its peak the giants have lost
@@ -255,14 +265,14 @@ x: year
 y: value
 series: series
 volume: true
-focus: [Known now]
+focus: [Estimated then, Known now]
 unit_label: "million {unit}"
 title: The same fields held {{ growth_2004 | pct }} more than Sodir estimated in 2004
 subtitle: Remaining reserves at each year end, million Sm³ o.e., for the fields in that year's table
 source: sodir
 confidence: derived
 unit: million Sm³ o.e.
-notes: "Estimated at the time: Sodir's field reserve table for that year. Known now: today's remaining plus production since, for the same fields. Field-level estimates before 2004 are not published in FactPages."
+notes: "Estimated then: Sodir's field reserve table for that year. Known now: today's remaining plus production since, for the same fields. Field-level estimates before 2004 are not published in FactPages."
 ```
 
 ## Most of the giants were found before 1990
@@ -393,8 +403,17 @@ years add another step outward depends on exploration, and on sanctioning what h
   Utgard, Alvheim) carry the Norwegian share only; all balance within {{ xb_max_gap | volume:1 }}.
 - **Size classes**: total recoverable volume on a log scale in half-decade steps anchored on giant
   ({{ 500 | param }} million boe) and super-giant ({{ 5 | param }} billion boe): small, medium, large, two giant steps, and
-  super-giant. Two linked colour families per fluid split at giant size; oil is kept darker than gas
-  in each class so the two stay apart for colour-blind readers.
+  super-giant. Two linked colour families per fluid split at giant size: lime to deep green for oil, cream through
+  orange to crimson for gas, pale for small and strong for large. Red against green is a hard pair for some
+  colour-blind readers, so the fluids also sit in separate graphs and size is carried by lightness as well as hue.
+  The palette has not been checked for colour-blind separation.
+- **Without the giants**: fields below {{ 500 | param }} million boe recoverable. Small is under {{ 50 | param }} million boe and medium
+  {{ 50 | param }} to {{ 160 | param }}; large ({{ 160 | param }} to {{ 500 | param }}) is left out of the small-and-medium figure. A field is *added* in the quarter it
+  enters its stream, at the volume it has left then (production start, or approval for fields approved and not yet
+  producing); what is *produced* is what was added minus the change in what is left. Volumes use today's estimate, so
+  earlier fields carry more reserve growth.
+- **Seas on the maps**: a quadrant sits in the sea Sodir names for it by latitude, North Sea south of {{ 62 | param }}°N, Norwegian
+  Sea to {{ 70 | param }}°N, Barents Sea beyond. Each map is Relief's view of that sea in its own projection.
 - **Hubs and areas** are an interpretation: hubs read from Sodir's development descriptions; areas
   from the nearest named area in each sea, with overrides for Valhall (southern North Sea), Grane
   (Frigg–Alvheim–Balder), Martin Linge (Oseberg–Troll) and Yggdrasil (Hugin, Munin and Fulla).

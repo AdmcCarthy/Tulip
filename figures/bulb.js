@@ -35,7 +35,8 @@ function gaussian(v, sig) {
 
 export default function create(el, { bulb: B }, opts = {}) {
   // Poster mode (full-screen view, and every export/print plate): events in the left margin, discovery years on the right
-  const POSTER = opts.poster ?? (opts.export ? { height: () => opts.height(), roots: ["TROLL", "JOHAN SVERDRUP"] } : null);
+  // (graphs by size class have no events or discovery notes: they never use the poster layout, though an export still fills its artboard)
+  const POSTER = opts.groups ? null : opts.poster ?? (opts.export ? { height: () => opts.height(), roots: ["TROLL", "JOHAN SVERDRUP"] } : null);
   const PANELS = opts.groups
     ? opts.groups.map((g) => ({ key: "oe", title: g.title, short: g.short, classes: g.classes }))
     : (opts.panels ?? ALL_PANELS.map((p) => p.key)).map((k) => ALL_PANELS.find((p) => p.key === k));
@@ -79,7 +80,8 @@ export default function create(el, { bulb: B }, opts = {}) {
 
   el.innerHTML = "";
   el.classList.add("tl-bulb");
-  const wrap = d3.select(el).append("div").style("position", "relative");
+  // full width: an export artboard centres its chart in a flex box, which would otherwise shrink this wrapper (all its children are absolute or sized by it)
+  const wrap = d3.select(el).append("div").style("position", "relative").style("width", "100%");
   const layer = wrap.append("div").style("position", "absolute").style("left", 0).style("top", 0).node();
   const svg = wrap.append("svg").style("position", "relative").style("display", "block").style("width", "100%").style("height", "auto");
   let geo = null, cur = { mode: "colour" }, shown = null, idleQ = null;
@@ -142,6 +144,7 @@ export default function create(el, { bulb: B }, opts = {}) {
     const above = fig ? el.getBoundingClientRect().top - fig.getBoundingClientRect().top : 0;
     const room = narrow || !fig ? Infinity : vh - 56 - above - 24; // wide layout pins the figure 56px from the top
     const H = poster ? Math.max(480, Math.round(POSTER.height()))
+      : opts.export ? Math.max(480, Math.round(opts.height())) // an export fills its artboard
       : Math.round(Math.max(narrow ? 220 : 361, Math.min(W * 1.235, vh * (narrow ? 0.3 : 0.684), room, 1045)));
     const avail = W - mL - mR;
     let k = (avail - (GUT ? gw : (PANELS.length - 1) * gap)) / d3.sum(maxW);
@@ -217,7 +220,7 @@ export default function create(el, { bulb: B }, opts = {}) {
       return { e, lines: val ? 2 : 1, val, y: y(parseMonth(e.date)) };
     });
     dodge(ev, LH).forEach((it) => {
-      an.append("line").attr("x1", mL - 6).attr("x2", GUT ? mL + 8 : x1).attr("y1", it.y).attr("y2", it.y).attr("stroke", tok("text-muted")).attr("stroke-dasharray", "2 3").attr("opacity", 0.55);
+      an.append("line").attr("x1", mL - 6).attr("x2", mL + 8).attr("y1", it.y).attr("y2", it.y).attr("stroke", tok("text-muted")).attr("stroke-dasharray", "2 3").attr("opacity", 0.55);
       const ty = it.top + LH * 0.8;
       if (Math.abs(ty - it.y) > 2) an.append("path").attr("d", `M${mL - 14},${ty - 4}L${mL - 6},${it.y}`).attr("stroke", tok("text-muted")).attr("fill", "none");
       const t1 = an.append("text").attr("class", "tl-ev").attr("x", mL - 16).attr("y", ty).attr("dy", "-0.1em").attr("text-anchor", "end");
@@ -255,7 +258,7 @@ export default function create(el, { bulb: B }, opts = {}) {
   function gutterAxis(g, yrs, yNow) {
     const { y, gx, mT, H } = g, an = svg.append("g").attr("class", "tl-ann");
     an.append("line").attr("x1", gx).attr("x2", gx).attr("y1", mT).attr("y2", H).attr("stroke", tok("text-muted")).attr("stroke-width", 0.75).attr("opacity", 0.5);
-    an.selectAll("text").data(yrs).join("text").attr("class", "tl-gyear").attr("x", gx).attr("y", y).attr("dy", "0.35em").attr("text-anchor", "middle").text((d) => d.getFullYear());
+    an.selectAll("text").data(yrs.filter((d) => Math.abs(y(d) - yNow) > 16)).join("text").attr("class", "tl-gyear").attr("x", gx).attr("y", y).attr("dy", "0.35em").attr("text-anchor", "middle").text((d) => d.getFullYear());
     an.append("text").attr("class", "tl-gyear").style("font-weight", 700).attr("x", gx).attr("y", yNow).attr("dy", "0.35em").attr("text-anchor", "middle").text("Today");
   }
 
@@ -289,11 +292,12 @@ export default function create(el, { bulb: B }, opts = {}) {
     svg.selectAll("*").remove();
     const today = dates[n - 1], yNow = y(today), x1 = GUT && !g.poster ? W - mR : W - mR + 30;
     svg.append("rect").attr("x", mL).attr("width", x1 - mL).attr("y", mT).attr("height", yNow - mT).attr("fill", tok("surface-raised")).attr("opacity", 0.6);
-    svg.append("text").attr("class", "tl-note").attr("x", mL + 4).attr("y", mT + 13).text(`Next ten years, to ${B.axis_end}`);
+    // (on a phone the open band is too short for this and the "not yet sanctioned" label together)
+    if (!(g.narrow && jOE >= 0 && !only)) svg.append("text").attr("class", "tl-note").attr("x", mL + 4).attr("y", mT + 13).text(`Next ten years, to ${B.axis_end}`);
     const yrs = d3.range(1970, B.axis_end + 1, 10).map((v) => new Date(v, 0, 1));
     const ax = svg.append("g");
     const xYear = g.poster ? x1 + 40 : W - 2;
-    if (!GUT) ax.selectAll("text").data(yrs).join("text").attr("class", "tl-axis").attr("x", xYear).attr("y", y).attr("dy", "0.35em").attr("text-anchor", "end").text((d) => d.getFullYear());
+    if (!GUT) ax.selectAll("text").data(yrs.filter((d) => Math.abs(y(d) - yNow) > 16)).join("text").attr("class", "tl-axis").attr("x", xYear).attr("y", y).attr("dy", "0.35em").attr("text-anchor", "end").text((d) => d.getFullYear());
     svg.append("line").attr("x1", mL).attr("x2", x1).attr("y1", yNow).attr("y2", yNow).attr("stroke", tok("text")).attr("stroke-width", 1);
     if (!GUT) svg.append("text").attr("class", "tl-axis tl-strong").attr("x", xYear).attr("y", yNow).attr("dy", "0.35em").attr("text-anchor", "end").text("Today");
     if (GUT) gutterAxis(g, yrs, yNow);
@@ -302,13 +306,14 @@ export default function create(el, { bulb: B }, opts = {}) {
       svg.append("text").attr("class", "tl-col").attr("x", cx[j]).attr("y", 14).attr("text-anchor", "middle").text(g.narrow ? p.short : p.title);
       svg.append("text").attr("class", "tl-note").attr("x", cx[j]).attr("y", 29).attr("text-anchor", "middle").text(`peak ${volShort(peakP[j])}`);
     });
-    if (opts.scaleBar || opts.scaleNote) { // width has no axis: say what a width is, and how far this scale is from another figure's
-      const v = [10, 20, 50, 100, 200, 500, 1000, 2000].find((s) => s * k >= 90) ?? 2000, w = v * k, bx = mL + 6, by = mT + 38;
+    if ((opts.scaleBar || opts.scaleNote) && !g.narrow) { // (not on a phone: three graphs and their stems leave no clear corner) width has no axis: say what a width is, and how far this scale is from another figure's
+      // bottom-left, where the streams are narrowest and nothing else is drawn; on a phone the bar and its width only
+      const v = [10, 20, 50, 100, 200, 500, 1000, 2000].find((s) => s * k >= 90) ?? 2000, w = v * k, bx = mL + 6, by = H - g.mB - (opts.scaleNote ? 30 : 14);
       svg.append("line").attr("x1", bx).attr("x2", bx + w).attr("y1", by).attr("y2", by).attr("stroke", tok("text")).attr("stroke-width", 1.5);
       [bx, bx + w].forEach((px) => svg.append("line").attr("x1", px).attr("x2", px).attr("y1", by - 4).attr("y2", by + 4).attr("stroke", tok("text")).attr("stroke-width", 1.5));
       svg.append("text").attr("class", "tl-note").attr("x", bx).attr("y", by - 8).text(`Width: ${vol(v)}`);
       if (opts.scaleNote) {
-        const ref = opts.scaleNote === "pair" ? g.kRef : g.kTot, what = opts.scaleNote === "pair" ? "the two graphs above" : "the total above";
+        const ref = opts.scaleNote === "pair" ? g.kRef : g.kTot, what = opts.scaleNote === "pair" ? "the gas and oil graphs" : "the total graph"; // says what it compares with, so it reads on a plate on its own
         svg.append("text").attr("class", "tl-note").attr("x", bx).attr("y", by + 18).text(`Scale ${fmt1(k / ref)} times that of ${what}`);
       }
     }
@@ -379,8 +384,8 @@ export default function create(el, { bulb: B }, opts = {}) {
   }
 
   function render(W, state, animate) {
-    const posterH = POSTER ? Math.max(480, Math.round(POSTER.height())) : null;
-    if (!geo || (POSTER ? geo.W !== W || geo.H !== posterH : Math.abs(W / geo.W - 1) > 0.2)) geo = build(W); // small resizes scale the bitmaps
+    const fixedH = POSTER ? Math.max(480, Math.round(POSTER.height())) : opts.export ? Math.max(480, Math.round(opts.height())) : null;
+    if (!geo || (fixedH != null ? geo.W !== W || geo.H !== fixedH : Math.abs(W / geo.W - 1) > 0.2)) geo = build(W); // small resizes scale the bitmaps
     const sc = W / geo.W;
     const e = ensure(state);
     const dur = animate && !reducedMotion() ? (cur.mode === "silhouette" && state.mode !== "silhouette" ? 1600 : 600) : 0;
