@@ -30,7 +30,7 @@ Performance is checked with SubScout's `scripts/perf.py` (4x CPU throttle, no fr
 ## Data and licence
 
 Data: Sodir (Norwegian Offshore Directorate), Norwegian Licence for Open Government Data (NLOD 2.0);
-method in [`data/README.md`](data/README.md) and on the page under "How we know". Code: MIT License with Acknowledgement.
+method in [`data/README.md`](data/README.md) and on the page under "Basis of analysis". Code: MIT License with Acknowledgement.
 
 The quadrant maps sit on [Relief](https://github.com/AdmcCarthy/Relief) (Copernicus DEM GLO-90 and EMODnet Bathymetry) in its Detuned
 style at context strength, converted to longitude and latitude once by `scripts/build_relief_base.py` so the base and the Sodir
