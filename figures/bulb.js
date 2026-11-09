@@ -5,7 +5,12 @@
 //
 // state: { mode: "silhouette" | "colour", focus: [field keys], classes: [size class idx], note: str }
 // opts.panels: which graphs to draw, in order (default all three). opts.gutter: with two panels, put the
-// time axis and the story's events between them. opts.autoLabels: name the biggest streams on the streams.
+// time axis and the story's events between them. opts.autoLabels: name the biggest streams, horizontally, where
+// the stream is wide enough (nothing is ever turned on its side).
+// opts.groups: [{ title, short, classes }]: one oil-equivalent graph per group of size classes, on one scale,
+// spread evenly across the frame. opts.scaleWith: the width of the total figure (see TOTAL_FRAC); without it
+// the graphs are stretched to fill the frame. opts.scaleBar draws a bar that says what a width is, and
+// opts.scaleNote ("pair" or "total") says how far this scale is from that figure's.
 import { pal, shade, tok, vol, volShort, tip, fmt1, parseMonth, fmtMonth, reducedMotion, classLegend, scheme } from "./common.js";
 
 const ALL_PANELS = [
@@ -13,6 +18,8 @@ const ALL_PANELS = [
   { key: "gas", title: "Gas", short: "Gas" },
   { key: "oe", title: "Oil equivalent", short: "Oil eq." },
 ];
+
+const TOTAL_FRAC = 0.6; // the widest part of the total takes this share of the frame: narrow enough to read, one scale for what follows
 
 function gaussian(v, sig) {
   const rad = Math.ceil(sig * 3), ker = [];
@@ -29,19 +36,21 @@ function gaussian(v, sig) {
 export default function create(el, { bulb: B }, opts = {}) {
   // Poster mode (full-screen view, and every export/print plate): events in the left margin, discovery years on the right
   const POSTER = opts.poster ?? (opts.export ? { height: () => opts.height(), roots: ["TROLL", "JOHAN SVERDRUP"] } : null);
-  const PANELS = (opts.panels ?? ALL_PANELS.map((p) => p.key)).map((k) => ALL_PANELS.find((p) => p.key === k));
+  const PANELS = opts.groups
+    ? opts.groups.map((g) => ({ key: "oe", title: g.title, short: g.short, classes: g.classes }))
+    : (opts.panels ?? ALL_PANELS.map((p) => p.key)).map((k) => ALL_PANELS.find((p) => p.key === k));
   const GUT = !!opts.gutter && PANELS.length === 2;
   const jOE = PANELS.findIndex((p) => p.key === "oe");
-  // opts.classes: draw only these size classes (the view without the giants); opts.lift steps their shades up
-  // the ramp so pale classes stay visible; opts.ghost: the whole shelf's outline behind them, at the same scale
-  const only = opts.classes ? new Set(opts.classes) : null, lift = opts.lift ?? 0;
+  // opts.classes (or the union of the groups): draw only these size classes; opts.lift steps their shades up
+  // the ramp so pale classes stay visible
+  const only = opts.groups ? new Set(opts.groups.flatMap((g) => g.classes)) : opts.classes ? new Set(opts.classes) : null, lift = opts.lift ?? 0;
+  const inPanel = (p, f) => !p.classes || p.classes.includes(f.cls);
   const drawLegend = () => classLegend(opts.legendEl, only ? B.classes.filter((c) => only.has(c.idx)) : B.classes, lift);
   drawLegend();
   const n = B.dates.length;
   const dates = B.dates.map(parseMonth);
-  // whole-shelf totals (every field, whichever are drawn): the scale reference and the ghost outline
+  // whole-shelf totals (every field, whichever are drawn): the scale references
   const allSm = Object.fromEntries(["liq", "gas", "oe"].map((key) => [key, gaussian(Float32Array.from({ length: n }, (_, t) => d3.sum(B.fields, (f) => (key === "oe" ? f.liq[t] + f.gas[t] : f[key][t]))), B.smooth_sigma)]));
-  const ghost = opts.ghost ? allSm.oe : null;
   const F = B.fields.filter((f) => !only || only.has(f.cls)).map((f) => {
     const oe = f.liq.map((v, t) => v + f.gas[t]);
     return { ...f, raw: { liq: f.liq, gas: f.gas, oe }, sm: { liq: gaussian(f.liq, B.smooth_sigma), gas: gaussian(f.gas, B.smooth_sigma), oe: gaussian(oe, B.smooth_sigma) } };
@@ -49,8 +58,10 @@ export default function create(el, { bulb: B }, opts = {}) {
   // oldest at the centre, younger alternating left and right
   const order = [];
   [...F.keys()].sort((a, b) => F[a].entry - F[b].entry).forEach((i, k) => (k % 2 ? order.unshift(i) : order.push(i)));
-  const LAY = Object.fromEntries(PANELS.map((p) => p.key).map((key) => {
-    const sers = order.filter((i) => F[i].raw[key].some((v) => v > 0));
+  // one layout per graph (indexed like PANELS): which streams, where each sits, the total width
+  const LAY = PANELS.map((p) => {
+    const key = p.key;
+    const sers = order.filter((i) => inPanel(p, F[i]) && F[i].raw[key].some((v) => v > 0));
     const x0 = {}, x1 = {}, tot = new Float32Array(n);
     sers.forEach((i) => { x0[i] = new Float32Array(n); x1[i] = new Float32Array(n); });
     for (let t = 0; t < n; t++) {
@@ -58,12 +69,13 @@ export default function create(el, { bulb: B }, opts = {}) {
       tot[t] = s; let c = -s / 2;
       for (const i of sers) { x0[i][t] = c; c += F[i].sm[key][t]; x1[i][t] = c; }
     }
-    return [key, { sers, x0, x1, tot }];
-  }));
-  // totals for all three series, whichever graphs are drawn: the hover quotes them all
+    return { sers, x0, x1, tot };
+  });
+  // totals for all three series, whichever graphs are drawn: the hover quotes them all; and per graph (a group's own total)
   const RAW = Object.fromEntries(ALL_PANELS.map(({ key }) => [key, dates.map((_, t) => d3.sum(F, (f) => f.raw[key][t]))]));
-  const peakRaw = Object.fromEntries(ALL_PANELS.map(({ key }) => [key, key === "oe" && !only ? B.peak : d3.max(RAW[key])]));
-  const maxW = PANELS.map(({ key }) => (key === "oe" && ghost ? d3.max(ghost) : d3.max(LAY[key].tot)));
+  const RAWP = PANELS.map((p) => dates.map((_, t) => d3.sum(F.filter((f) => inPanel(p, f)), (f) => f.raw[p.key][t])));
+  const peakP = PANELS.map((p, j) => (p.key === "oe" && !only ? B.peak : d3.max(RAWP[j])));
+  const maxW = PANELS.map((_, j) => d3.max(LAY[j].tot));
 
   el.innerHTML = "";
   el.classList.add("tl-bulb");
@@ -105,8 +117,8 @@ export default function create(el, { bulb: B }, opts = {}) {
   // places them with a matrix, so a resize or a state change never rebuilds geometry.
   const yr = dates.map((d) => d.getFullYear() + (d - new Date(d.getFullYear(), 0, 1)) / 3.15576e10);
   const def = (v, t) => v[t] > 0 || (t + 1 < n && v[t + 1] > 0) || (t > 0 && v[t - 1] > 0);
-  const NORM = PANELS.map(({ key }) => {
-    const L = LAY[key];
+  const NORM = PANELS.map(({ key }, j) => {
+    const L = LAY[j];
     const sers = L.sers.map((i) => {
       const p = new Path2D();
       d3.area().curve(d3.curveBasis).context(p).defined((_, t) => def(F[i].sm[key], t)).y((_, t) => yr[t]).x0((_, t) => L.x0[i][t]).x1((_, t) => L.x1[i][t])(dates);
@@ -118,12 +130,6 @@ export default function create(el, { bulb: B }, opts = {}) {
     d3.area().curve(d3.curveBasis).context(sil).defined((_, t) => def(L.tot, t)).y((_, t) => yr[t]).x0((_, t) => -L.tot[t] / 2).x1((_, t) => L.tot[t] / 2)(dates);
     return { sers, seams, sil };
   });
-
-  const GHOST = ghost && jOE >= 0 ? (() => {
-    const p = new Path2D();
-    d3.area().curve(d3.curveBasis).context(p).defined((_, t) => def(ghost, t)).y((_, t) => yr[t]).x0((_, t) => -ghost[t] / 2).x1((_, t) => ghost[t] / 2)(dates);
-    return p;
-  })() : null;
 
   function build(W) {
     const narrow = W < 560, poster = !!POSTER;
@@ -137,20 +143,29 @@ export default function create(el, { bulb: B }, opts = {}) {
     const room = narrow || !fig ? Infinity : vh - 56 - above - 24; // wide layout pins the figure 56px from the top
     const H = poster ? Math.max(480, Math.round(POSTER.height()))
       : Math.round(Math.max(narrow ? 220 : 361, Math.min(W * 1.235, vh * (narrow ? 0.3 : 0.684), room, 1045)));
-    let k = (W - mL - mR - (GUT ? gw : (PANELS.length - 1) * gap)) / d3.sum(maxW);
-    // the pixels per million Sm³ of the pair of graphs (gas, oil) drawn at this width, for every field (see bulb_pair.js):
-    // opts.scaleWith draws on that scale; opts.scaleNote says how far this figure's own scale is stretched from it
+    const avail = W - mL - mR;
+    let k = (avail - (GUT ? gw : (PANELS.length - 1) * gap)) / d3.sum(maxW);
+    // two reference scales, in pixels per million Sm³, both for every field: the pair of graphs (gas, oil) drawn at this width
+    // (see bulb_pair.js), and the total, whose widest part takes TOTAL_FRAC of the frame
     const kRef = (W - mL - (poster ? 250 : narrow ? 4 : 12) - (narrow ? 46 : 80)) / (d3.max(allSm.gas) + d3.max(allSm.liq));
-    if (opts.scaleWith) k = kRef;
-    let acc = opts.scaleWith ? mL + (W - mL - mR - d3.sum(maxW) * k) / 2 : mL; // centred in its frame
-    const cx = maxW.map((m) => { const c = acc + (m * k) / 2; acc += m * k + (GUT ? gw : gap); return c; });
+    const kTot = (TOTAL_FRAC * avail) / d3.max(allSm.oe);
+    let cx;
+    if (opts.groups) { // graphs of one kind side by side: equal slots across the frame, one shared scale
+      const slot = avail / PANELS.length;
+      k = opts.scaleWith ? kTot : (0.9 * slot) / d3.max(maxW);
+      cx = PANELS.map((_, j) => mL + slot * (j + 0.5));
+    } else {
+      if (opts.scaleWith) k = kTot;
+      let acc = opts.scaleWith ? mL + (avail - d3.sum(maxW) * k - (PANELS.length - 1) * gap) / 2 : mL; // centred in its frame
+      cx = maxW.map((m) => { const c = acc + (m * k) / 2; acc += m * k + (GUT ? gw : gap); return c; });
+    }
     const gx = GUT ? cx[0] + (maxW[0] * k) / 2 + gw / 2 : 0; // centre line of the gutter
     const y = d3.scaleTime([new Date(B.axis_start, 0, 1), new Date(B.axis_end, 11, 31)], [H - mB, mT]);
     const dpr = Math.min(opts.print ? 6 : 2, opts.pixelRatio ?? (window.devicePixelRatio || 1)); // print plates ask for more device pixels
     // decimal year -> pixel row: linear, from two points of the time scale
     const y0 = y(new Date(2000, 0, 1)), sy = y(new Date(2010, 0, 1)) - y0;
     const mats = cx.map((c) => new DOMMatrix([k * dpr, 0, 0, (sy / 10) * dpr, c * dpr, (y0 - 2000 * (sy / 10)) * dpr]));
-    return { W, H, narrow, poster, mL, mR, mT, mB, k, kRef, cx, y, dpr, mats, gw, gx };
+    return { W, H, narrow, poster, mL, mR, mT, mB, k, kRef, kTot, cx, y, dpr, mats, gw, gx };
   }
 
   function paint(c, state) {
@@ -161,12 +176,6 @@ export default function create(el, { bulb: B }, opts = {}) {
     if (state.mode === "silhouette") {
       NORM.forEach((p, j) => { const q = new Path2D(); q.addPath(p.sil, g.mats[j]); ctx.fillStyle = P.silhouette; ctx.fill(q); });
       return;
-    }
-    if (GHOST) { // the whole shelf, faint, behind the streams drawn
-      const q = new Path2D(); q.addPath(GHOST, g.mats[jOE]);
-      ctx.globalAlpha = 0.3; ctx.fillStyle = P.silhouette; ctx.fill(q);
-      ctx.globalAlpha = 0.8; ctx.strokeStyle = P.silhouette; ctx.lineWidth = 1.2 * g.dpr; ctx.stroke(q);
-      ctx.globalAlpha = 1;
     }
     const focus = state.focus?.length ? new Set(state.focus) : null;
     const cls = state.classes?.length ? new Set(state.classes) : null;
@@ -221,7 +230,7 @@ export default function create(el, { bulb: B }, opts = {}) {
     (POSTER.roots ?? []).forEach((key) => {
       const i = F.findIndex((f) => f.key === key);
       if (i < 0 || !F[i].discovered) return;
-      const pk = jOE >= 0 ? "oe" : F[i].dom === "gas" ? "gas" : "liq", j = PANELS.findIndex((p) => p.key === pk), L = LAY[pk];
+      const pk = jOE >= 0 ? "oe" : F[i].dom === "gas" ? "gas" : "liq", j = PANELS.findIndex((p) => p.key === pk), L = LAY[j];
       if (j < 0 || !(i in L.x0)) return;
       const f = F[i], te = f.entry, tt = Math.min(n - 1, te + 2);
       const xe = g.cx[j] + ((L.x0[i][tt] + L.x1[i][tt]) / 2) * g.k, yd = y(new Date(f.discovered, 6, 1)), ye = y(dates[te]);
@@ -250,32 +259,25 @@ export default function create(el, { bulb: B }, opts = {}) {
     an.append("text").attr("class", "tl-gyear").style("font-weight", 700).attr("x", gx).attr("y", yNow).attr("dy", "0.35em").attr("text-anchor", "middle").text("Today");
   }
 
-  // Name the biggest streams on the streams: horizontal where the stream is wide enough, turned to read
-  // upwards where it is narrow, black or white by the colour underneath. Greedy, so labels never overlap.
+  // Name the biggest streams on the streams, horizontally and only where the stream is wide enough for the name
+  // (nothing is turned on its side), black or white by the colour underneath. Greedy, so labels never overlap.
   function autoLabels(g) {
     const { y, cx, k } = g, taken = [], max = g.narrow ? 6 : 16;
     PANELS.forEach((p, j) => {
-      const L = LAY[p.key];
+      const L = LAY[j];
       const ranked = L.sers.map((i) => ({ i, peak: d3.max(F[i].sm[p.key]) })).sort((a, b) => b.peak - a.peak).slice(0, max);
       for (const { i } of ranked) {
         const f = F[i], tl = Math.min(n - 1, d3.maxIndex(f.sm[p.key]) + 2), w = (L.x1[i][tl] - L.x0[i][tl]) * k, tw = f.name.length * 6.6;
         const colour = p.key === "oe" ? shade(f.dom, Math.min(5, f.cls + lift)) : shade(p.key, Math.min(5, f.cls + lift));
         const cxp = cx[j] + ((L.x0[i][tl] + L.x1[i][tl]) / 2) * k, cyp = y(dates[tl]);
         if (cyp < y(dates[n - 1]) + 10) continue; // not on the Today line, where the label would be cut
-        let box = null, rot = false;
-        if (w >= tw + 12) box = [cxp - tw / 2, cyp - 8, cxp + tw / 2, cyp + 8];
-        else if (w >= 14) {
-          // vertical room: rows either side of the peak where the stream stays at least 14px wide
-          let a = tl, b = tl;
-          while (a > 0 && (L.x1[i][a - 1] - L.x0[i][a - 1]) * k >= 14) a--;
-          while (b < n - 1 && (L.x1[i][b + 1] - L.x0[i][b + 1]) * k >= 14) b++;
-          if (y(dates[a]) - y(dates[b]) >= tw + 8) { box = [cxp - 8, cyp - tw / 2, cxp + 8, cyp + tw / 2]; rot = true; }
-        }
-        if (!box || taken.some((o) => box[0] < o[2] && box[2] > o[0] && box[1] < o[3] && box[3] > o[1])) continue;
+        if (w < tw + 12) continue; // too narrow for the name: leave it to the hover
+        const box = [cxp - tw / 2, cyp - 8, cxp + tw / 2, cyp + 8];
+        if (taken.some((o) => box[0] < o[2] && box[2] > o[0] && box[1] < o[3] && box[3] > o[1])) continue;
         taken.push(box);
-        const txt = svg.append("text").attr("class", "tl-flabel").attr("text-anchor", "middle").attr("dy", "0.35em")
+        svg.append("text").attr("class", "tl-flabel").attr("text-anchor", "middle").attr("dy", "0.35em")
+          .attr("transform", `translate(${cxp},${cyp})`)
           .style("fill", d3.lab(colour).l > 62 ? "#1c1a17" : "#fff").text(f.name); // inline: the page's own text rules must not recolour it
-        txt.attr("transform", rot ? `translate(${cxp},${cyp}) rotate(-90)` : `translate(${cxp},${cyp})`);
       }
     });
   }
@@ -298,16 +300,19 @@ export default function create(el, { bulb: B }, opts = {}) {
     if (g.poster) posterNotes(g, yNow, x1);
     PANELS.forEach((p, j) => {
       svg.append("text").attr("class", "tl-col").attr("x", cx[j]).attr("y", 14).attr("text-anchor", "middle").text(g.narrow ? p.short : p.title);
-      svg.append("text").attr("class", "tl-note").attr("x", cx[j]).attr("y", 29).attr("text-anchor", "middle").text(`peak ${volShort(peakRaw[p.key])}`);
+      svg.append("text").attr("class", "tl-note").attr("x", cx[j]).attr("y", 29).attr("text-anchor", "middle").text(`peak ${volShort(peakP[j])}`);
     });
-    // found but not sanctioned: placeholder width at today in the oil-equivalent column
-    if (opts.scaleBar || opts.scaleNote) { // width has no axis: say what a width is, and how far this scale is stretched
+    if (opts.scaleBar || opts.scaleNote) { // width has no axis: say what a width is, and how far this scale is from another figure's
       const v = [10, 20, 50, 100, 200, 500, 1000, 2000].find((s) => s * k >= 90) ?? 2000, w = v * k, bx = mL + 6, by = mT + 38;
       svg.append("line").attr("x1", bx).attr("x2", bx + w).attr("y1", by).attr("y2", by).attr("stroke", tok("text")).attr("stroke-width", 1.5);
       [bx, bx + w].forEach((px) => svg.append("line").attr("x1", px).attr("x2", px).attr("y1", by - 4).attr("y2", by + 4).attr("stroke", tok("text")).attr("stroke-width", 1.5));
       svg.append("text").attr("class", "tl-note").attr("x", bx).attr("y", by - 8).text(`Width: ${vol(v)}`);
-      if (opts.scaleNote) svg.append("text").attr("class", "tl-note").attr("x", bx).attr("y", by + 18).text(`Scale ${fmt1(k / g.kRef)} times that of the total above`);
+      if (opts.scaleNote) {
+        const ref = opts.scaleNote === "pair" ? g.kRef : g.kTot, what = opts.scaleNote === "pair" ? "the two graphs above" : "the total above";
+        svg.append("text").attr("class", "tl-note").attr("x", bx).attr("y", by + 18).text(`Scale ${fmt1(k / ref)} times that of ${what}`);
+      }
     }
+    // found but not sanctioned: placeholder width at today in the oil-equivalent column
     if (jOE >= 0 && !only) {
       const pw = (RAW.oe[n - 1] + B.pending) * k;
       const pat = svg.append("defs").append("pattern").attr("id", "tl-hatch").attr("patternUnits", "userSpaceOnUse").attr("width", 5).attr("height", 5).attr("patternTransform", "rotate(45)");
@@ -328,7 +333,7 @@ export default function create(el, { bulb: B }, opts = {}) {
       if (i < 0) return;
       const f = F[i];
       PANELS.forEach((p, j) => {
-        const L = LAY[p.key];
+        const L = LAY[j];
         if (!(i in L.x0)) return;
         const tl = Math.min(n - 1, d3.maxIndex(f.sm[p.key]) + 2), w = (L.x1[i][tl] - L.x0[i][tl]) * k;
         if (w < 22 && p.key !== "oe") return;
@@ -350,13 +355,16 @@ export default function create(el, { bulb: B }, opts = {}) {
       const t = Math.max(0, Math.min(n - 1, d3.bisectLeft(dates, y.invert(py))));
       hl.attr("x1", mL).attr("x2", x1).attr("y1", y(dates[t])).attr("y2", y(dates[t])).attr("opacity", 1);
       let hit = null;
-      PANELS.forEach((p, j) => { const L = LAY[p.key], v = (px - cx[j]) / k; for (const i of L.sers) if (v >= L.x0[i][t] && v <= L.x1[i][t] && L.x1[i][t] > L.x0[i][t]) { hit = i; break; } });
+      PANELS.forEach((p, j) => { const L = LAY[j], v = (px - cx[j]) / k; for (const i of L.sers) if (v >= L.x0[i][t] && v <= L.x1[i][t] && L.x1[i][t] > L.x0[i][t]) { hit = i; break; } });
       hov.selectAll("*").remove();
-      let html = `<b>${fmtMonth(dates[t])}</b><br><span class="ss-k">${only ? "Fields outside the giants" : "All fields"}, remaining</span><br>Liquids ${vol(RAW.liq[t])}<br>Gas ${vol(RAW.gas[t])}<br><b>Total ${vol(RAW.oe[t])}</b>`;
+      const jp = d3.minIndex(cx, (c) => Math.abs(px - c)); // the graph the pointer is over
+      let html = opts.groups
+        ? `<b>${fmtMonth(dates[t])}</b><br><span class="ss-k">${PANELS[jp].title}, remaining</span><br><b>Total ${vol(RAWP[jp][t])}</b>`
+        : `<b>${fmtMonth(dates[t])}</b><br><span class="ss-k">${only ? "Fields outside the giants" : "All fields"}, remaining</span><br>Liquids ${vol(RAW.liq[t])}<br>Gas ${vol(RAW.gas[t])}<br><b>Total ${vol(RAW.oe[t])}</b>`;
       if (hit != null) {
         const f = F[hit], lv = f.raw.liq[t], gv = f.raw.gas[t];
         PANELS.forEach((p, j) => {
-          const L = LAY[p.key]; if (!(hit in L.x0)) return;
+          const L = LAY[j]; if (!(hit in L.x0)) return;
           hov.append("path").attr("fill", "none").attr("stroke", tok("text")).attr("stroke-width", 1.4)
             .attr("d", d3.area().curve(d3.curveBasis).defined((_, tt) => f.sm[p.key][tt] > 0 || (tt + 1 < n && f.sm[p.key][tt + 1] > 0)).y((_, tt) => y(dates[tt]))
               .x0((_, tt) => cx[j] + L.x0[hit][tt] * k).x1((_, tt) => cx[j] + L.x1[hit][tt] * k)(dates));

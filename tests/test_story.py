@@ -23,7 +23,7 @@ def built(tmp_path_factory):
 def test_builds_without_errors_or_warnings(built):
     rep, _, out = built
     assert rep.errors == [] and rep.warnings == []
-    for m in ("bulb", "bulb_pair", "bulb_total", "bulb_sub", "bulb_sub_same", "pack", "cream", "maps", "common"):
+    for m in ("bulb", "bulb_pair", "bulb_total", "bulb_trio", "bulb_trio_same", "bulb_trio_stretched", "pack", "cream", "maps", "common"):
         assert (out / "figures" / f"{m}.js").exists()
 
 
@@ -114,19 +114,26 @@ def _outside_giants():
     n = len(s["dates"])
     yr = [int(x[:4]) for x in s["dates"]]
     sub, big, ents, produced = [0.0] * n, [0.0] * n, [], {}
+    cls, n_cls = [[0.0] * n for _ in range(3)], [0, 0, 0]  # small (under 50 MMboe), medium (50 to 160), large (160 to 500)
     for x in s["fields"]:
         tot = [a + b + c for a, b, c in zip(x["v"]["oil"], x["v"]["liquids"], x["v"]["gas"], strict=True)]
         r = f.loc[x["key"]]
-        giant = (r.recoverable_oil + r.recoverable_liquids + r.recoverable_gas) * 6.29 >= 500
+        mmboe = (r.recoverable_oil + r.recoverable_liquids + r.recoverable_gas) * 6.29
+        giant = mmboe >= 500
+        c = 0 if mmboe < 50 else 1 if mmboe < 160 else 2
         for t, v in enumerate(tot):
             (big if giant else sub)[t] += v
+            if not giant:
+                cls[c][t] += v
+        if not giant:
+            n_cls[c] += 1
         if giant or not any(v > 0 for v in tot):
             continue
         e = next(t for t, v in enumerate(tot) if v > 0)
         ents.append({"key": x["key"], "year": yr[e], "vol": tot[e], "producing": not bool(r.not_yet_producing)})
         for t in range(e + 1, n):
             produced[yr[t]] = produced.get(yr[t], 0.0) + (tot[t - 1] - tot[t])
-    return {"dates": s["dates"], "yr": yr, "sub": sub, "big": big, "ents": ents, "produced": produced}
+    return {"dates": s["dates"], "yr": yr, "sub": sub, "big": big, "ents": ents, "produced": produced, "cls": cls, "n_cls": n_cls}
 
 
 def _m(ledger, name):
@@ -143,15 +150,34 @@ def test_outside_the_giants_volumes(built):
     assert _m(ledger, "sub_share_peak") == pytest.approx(sub[ipk] / (sub[ipk] + big[ipk]), rel=1e-5)
     assert _m(ledger, "sub_now") == pytest.approx(sub[-1] * 1e6, rel=1e-5)
     assert _m(ledger, "sub_share_now") == pytest.approx(sub[-1] / (sub[-1] + big[-1]), rel=1e-5)
-    mid = [v for v, y in zip(sub, g["yr"], strict=True) if 2000 <= y <= 2014]
-    assert _m(ledger, "sub_lo_0014") == pytest.approx(min(mid) * 1e6, rel=1e-5)
-    assert _m(ledger, "sub_hi_0014") == pytest.approx(max(mid) * 1e6, rel=1e-5)
-    # "rose ... to X at the end of 2023, and has eased since"
-    ipeak = max(range(len(sub)), key=lambda i: sub[i])
-    assert g["dates"][ipeak] == "2023-12" and sub[-1] < sub[ipeak]
-    assert _m(ledger, "sub_peak") == pytest.approx(sub[ipeak] * 1e6, rel=1e-5)
+
+
+def test_small_and_medium_fields(built):
+    """The three figures and the prose after them: small (under 50 MMboe) and medium (50 to 160), large left out."""
+    _, ledger, _ = built
+    g = _outside_giants()
+    small, medium, large = g["cls"]
+    sm = [a + b for a, b in zip(small, medium, strict=True)]
+    sub, big = g["sub"], g["big"]
+    assert [_m(ledger, k) for k in ("n_small", "n_medium", "n_large")] == g["n_cls"]
+    assert sum(g["n_cls"]) == 106  # "106 fields remain" outside the giants
+    assert _m(ledger, "large_share_sub") == pytest.approx(large[-1] / sub[-1], rel=1e-5)
+    for name, arr in (("small_now", small), ("medium_now", medium), ("sm_now", sm)):
+        assert _m(ledger, name) == pytest.approx(arr[-1] * 1e6, rel=1e-5), name
+    assert _m(ledger, "sm_share_now") == pytest.approx(sm[-1] / (sub[-1] + big[-1]), rel=1e-5)
+    mid = [v for v, y in zip(sm, g["yr"], strict=True) if 2000 <= y <= 2014]
+    assert _m(ledger, "sm_lo_0014") == pytest.approx(min(mid) * 1e6, rel=1e-5)
+    assert _m(ledger, "sm_hi_0014") == pytest.approx(max(mid) * 1e6, rel=1e-5)
+    # "rose to X at the end of 2023 and has eased since"
+    ipeak = max(range(len(sm)), key=lambda i: sm[i])
+    assert g["dates"][ipeak] == "2023-12" and sm[-1] < sm[ipeak]
+    assert _m(ledger, "sm_peak") == pytest.approx(sm[ipeak] * 1e6, rel=1e-5)
     # "held level to 2014": the whole range 2000-2014 sits below the 2023 peak by a wide margin
-    assert max(mid) < 0.7 * sub[ipeak]
+    assert max(mid) < 0.7 * sm[ipeak]
+    # "medium fields held more than small ones in every year from 2000" (checked every quarter)
+    assert all(m > s for m, s, y in zip(medium, small, g["yr"], strict=True) if y >= 2000)
+    # large fields are about half of what is left outside the giants, which is why they are named as left out
+    assert 0.45 < large[-1] / sub[-1] < 0.55
 
 
 def test_giants_fall_and_share(built):
