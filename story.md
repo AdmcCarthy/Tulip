@@ -28,10 +28,10 @@ sources:
     accessed: 2026-11-07
     note: Totals by resource class (norskpetroleum.no spreadsheet)
   sodir_relief:
-    name: Sodir FactPages and FactMaps; base map Relief (Copernicus DEM GLO-90, EMODnet Bathymetry)
+    name: Sodir FactPages and FactMaps; base map Relief (Copernicus DEM GLO-90, EMODnet Bathymetry; GEBCO 2026 beyond them)
     url: https://github.com/AdmcCarthy/Relief
     accessed: 2026-11-09
-    note: Quadrants and field reserves from Sodir (NLOD 2.0). Land heights Copernicus DEM GLO-90 © DLR e.V. 2010-2014 and © Airbus 2014-2018, provided under COPERNICUS by the European Union and ESA; sea-floor depths EMODnet Bathymetry Consortium (2024), generalised by Relief to a 2 km cell (4 km for the Barents Sea).
+    note: Quadrants and field reserves from Sodir (NLOD 2.0). Land heights Copernicus DEM GLO-90 © DLR e.V. 2010-2014 and © Airbus 2014-2018, provided under COPERNICUS by the European Union and ESA; sea-floor depths EMODnet Bathymetry Consortium (2024), generalised by Relief to a 2 km cell (4 km for the Barents Sea and north-east Europe). Beyond those regions (Finland, the far Atlantic) the sea floor and land come from the GEBCO 2026 Grid (GEBCO; public domain, acknowledged), generalised to a 20 km cell; not for navigation.
 data:
   header: data/header.json
   streams: data/streams.json

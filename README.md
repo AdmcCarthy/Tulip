@@ -34,8 +34,9 @@ method in [`data/README.md`](data/README.md) and on the page under "Basis of ana
 
 The quadrant maps sit on [Relief](https://github.com/AdmcCarthy/Relief) (Copernicus DEM GLO-90 and EMODnet Bathymetry) in its Detuned
 style at context strength, converted to longitude and latitude once by `scripts/build_relief_base.py` so the base and the Sodir
-quadrants are projected together. Relief has no single region over the whole shelf, so the base joins `north_sea`, `norwegian_sea` and
-`barents_sea`; beyond them (Sweden, Finland, the Baltic) a flat tint and the plain Sodir land outline show as a straight edge.
+quadrants are projected together. Relief has no single region over the whole shelf, so the base joins `north_sea`, `norwegian_sea`,
+`barents_sea` and `ne_europe` (the UK, Denmark, Germany, Poland and southern Sweden) at their overview level, with `atlantic` (GEBCO 2026,
+the coarsest) filling what is left, so Sweden, Finland, the Baltic and the UK carry relief too. The earlier region wins where two meet.
 
 ## Licence and acknowledgement
 
