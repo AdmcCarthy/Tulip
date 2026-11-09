@@ -27,3 +27,5 @@ Hubs and areas (`fields.csv` columns `hub`, `area_group`): hub = host facility p
 'Development' descriptions (`scripts/hubs.py`; tied/connected/processed to a named field's facility,
 chains resolved). Areas: nearest named anchor per sea with documented overrides. Interpreted grouping;
 checked by `tests/test_hubs.py`.
+
+`header.json` is the band in the page's hero: a synthetic seismic section made by `scripts/make_header.py` (seismic_art's `synthetic_hero`), not Sodir data and not a real survey; the page says so.

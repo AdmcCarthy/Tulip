@@ -10,7 +10,7 @@ register: section
 palette: tide
 surface: nordic-cool
 units: sm3
-horizon: true
+horizon: { data: header, height: 80, label: false }
 kpis:
   - { metric: peak_total, filter: volume, label: "left to produce at the peak, in 2000" }
   - { metric: now_total, filter: volume, label: "left to produce today" }
@@ -33,6 +33,7 @@ sources:
     accessed: 2026-11-09
     note: Quadrants and field reserves from Sodir (NLOD 2.0). Land heights Copernicus DEM GLO-90 © DLR e.V. 2010-2014 and © Airbus 2014-2018, provided under COPERNICUS by the European Union and ESA; sea-floor depths EMODnet Bathymetry Consortium (2024), generalised by Relief to a 2 km cell (4 km for the Barents Sea).
 data:
+  header: data/header.json
   streams: data/streams.json
   fields: data/fields.csv
   totals: data/totals_monthly.csv
