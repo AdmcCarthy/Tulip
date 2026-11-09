@@ -12,7 +12,8 @@ committed; everything else here is built by `scripts/build_data.py`. Don't hand-
 | `hindsight.csv` | Each year's Sodir estimate of remaining (versions 2004–2025) vs today's back-projection, same fields | Derived |
 | `quadrants_remaining.geojson`, `snapshots_fields.csv` | Remaining by quadrant at 1975…2025 | Derived |
 | `potential.json` | Sodir resource accounts 31.12.2025 (norskpetroleum.no spreadsheet) + undiscovered range | Observed / Interpreted |
-| `land_simple.geojson` | Sodir FactMaps basemap land, clipped and simplified | Observed |
+| `land_simple.geojson` | Sodir FactMaps basemap land, clipped and simplified (kept as a build input; the maps draw Relief's own land) | Observed |
+| `seas.json` | The three Relief map views (North Sea, Norwegian Sea, Barents Sea) at overview level, in each region's own projection (units of 100 m), with the quadrants that held reserves and the maritime boundaries; built by `scripts/build_seas.py` | Derived |
 
 Raw sources (accessed 2026-11-07): FactPages tables `field`, `field_reserves`, `field_in_place_volumes`,
 `field_production_monthly`, `field_activity_status_hst`, `field_description`, `field_operator_hst`,

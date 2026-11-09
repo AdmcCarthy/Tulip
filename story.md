@@ -28,10 +28,10 @@ sources:
     accessed: 2026-11-07
     note: Totals by resource class (norskpetroleum.no spreadsheet)
   sodir_relief:
-    name: Sodir FactPages and FactMaps; base map Relief (Copernicus DEM GLO-90, EMODnet Bathymetry; GEBCO 2026 beyond them)
+    name: Sodir FactPages and FactMaps; base maps Relief (Copernicus DEM GLO-90, EMODnet Bathymetry, NOAA ETOPO 2022)
     url: https://github.com/AdmcCarthy/Relief
     accessed: 2026-11-09
-    note: Quadrants and field reserves from Sodir (NLOD 2.0). Land heights Copernicus DEM GLO-90 © DLR e.V. 2010-2014 and © Airbus 2014-2018, provided under COPERNICUS by the European Union and ESA; sea-floor depths EMODnet Bathymetry Consortium (2024), generalised by Relief to a 2 km cell (4 km for the Barents Sea and north-east Europe). Beyond those regions (Finland, the far Atlantic) the sea floor and land come from the GEBCO 2026 Grid (GEBCO; public domain, acknowledged), generalised to a 20 km cell; not for navigation.
+    note: Quadrants and field reserves from Sodir (NLOD 2.0). Land heights Copernicus DEM GLO-90 © DLR e.V. 2010-2014 and © Airbus 2014-2018, provided under COPERNICUS by the European Union and ESA; sea-floor depths EMODnet Bathymetry Consortium (2024), generalised by Relief to a 2 km cell (4 km for the Barents Sea). East of 43°E (the Barents Sea map) the sea floor is NOAA NCEI (2022), ETOPO 2022 15 Arc-Second Global Relief Model (public domain).
 data:
   header: data/header.json
   streams: data/streams.json
@@ -40,10 +40,7 @@ data:
   hindsight: data/hindsight.csv
   potential: data/potential.json
   snap: data/snapshots_fields.csv
-  quads: data/quadrants_remaining.geojson
-  land: data/land_simple.geojson
-  relief: data/relief_shelf.json
-  borders: data/borders.geojson
+  seas: data/seas.json
 ---
 
 Every oil and gas field has a volume it can still produce. Sodir, the Norwegian Offshore
@@ -291,19 +288,20 @@ exception: { rule: direct-labels, reason: "139 points: colour shows fluid and si
 ## The centre of gravity moves north
 
 In 1995 almost all of what was left lay in the North Sea. Today {{ north_share_now | pct }} lies in
-the Norwegian and Barents Seas, up from {{ north_share_1995 | pct }} at the end of 1995.
+the Norwegian and Barents Seas, up from {{ north_share_1995 | pct }} at the end of 1995. Each column below is one sea and each row
+one year, so a column shows a sea filling and a row shows the shelf at one moment.
 
 ```chart
 id: maps
 type: custom
-module: figures/maps.js
-data: [quads, relief, land, borders]
+module: figures/seas.js
+data: seas
 title: Remaining reserves spread north as the North Sea giants drained
-subtitle: Remaining recoverable volume by Sodir quadrant at the end of each snapshot year
+subtitle: Remaining recoverable volume by Sodir quadrant at the end of each snapshot year, one column per sea
 source: sodir_relief
 confidence: derived
-notes: Fields assigned to the quadrant holding a point inside their outline. Dashed lines are agreed maritime boundaries.
-exception: { rule: north-up, reason: "Maps rotated so the shelf runs up each panel and the frame leaves out empty land to the east; a north arrow marks the turn." }
+notes: Fields assigned to the quadrant holding a point inside their outline. Each quadrant sits in the sea Sodir names for it, by latitude (North Sea south of 62°N, Norwegian Sea to 70°N, Barents Sea beyond). Dashed lines are agreed maritime boundaries. Each column is that sea's Relief map view in its own projection, so north is a few degrees off up the page and differs between columns; the arrow in each map shows where it points.
+exception: { rule: north-up, reason: "Each sea keeps its Relief region's own projection (UTM zone 32N, Lambert conic, polar azimuthal) rather than one rotated map, so north is not exactly up the page and differs between the three columns; an arrow in every map marks it." }
 ```
 
 ## How the shelf is wired
