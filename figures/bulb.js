@@ -43,7 +43,7 @@ export default function create(el, { bulb: B }, opts = {}) {
   // oldest at the centre, younger alternating left and right
   const order = [];
   [...F.keys()].sort((a, b) => F[a].entry - F[b].entry).forEach((i, k) => (k % 2 ? order.unshift(i) : order.push(i)));
-  const LAY = Object.fromEntries(PANELS.map(({ key }) => {
+  const LAY = Object.fromEntries([...new Set([...PANELS.map((p) => p.key), ...(opts.scaleWith ?? [])])].map((key) => {
     const sers = order.filter((i) => F[i].raw[key].some((v) => v > 0));
     const x0 = {}, x1 = {}, tot = new Float32Array(n);
     sers.forEach((i) => { x0[i] = new Float32Array(n); x1[i] = new Float32Array(n); });
@@ -116,8 +116,8 @@ export default function create(el, { bulb: B }, opts = {}) {
   function build(W) {
     const narrow = W < 560, poster = !!POSTER;
     // gutter layout: years (and, when wide enough, the events) sit between the two graphs, not in the margins
-    const gw = !GUT ? 0 : W < 900 ? (narrow ? 46 : 70) : 290, evts = GUT && gw >= 200;
-    const mL = GUT ? (narrow ? 4 : 12) : poster ? 330 : narrow ? 4 : 12, mR = GUT ? (narrow ? 4 : 12) : poster ? 250 : narrow ? 30 : 46, mT = poster ? 48 : 44, mB = 8, gap = poster ? 30 : narrow ? 6 : 16;
+    const gw = !GUT ? 0 : narrow ? 46 : 80;
+    const mL = poster ? 330 : narrow ? 4 : 12, mR = poster ? 250 : GUT ? (narrow ? 4 : 12) : narrow ? 30 : 46, mT = poster ? 48 : 44, mB = 8, gap = poster ? 30 : narrow ? 6 : 16;
     const vh = window.innerHeight || 800;
     // 5% shorter than v0.2; on the page, capped so the figure's title and legend stay on screen
     const fig = el.closest(".ss-figure");
@@ -125,8 +125,10 @@ export default function create(el, { bulb: B }, opts = {}) {
     const room = narrow || !fig ? Infinity : vh - 56 - above - 24; // wide layout pins the figure 56px from the top
     const H = poster ? Math.max(480, Math.round(POSTER.height()))
       : Math.round(Math.max(narrow ? 220 : 361, Math.min(W * 1.235, vh * (narrow ? 0.3 : 0.684), room, 1045)));
-    const k = (W - mL - mR - (GUT ? gw : (PANELS.length - 1) * gap)) / d3.sum(maxW);
-    let acc = mL;
+    let k = (W - mL - mR - (GUT ? gw : (PANELS.length - 1) * gap)) / d3.sum(maxW);
+    // opts.scaleWith: the same pixels per million Sm³ as a pair of graphs drawn at this width (see bulb_pair.js)
+    if (opts.scaleWith) k = (W - mL - (poster ? 250 : narrow ? 4 : 12) - (narrow ? 46 : 80)) / d3.sum(opts.scaleWith.map((key) => d3.max(LAY[key].tot)));
+    let acc = opts.scaleWith ? mL + (W - mL - mR - d3.sum(maxW) * k) / 2 : mL; // centred in its frame
     const cx = maxW.map((m) => { const c = acc + (m * k) / 2; acc += m * k + (GUT ? gw : gap); return c; });
     const gx = GUT ? cx[0] + (maxW[0] * k) / 2 + gw / 2 : 0; // centre line of the gutter
     const y = d3.scaleTime([new Date(B.axis_start, 0, 1), new Date(B.axis_end, 11, 31)], [H - mB, mT]);
@@ -134,7 +136,7 @@ export default function create(el, { bulb: B }, opts = {}) {
     // decimal year -> pixel row: linear, from two points of the time scale
     const y0 = y(new Date(2000, 0, 1)), sy = y(new Date(2010, 0, 1)) - y0;
     const mats = cx.map((c) => new DOMMatrix([k * dpr, 0, 0, (sy / 10) * dpr, c * dpr, (y0 - 2000 * (sy / 10)) * dpr]));
-    return { W, H, narrow, poster, mL, mR, mT, mB, k, cx, y, dpr, mats, gw, gx, evts };
+    return { W, H, narrow, poster, mL, mR, mT, mB, k, cx, y, dpr, mats, gw, gx };
   }
 
   function paint(c, state) {
@@ -186,7 +188,7 @@ export default function create(el, { bulb: B }, opts = {}) {
       return { e, lines: val ? 2 : 1, val, y: y(parseMonth(e.date)) };
     });
     dodge(ev, LH).forEach((it) => {
-      an.append("line").attr("x1", mL - 6).attr("x2", x1).attr("y1", it.y).attr("y2", it.y).attr("stroke", tok("text-muted")).attr("stroke-dasharray", "2 3").attr("opacity", 0.55);
+      an.append("line").attr("x1", mL - 6).attr("x2", GUT ? mL + 8 : x1).attr("y1", it.y).attr("y2", it.y).attr("stroke", tok("text-muted")).attr("stroke-dasharray", "2 3").attr("opacity", 0.55);
       const ty = it.top + LH * 0.8;
       if (Math.abs(ty - it.y) > 2) an.append("path").attr("d", `M${mL - 14},${ty - 4}L${mL - 6},${it.y}`).attr("stroke", tok("text-muted")).attr("fill", "none");
       const t1 = an.append("text").attr("class", "tl-ev").attr("x", mL - 16).attr("y", ty).attr("dy", "-0.1em").attr("text-anchor", "end");
@@ -195,10 +197,12 @@ export default function create(el, { bulb: B }, opts = {}) {
       if (it.val) an.append("text").attr("class", "tl-ev").attr("x", mL - 16).attr("y", ty + LH).attr("dy", "-0.1em").attr("text-anchor", "end").text(it.val);
     });
     // discovery-to-first-oil lines for selected fields, in the oil-equivalent column
-    const L = LAY.oe, j = jOE;
-    (jOE < 0 ? [] : POSTER.roots ?? []).forEach((key) => {
+    // (in the oil-equivalent graph if drawn, else in the graph of the fluid the field is mostly made of)
+    (POSTER.roots ?? []).forEach((key) => {
       const i = F.findIndex((f) => f.key === key);
-      if (i < 0 || !(i in L.x0) || !F[i].discovered) return;
+      if (i < 0 || !F[i].discovered) return;
+      const pk = jOE >= 0 ? "oe" : F[i].dom === "gas" ? "gas" : "liq", j = PANELS.findIndex((p) => p.key === pk), L = LAY[pk];
+      if (j < 0 || !(i in L.x0)) return;
       const f = F[i], te = f.entry, tt = Math.min(n - 1, te + 2);
       const xe = g.cx[j] + ((L.x0[i][tt] + L.x1[i][tt]) / 2) * g.k, yd = y(new Date(f.discovered, 6, 1)), ye = y(dates[te]);
       an.append("line").attr("x1", xe).attr("x2", xe).attr("y1", yd).attr("y2", ye).attr("stroke", tok("text")).attr("stroke-width", 1.1).attr("stroke-dasharray", "3 3");
@@ -218,40 +222,12 @@ export default function create(el, { bulb: B }, opts = {}) {
     });
   }
 
-  // Between the two graphs: the year axis down the middle, the story's events either side of it, each
-  // block dodged so none overlap and tied to its exact year by a short leader.
-  function wrapWords(s, w) {
-    const out = [];
-    let line = "";
-    for (const word of s.split(" ")) {
-      if (line && (line + " " + word).length > w) { out.push(line); line = word; } else line = line ? `${line} ${word}` : word;
-    }
-    return line ? [...out, line] : out;
-  }
-  function gutterNotes(g, yrs, yNow) {
-    const { y, gx, gw, mT, H } = g, an = svg.append("g").attr("class", "tl-ann"), LH = 14, half = gw / 2 - 38;
+  // Between the two graphs: the year axis down the middle (the events and discovery notes stay in the margins).
+  function gutterAxis(g, yrs, yNow) {
+    const { y, gx, mT, H } = g, an = svg.append("g").attr("class", "tl-ann");
     an.append("line").attr("x1", gx).attr("x2", gx).attr("y1", mT).attr("y2", H).attr("stroke", tok("text-muted")).attr("stroke-width", 0.75).attr("opacity", 0.5);
     an.selectAll("text").data(yrs).join("text").attr("class", "tl-gyear").attr("x", gx).attr("y", y).attr("dy", "0.35em").attr("text-anchor", "middle").text((d) => d.getFullYear());
-    if (!g.evts) {
-      an.append("text").attr("class", "tl-gyear").style("font-weight", 700).attr("x", gx).attr("y", yNow).attr("dy", "0.35em").attr("text-anchor", "middle").text("Today");
-      return;
-    }
-    const ev = [...B.events, { date: B.dates[n - 1], year: "Today", text: "", msm3: B.now, after: "left" }].map((e, i) => {
-      const val = e.msm3 != null ? `${vol(e.msm3)}${e.after ? ` ${e.after}` : ""}` : "";
-      const lines = [...wrapWords(e.text, Math.floor(half / 5.9)), ...(val ? wrapWords(val, Math.floor(half / 5.9)) : [])];
-      return { e, side: i % 2 ? 1 : -1, lines: Math.max(1, lines.length) + 1, body: lines, y: y(parseMonth(e.date)) };
-    });
-    for (const side of [-1, 1]) {
-      dodge(ev.filter((it) => it.side === side), LH).forEach((it) => {
-        const ty = it.top + LH * 0.8, x0 = gx + side * 3, xt = gx + side * 32, anchor = side < 0 ? "end" : "start";
-        an.append("path").attr("d", `M${x0},${it.y}L${gx + side * 26},${it.y}L${xt - side * 3},${ty - 4}`).attr("stroke", tok("text-muted")).attr("fill", "none");
-        an.append("circle").attr("cx", gx).attr("cy", it.y).attr("r", 2.2).attr("fill", tok("text"));
-        const t = an.append("text").attr("class", "tl-gev").attr("x", xt).attr("y", ty).attr("text-anchor", anchor);
-        t.append("tspan").attr("class", "tl-ev-y").text(it.e.year);
-        it.body.forEach((ln) => t.append("tspan").attr("x", xt).attr("dy", `${LH}px`).text(ln));
-      });
-    }
-    an.selectAll(".tl-gyear").raise(); // decade labels sit on top of the leaders
+    an.append("text").attr("class", "tl-gyear").style("font-weight", 700).attr("x", gx).attr("y", yNow).attr("dy", "0.35em").attr("text-anchor", "middle").text("Today");
   }
 
   // Name the biggest streams on the streams: horizontal where the stream is wide enough, turned to read
@@ -288,18 +264,17 @@ export default function create(el, { bulb: B }, opts = {}) {
     svg.attr("viewBox", [0, 0, W, H]).attr("role", "img")
       .attr("aria-label", `${PANELS.length === 1 ? "A stream graph" : PANELS.length === 2 ? "Two stream graphs" : "Three stream graphs"} of remaining reserves per field, ${PANELS.map((p) => p.title.toLowerCase()).join(", ")}, from 1971 to today, time running up`);
     svg.selectAll("*").remove();
-    const today = dates[n - 1], yNow = y(today), x1 = GUT ? W - mR : W - mR + 30;
+    const today = dates[n - 1], yNow = y(today), x1 = GUT && !g.poster ? W - mR : W - mR + 30;
     svg.append("rect").attr("x", mL).attr("width", x1 - mL).attr("y", mT).attr("height", yNow - mT).attr("fill", tok("surface-raised")).attr("opacity", 0.6);
     svg.append("text").attr("class", "tl-note").attr("x", mL + 4).attr("y", mT + 13).text(`Next ten years, to ${B.axis_end}`);
     const yrs = d3.range(1970, B.axis_end + 1, 10).map((v) => new Date(v, 0, 1));
     const ax = svg.append("g");
-    ax.selectAll("line").data(yrs).join("line").attr("x1", mL).attr("x2", x1).attr("y1", y).attr("y2", y).attr("stroke", tok("grid")).attr("stroke-dasharray", "1 3");
     const xYear = g.poster ? x1 + 40 : W - 2;
     if (!GUT) ax.selectAll("text").data(yrs).join("text").attr("class", "tl-axis").attr("x", xYear).attr("y", y).attr("dy", "0.35em").attr("text-anchor", "end").text((d) => d.getFullYear());
     svg.append("line").attr("x1", mL).attr("x2", x1).attr("y1", yNow).attr("y2", yNow).attr("stroke", tok("text")).attr("stroke-width", 1);
     if (!GUT) svg.append("text").attr("class", "tl-axis tl-strong").attr("x", xYear).attr("y", yNow).attr("dy", "0.35em").attr("text-anchor", "end").text("Today");
-    if (GUT) gutterNotes(g, yrs, yNow);
-    else if (g.poster) posterNotes(g, yNow, x1);
+    if (GUT) gutterAxis(g, yrs, yNow);
+    if (g.poster) posterNotes(g, yNow, x1);
     PANELS.forEach((p, j) => {
       svg.append("text").attr("class", "tl-col").attr("x", cx[j]).attr("y", 14).attr("text-anchor", "middle").text(g.narrow ? p.short : p.title);
       svg.append("text").attr("class", "tl-note").attr("x", cx[j]).attr("y", 29).attr("text-anchor", "middle").text(`peak ${volShort(peakRaw[p.key])}`);

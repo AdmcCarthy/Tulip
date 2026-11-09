@@ -75,8 +75,8 @@ const CSS = `
 .tl-legend-compact{font-size:11px;gap:2px 10px;margin-bottom:4px}
 .tl-legend-compact .tl-grp{gap:2px 8px}
 .tl-legend-compact i{width:10px;height:10px;margin-right:3px}
-.tl-ev-y{font:500 11.5px var(--ss-font-mono);fill:var(--ss-text);letter-spacing:.04em}
-.tl-ev{font:400 12.5px var(--ss-font-body);fill:var(--ss-text-muted)}
+.tl-ev-y{font:600 12.5px var(--ss-font-mono);fill:var(--ss-text);letter-spacing:.04em}
+.tl-ev{font:500 14px var(--ss-font-body);fill:var(--ss-text)}
 `;
 if (!document.getElementById("tl-css")) {
   const s = document.createElement("style");
