@@ -19,7 +19,8 @@ const ALL_PANELS = [
   { key: "oe", title: "Oil equivalent", short: "Oil eq." },
 ];
 
-const TOTAL_FRAC = 0.6; // the widest part of the total takes this share of the frame: narrow enough to read, one scale for what follows
+const FIT = 0.95; // every figure draws this share of its full width, centred, and its width bar shrinks with it
+const TOTAL_FRAC = 0.6 * FIT; // the widest part of the total takes this share of the frame: narrow enough to read, one scale for what follows
 
 function gaussian(v, sig) {
   const rad = Math.ceil(sig * 3), ker = [];
@@ -147,19 +148,20 @@ export default function create(el, { bulb: B }, opts = {}) {
       : opts.export ? Math.max(480, Math.round(opts.height())) // an export fills its artboard
       : Math.round(Math.max(narrow ? 220 : 361, Math.min(W * 1.235, vh * (narrow ? 0.3 : 0.684), room, 1045)));
     const avail = W - mL - mR;
-    let k = (avail - (GUT ? gw : (PANELS.length - 1) * gap)) / d3.sum(maxW);
+    const gaps = GUT ? gw : (PANELS.length - 1) * gap;
+    let k = (FIT * (avail - gaps)) / d3.sum(maxW);
     // two reference scales, in pixels per million Sm³, both for every field: the pair of graphs (gas, oil) drawn at this width
     // (see bulb_pair.js), and the total, whose widest part takes TOTAL_FRAC of the frame
-    const kRef = (W - mL - (poster ? 250 : narrow ? 4 : 12) - (narrow ? 46 : 80)) / (d3.max(allSm.gas) + d3.max(allSm.liq));
+    const kRef = FIT * (W - mL - (poster ? 250 : narrow ? 4 : 12) - (narrow ? 46 : 80)) / (d3.max(allSm.gas) + d3.max(allSm.liq));
     const kTot = (TOTAL_FRAC * avail) / d3.max(allSm.oe);
     let cx;
     if (opts.groups) { // graphs of one kind side by side: equal slots across the frame, one shared scale
       const slot = avail / PANELS.length;
-      k = opts.scaleWith ? kTot : (0.9 * slot) / d3.max(maxW);
+      k = opts.scaleWith ? kTot : (0.9 * FIT * slot) / d3.max(maxW);
       cx = PANELS.map((_, j) => mL + slot * (j + 0.5));
     } else {
       if (opts.scaleWith) k = kTot;
-      let acc = opts.scaleWith ? mL + (avail - d3.sum(maxW) * k - (PANELS.length - 1) * gap) / 2 : mL; // centred in its frame
+      let acc = mL + (avail - d3.sum(maxW) * k - (GUT ? (PANELS.length - 1) * gw : (PANELS.length - 1) * gap)) / 2; // centred in its frame
       cx = maxW.map((m) => { const c = acc + (m * k) / 2; acc += m * k + (GUT ? gw : gap); return c; });
     }
     const gx = GUT ? cx[0] + (maxW[0] * k) / 2 + gw / 2 : 0; // centre line of the gutter
@@ -308,7 +310,7 @@ export default function create(el, { bulb: B }, opts = {}) {
     });
     if ((opts.scaleBar || opts.scaleNote) && !g.narrow) { // (not on a phone: three graphs and their stems leave no clear corner) width has no axis: say what a width is, and how far this scale is from another figure's
       // bottom-left, where the streams are narrowest and nothing else is drawn; on a phone the bar and its width only
-      const v = [10, 20, 50, 100, 200, 500, 1000, 2000].find((s) => s * k >= 90) ?? 2000, w = v * k, bx = mL + 6, by = H - g.mB - (opts.scaleNote ? 30 : 14);
+      const v = [10, 20, 50, 100, 200, 500, 1000, 2000].find((s) => s * k >= 90 * FIT) ?? 2000, w = v * k, bx = mL + 6, by = H - g.mB - (opts.scaleNote ? 30 : 14);
       svg.append("line").attr("x1", bx).attr("x2", bx + w).attr("y1", by).attr("y2", by).attr("stroke", tok("text")).attr("stroke-width", 1.5);
       [bx, bx + w].forEach((px) => svg.append("line").attr("x1", px).attr("x2", px).attr("y1", by - 4).attr("y2", by + 4).attr("stroke", tok("text")).attr("stroke-width", 1.5));
       svg.append("text").attr("class", "tl-note").attr("x", bx).attr("y", by - 8).text(`Width: ${vol(v)}`);
