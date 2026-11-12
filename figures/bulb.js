@@ -146,7 +146,7 @@ export default function create(el, { bulb: B }, opts = {}) {
     const room = narrow || !fig ? Infinity : vh - 56 - above - 24; // wide layout pins the figure 56px from the top
     const H = poster ? Math.max(480, Math.round(POSTER.height()))
       : opts.export ? Math.max(480, Math.round(opts.height())) // an export fills its artboard
-      : Math.round(Math.max(narrow ? 220 : 361, Math.min(W * 1.235, vh * (narrow ? 0.3 : 0.684), room, 1045)));
+      : Math.round(Math.max(narrow ? 160 : 361, Math.min(W * 1.235, vh * (narrow ? 0.24 : 0.684), room, 1045)));
     const avail = W - mL - mR;
     const gaps = GUT ? gw : (PANELS.length - 1) * gap;
     let k = (FIT * (avail - gaps)) / d3.sum(maxW);
