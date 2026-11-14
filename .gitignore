@@ -2,3 +2,4 @@
 __pycache__/
 data/raw/
 _site/
+_snapshots/
